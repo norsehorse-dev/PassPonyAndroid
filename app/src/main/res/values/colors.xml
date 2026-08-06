@@ -1,0 +1,7 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- Flat orange sampled from the iOS icon's gradient. Adaptive icon
+         background layer; a flat color rather than a gradient drawable to
+         keep this simple until the icon gets real design attention. -->
+    <color name="ic_launcher_background">#FF7A1E</color>
+</resources>

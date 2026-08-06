@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Compose owns all real theming (see ui/theme/Theme.kt). This exists
+      only because the manifest needs a system theme to apply before the
+      first Compose frame draws.
+    -->
+    <style name="Theme.PassPony" parent="android:Theme.Material.Light.NoActionBar" />
+</resources>

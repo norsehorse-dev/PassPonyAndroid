@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">PassPony</string>
+    <string name="store_list_title">PassPony</string>
+    <string name="store_list_empty">No entries yet. The store browser lands in P03.</string>
+</resources>

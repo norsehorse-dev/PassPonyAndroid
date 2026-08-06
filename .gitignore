@@ -1,0 +1,24 @@
+# Local config, never committed
+local.properties
+keystore.properties
+*.keystore
+*.jks
+
+# Build outputs
+build/
+app/build/
+core/build/
+.gradle/
+.kotlin/
+
+# Rust/UniFFI build products (produced by scripts/build-core.sh)
+core/src/main/jniLibs/
+core/src/main/kotlin/uniffi/
+
+# IDE
+.idea/
+*.iml
+.DS_Store
+
+# Git submodule scratch (PGPonyCore-Kotlin is checked out via
+# third_party/pgponycore-kotlin, tracked as a submodule pointer, not here)

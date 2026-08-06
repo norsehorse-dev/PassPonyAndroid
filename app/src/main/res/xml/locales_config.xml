@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Per-app locale list for API 33+ (AppCompatDelegate delegates to the
+  platform LocaleManager there). P13 adds the other six languages
+  alongside their strings.xml resources; English is the only locale that
+  exists this early.
+-->
+<locale-config xmlns:android="http://schemas.android.com/apk/res/android">
+    <locale android:name="en" />
+</locale-config>
