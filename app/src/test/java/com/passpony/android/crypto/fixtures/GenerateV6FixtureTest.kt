@@ -61,7 +61,7 @@ class GenerateV6FixtureTest {
         val storeDir = File(outDir, "store").apply { mkdirs() }
         val goldensDir = File(outDir, "goldens").apply { mkdirs() }
 
-        File(storeDir, ".gpg-id").writeText(generated.fingerprint)
+        File(storeDir, "gpg-id").writeText(generated.fingerprint)
         File(outDir, "identity.asc").writeText(generated.armoredPrivateKey)
 
         for ((name, plain) in goldens) {

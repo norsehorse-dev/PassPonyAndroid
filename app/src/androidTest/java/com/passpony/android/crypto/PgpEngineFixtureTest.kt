@@ -50,7 +50,10 @@ class PgpEngineFixtureTest {
         for (name in listOf("alpha", "beta", "gamma")) {
             File(storeDir, "$name.gpg").writeBytes(asset(fixture, "store/$name.gpg"))
         }
-        File(storeDir, ".gpg-id").writeBytes(asset(fixture, "store/.gpg-id"))
+        // Asset name has no leading dot: aapt drops dotfiles from
+        // packaged assets by default, so the fixture is committed as
+        // store/gpg-id and written to disk under the real pass filename.
+        File(storeDir, ".gpg-id").writeBytes(asset(fixture, "store/gpg-id"))
 
         val backend = PgpEngine.load(appContext(), passphrase = null)
         val store = PassStore.open(storeDir.absolutePath, StoreFormat.PASS)

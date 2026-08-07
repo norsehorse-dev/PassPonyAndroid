@@ -22,7 +22,7 @@ gpg --batch --quiet --pinentry-mode loopback --passphrase '' \
 FPR="$(gpg --list-keys --with-colons rsa@passpony.test | awk -F: '/^fpr:/{print $10; exit}')"
 
 mkdir -p "$OUT/store" "$OUT/goldens"
-printf '%s' "$FPR" > "$OUT/store/.gpg-id"
+printf '%s' "$FPR" > "$OUT/store/gpg-id"
 gpg --batch --pinentry-mode loopback --passphrase '' \
     --export-secret-keys --armor "$FPR" > "$OUT/identity.asc"
 

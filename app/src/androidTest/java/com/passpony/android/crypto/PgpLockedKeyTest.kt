@@ -56,7 +56,9 @@ class PgpLockedKeyTest {
         val fileName = installLockedIdentity()
         val storeDir = freshStoreDir()
         File(storeDir, "alpha.gpg").writeBytes(asset("store/alpha.gpg"))
-        File(storeDir, ".gpg-id").writeBytes(asset("store/.gpg-id"))
+        // See PgpEngineFixtureTest: aapt drops dotfiles from packaged
+        // assets by default, so the fixture is committed as store/gpg-id.
+        File(storeDir, ".gpg-id").writeBytes(asset("store/gpg-id"))
         val store = PassStore.open(storeDir.absolutePath, StoreFormat.PASS)
 
         // No cached passphrase: the key loads as locked and decrypt has
