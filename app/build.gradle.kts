@@ -108,6 +108,10 @@ android {
 
 dependencies {
     implementation(project(":core"))
+    // P06: pass (OpenPGP) engine, over PGPonyCore-Kotlin / BouncyCastle.
+    // bcprov/bcpg are :pgponycore api dependencies, so they come along
+    // transitively; no separate BC version pin needed here.
+    implementation(project(":pgponycore"))
 
     // -- Jetpack Compose --
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))

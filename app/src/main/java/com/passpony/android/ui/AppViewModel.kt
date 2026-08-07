@@ -31,8 +31,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     private val context get() = getApplication<Application>()
 
-    val format: StoreFormat = StorePaths.currentFormatSnapshot(context)
-    val engine: CryptoBackend = EngineProvider.engine(context, format)
+    var format: StoreFormat = StorePaths.currentFormatSnapshot(context)
+        private set
+    var engine: CryptoBackend = EngineProvider.engine(context, format)
+        private set
 
     private val _entries = MutableStateFlow<List<EntryRef>>(emptyList())
     val entries: StateFlow<List<EntryRef>> = _entries.asStateFlow()
@@ -54,6 +56,21 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
 
     fun setSearchText(text: String) {
         _searchText.value = text
+    }
+
+    /**
+     * P06 debug-only developer toggle for verifying the pass engine end
+     * to end before P10 adds a real format switch in Settings. Wired to
+     * the (currently otherwise inert) settings gear in StoreListScreen;
+     * a real Settings screen replaces this entirely in P10. No-op in a
+     * release build.
+     */
+    fun debugToggleFormat() {
+        if (!BuildConfig.DEBUG) return
+        format = if (format == StoreFormat.PASSAGE) StoreFormat.PASS else StoreFormat.PASSAGE
+        engine = EngineProvider.engine(context, format)
+        store = null
+        openStore()
     }
 
     /**

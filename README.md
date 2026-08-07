@@ -51,6 +51,12 @@ over BouncyCastle, pulled in as a git submodule at
 `third_party/pgponycore-kotlin`. Clone with `--recurse-submodules`, or run
 `git submodule update --init` after a plain clone.
 
+Pinned to commit `080815d80021a2f86e1245f5044c6f6f6218be0e`, not a tagged
+release: PGPonyCore-Kotlin has none yet (a single "Initial 3.0.0 Commit"
+as of this pin). Re-pin to a real tag with `cd third_party/pgponycore-kotlin
+&& git fetch --tags && git checkout <tag>` once one exists, then commit the
+updated submodule reference.
+
 ## Layout
 
 - `app/`: the Compose app (list/search, entry detail, editing, sync UI
@@ -59,8 +65,8 @@ over BouncyCastle, pulled in as a git submodule at
 - `core/`: generated UniFFI Kotlin bindings and jniLibs `.so` per ABI
   (gitignored, produced by `scripts/build-core.sh`), plus the thin Kotlin
   crypto engines that implement the FFI's `CryptoBackend` interface.
-- `third_party/pgponycore-kotlin`: git submodule, pinned to a tagged
-  release.
+- `third_party/pgponycore-kotlin`: git submodule, pinned to a commit (no
+  tagged release exists upstream yet, see the build section above).
 - `scripts/`: the core build script and the xcstrings-to-strings.xml
   localization converter.
 - `docs/plan/`: the packet-by-packet build plan.
@@ -72,7 +78,13 @@ PassPonyCore's pass-ffi), reached through the generated FFI bindings. pass
 stores run on PGPonyCore-Kotlin over BouncyCastle: Cv25519 v4, X25519/Ed25519
 v6, and RSA keys, all in software. Unlike PassPony iOS (which has no
 software RSA path and waits on a smartcard implementation), Android opens
-RSA-keyed pass stores today, since BouncyCastle provides RSA natively.
+RSA-keyed pass stores today, since BouncyCastle provides RSA natively as a
+deliberate capability difference, not an oversight. The recipient-resolution
+rule (fingerprint or 16-hex key ID, `.gpg-id` per entry) is the same rule
+PassPony iOS uses. A passphrase-protected pass secret key is cached for 5
+minutes after entry, sealed with an Android Keystore AES-GCM key
+(`crypto/PassphraseCache.kt`); no shared Android unlock gate exists yet to
+read that same constant, unlike iOS's UnlockGate.
 
 ## Not yet
 

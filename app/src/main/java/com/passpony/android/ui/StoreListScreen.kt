@@ -59,11 +59,14 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
             TopAppBar(
                 title = { Text(stringResource(R.string.store_list_title)) },
                 actions = {
-                    // Placeholders: P09 wires sync, P10 wires settings, P08 wires add.
+                    // Placeholders: P09 wires sync, P08 wires add. The
+                    // settings gear is wired to AppViewModel.debugToggleFormat()
+                    // (P06 developer-only pass/passage switch, a no-op in
+                    // release builds) until P10 lands a real Settings screen.
                     IconButton(onClick = {}) {
                         Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.store_list_sync))
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = viewModel::debugToggleFormat) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.store_list_settings))
                     }
                     IconButton(onClick = {}) {
