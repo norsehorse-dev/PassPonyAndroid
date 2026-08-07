@@ -4,7 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.passpony.android.BuildConfig
-import com.passpony.android.crypto.DevCryptoEngine
+import com.passpony.android.crypto.EngineProvider
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
 import com.passpony.android.store.StorePaths
@@ -32,7 +32,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val context get() = getApplication<Application>()
 
     val format: StoreFormat = StorePaths.currentFormatSnapshot(context)
-    val engine: CryptoBackend = DevCryptoEngine
+    val engine: CryptoBackend = EngineProvider.engine(context, format)
 
     private val _entries = MutableStateFlow<List<EntryRef>>(emptyList())
     val entries: StateFlow<List<EntryRef>> = _entries.asStateFlow()
