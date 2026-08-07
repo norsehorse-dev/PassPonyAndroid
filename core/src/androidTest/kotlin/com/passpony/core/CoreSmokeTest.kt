@@ -31,11 +31,13 @@ class CoreSmokeTest {
 
     /** Same stand-in backend the core's own tests use: not real crypto. */
     private object FlipBackend : CryptoBackend {
+        // Kotlin's Byte has no inv(); only Int/Long do. Round-trip through
+        // Int to get the same bitwise NOT Rust's FlipBackend does on u8.
         override fun encrypt(plaintext: ByteArray, recipients: List<String>): ByteArray =
-            ByteArray(plaintext.size) { i -> plaintext[i].inv() }
+            ByteArray(plaintext.size) { i -> plaintext[i].toInt().inv().toByte() }
 
         override fun decrypt(ciphertext: ByteArray): ByteArray =
-            ByteArray(ciphertext.size) { i -> ciphertext[i].inv() }
+            ByteArray(ciphertext.size) { i -> ciphertext[i].toInt().inv().toByte() }
     }
 
     @Test
