@@ -54,9 +54,12 @@ cargo ndk --platform 26 -t arm64-v8a -t x86_64 -o "$REPO/core/src/main/jniLibs" 
 echo "Building host library for bindgen (debug profile; release strips the metadata bindgen reads)"
 cargo build -p pass-ffi --features "$FEATURES"
 
-HOST_LIB="target/debug/libpass_ffi.so"
+# crate-type = cdylib names its output per host platform: .dylib on macOS,
+# .so on Linux. Check both rather than assuming the CI (Linux) extension.
+HOST_LIB="target/debug/libpass_ffi.dylib"
+[[ -f "$HOST_LIB" ]] || HOST_LIB="target/debug/libpass_ffi.so"
 [[ -f "$HOST_LIB" ]] || {
-  echo "Host library not found at $HOST_LIB"; exit 1; }
+  echo "Host library not found at target/debug/libpass_ffi.{dylib,so}"; exit 1; }
 
 BINDINGS_OUT="$(mktemp -d)"
 cargo run -q -p pass-ffi --features "cli,$FEATURES" --bin uniffi-bindgen -- \
