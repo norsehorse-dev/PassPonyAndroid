@@ -27,27 +27,17 @@ class PgpEngine private constructor(
         if (secretRings.isEmpty()) throw CryptoException.NoUsableKey()
         return try {
             PGPCryptoService.shared.decrypt(ciphertext, secretRings, passphrase).data
-        } catch (e: PGPCryptoError.DecryptionFailed) {
-            // The one message PGPCryptoService.decrypt() throws when no
-            // held secret key's ID matches any PKESK in the ciphertext
-            // (PGPCryptoService.kt's `decryptedStream == null` branch) —
-            // the exact "no usable key" case pass expects. Anything else
-            // reaching here is a genuine corruption/parse failure.
-            if (e.message == NO_MATCHING_KEY_MESSAGE) {
-                throw CryptoException.NoUsableKey()
-            }
-            throw CryptoException.DecryptionFailed()
-        } catch (e: PGPCryptoError.PassphraseRequired) {
-            // Reachable only if a locked ring somehow made it into
-            // secretRings; PgpKeyStore already excludes those, so this is
-            // a belt-and-suspenders match for the "no usable key" case.
-            throw CryptoException.NoUsableKey()
-        } catch (e: PGPCryptoError.InvalidPassphrase) {
-            throw CryptoException.NoUsableKey()
-        } catch (e: PGPCryptoError) {
-            throw CryptoException.DecryptionFailed()
         } catch (e: Exception) {
-            throw CryptoException.DecryptionFailed()
+            // TEMP DIAGNOSTIC (P06): surfacing the real exception through
+            // Unavailable's reason string since DecryptionFailed/NoUsableKey
+            // carry no message across the FFI boundary. Revert to the typed
+            // mapping below once the connectedAndroidTest failure is
+            // diagnosed.
+            // if (e is PGPCryptoError.DecryptionFailed && e.message == NO_MATCHING_KEY_MESSAGE) throw CryptoException.NoUsableKey()
+            // if (e is PGPCryptoError.PassphraseRequired || e is PGPCryptoError.InvalidPassphrase) throw CryptoException.NoUsableKey()
+            throw CryptoException.Unavailable(
+                reason = "DEBUG decrypt ${e::class.qualifiedName}: ${e.message}; cause=${e.cause?.let { "${it::class.qualifiedName}: ${it.message}" }}"
+            )
         }
     }
 
@@ -73,8 +63,12 @@ class PgpEngine private constructor(
                 recipientPublicKeys = targets,
                 armor = false, // pass entries are binary .gpg
             )
-        } catch (e: PGPCryptoError) {
-            throw CryptoException.EncryptionFailed()
+        } catch (e: Exception) {
+            // TEMP DIAGNOSTIC (P06): see decrypt()'s comment above.
+            // if (e is PGPCryptoError) throw CryptoException.EncryptionFailed()
+            throw CryptoException.Unavailable(
+                reason = "DEBUG encrypt ${e::class.qualifiedName}: ${e.message}; cause=${e.cause?.let { "${it::class.qualifiedName}: ${it.message}" }}"
+            )
         }
     }
 
