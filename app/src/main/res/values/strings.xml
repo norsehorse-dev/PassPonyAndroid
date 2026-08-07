@@ -9,7 +9,16 @@
     <string name="store_list_unpushed">%1$d unpushed changes</string>
     <string name="store_list_no_entries">No entries</string>
     <string name="store_list_no_entries_hint">Add an entry, or clone your store in Sync.</string>
-    <string name="entry_detail_placeholder">Entry detail lands in P07.</string>
+    <string name="entry_detail_password">Password</string>
+    <string name="entry_detail_fields">Fields</string>
+    <string name="entry_detail_totp">One-time code</string>
+    <string name="entry_detail_reveal">Show password</string>
+    <string name="entry_detail_hide">Hide password</string>
+    <string name="entry_detail_copy">Copy</string>
+    <string name="entry_detail_binary_password">•binary•</string>
+    <string name="entry_detail_more">More options</string>
+    <string name="entry_detail_edit_fields">Edit fields</string>
+    <string name="entry_detail_move_rename">Move / rename</string>
     <string name="error_decryption_failed">Couldn\'t decrypt this entry. The matching key may be missing or locked.</string>
     <string name="error_encryption_failed">Couldn\'t encrypt the entry.</string>
     <string name="error_no_usable_key">No usable key. Import the key for this store in Settings.</string>

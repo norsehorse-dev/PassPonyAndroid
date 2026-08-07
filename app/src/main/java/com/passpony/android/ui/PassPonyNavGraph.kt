@@ -6,6 +6,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import com.passpony.android.ui.detail.EntryDetailScreen
 
 object Routes {
     const val STORE_LIST = "store_list"
@@ -39,7 +40,7 @@ fun PassPonyNavGraph() {
         }
         composable(Routes.ENTRY_PATTERN) { backStackEntry ->
             val name = Uri.decode(backStackEntry.arguments?.getString("name").orEmpty())
-            EntryDetailScreen(name)
+            EntryDetailScreen(name, appViewModel)
         }
     }
 }
