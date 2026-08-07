@@ -27,17 +27,15 @@ class PgpEngine private constructor(
         if (secretRings.isEmpty()) throw CryptoException.NoUsableKey()
         return try {
             PGPCryptoService.shared.decrypt(ciphertext, secretRings, passphrase).data
-        } catch (e: Exception) {
-            // TEMP DIAGNOSTIC (P06): surfacing the real exception through
-            // Unavailable's reason string since DecryptionFailed/NoUsableKey
-            // carry no message across the FFI boundary. Revert to the typed
-            // mapping below once the connectedAndroidTest failure is
-            // diagnosed.
-            // if (e is PGPCryptoError.DecryptionFailed && e.message == NO_MATCHING_KEY_MESSAGE) throw CryptoException.NoUsableKey()
-            // if (e is PGPCryptoError.PassphraseRequired || e is PGPCryptoError.InvalidPassphrase) throw CryptoException.NoUsableKey()
-            throw CryptoException.Unavailable(
-                reason = "DEBUG decrypt ${e::class.qualifiedName}: ${e.message}; cause=${e.cause?.let { "${it::class.qualifiedName}: ${it.message}" }}"
-            )
+        } catch (e: PGPCryptoError.DecryptionFailed) {
+            if (e.message == NO_MATCHING_KEY_MESSAGE) throw CryptoException.NoUsableKey()
+            throw CryptoException.Unavailable(reason = e.message ?: "decryption failed")
+        } catch (e: PGPCryptoError.PassphraseRequired) {
+            throw CryptoException.NoUsableKey()
+        } catch (e: PGPCryptoError.InvalidPassphrase) {
+            throw CryptoException.NoUsableKey()
+        } catch (e: PGPCryptoError) {
+            throw CryptoException.Unavailable(reason = e.message ?: "decryption failed")
         }
     }
 
@@ -63,12 +61,8 @@ class PgpEngine private constructor(
                 recipientPublicKeys = targets,
                 armor = false, // pass entries are binary .gpg
             )
-        } catch (e: Exception) {
-            // TEMP DIAGNOSTIC (P06): see decrypt()'s comment above.
-            // if (e is PGPCryptoError) throw CryptoException.EncryptionFailed()
-            throw CryptoException.Unavailable(
-                reason = "DEBUG encrypt ${e::class.qualifiedName}: ${e.message}; cause=${e.cause?.let { "${it::class.qualifiedName}: ${it.message}" }}"
-            )
+        } catch (e: PGPCryptoError) {
+            throw CryptoException.Unavailable(reason = e.message ?: "encryption failed")
         }
     }
 

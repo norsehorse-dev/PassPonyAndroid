@@ -10,14 +10,16 @@ import org.junit.Assert.assertTrue
 import org.junit.Assert.fail
 import org.junit.Test
 import org.junit.runner.RunWith
-import uniffi.pass_ffi.CryptoException
 import uniffi.pass_ffi.PassStore
+import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.StoreFormat
 
 /**
  * Locked-key behavior against pass-v6-locked (see GenerateV6FixtureTest):
  * a protected key without the cached passphrase loads as locked and
- * decrypt fails NoUsableKey; after PassphraseCache.save() a fresh
+ * decrypt fails (PgpEngine.decrypt() throws CryptoException.NoUsableKey,
+ * which pass-core's FFI layer surfaces to PassStore callers as
+ * StoreException.Crypto); after PassphraseCache.save() a fresh
  * PgpEngine.load() picks the cached passphrase up automatically and
  * decrypts. The fixed passphrase here must match
  * GenerateV6FixtureTest.LOCKED_FIXTURE_PASSPHRASE exactly — the two live
@@ -67,9 +69,13 @@ class PgpLockedKeyTest {
         assertEquals(listOf(fileName), PgpKeyStore.lockedKeyFiles)
         try {
             store.readEntry("alpha", lockedEngine)
-            fail("expected NoUsableKey while the key is locked")
-        } catch (e: CryptoException.NoUsableKey) {
-            // expected
+            fail("expected decrypt to fail while the key is locked")
+        } catch (e: StoreException.Crypto) {
+            // PgpEngine.decrypt() throws CryptoException.NoUsableKey when
+            // secretRings is empty, but PassStore callers never see that
+            // raw type: pass-core's FFI layer collapses every
+            // CryptoBackend exception into StoreException.Crypto(reason=…)
+            // by the time it crosses back out of readEntry().
         }
 
         // Cache the real passphrase, then rebuild the engine (mirrors the
