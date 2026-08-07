@@ -40,8 +40,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
+import androidx.navigation.NavHostController
 import com.passpony.android.R
 import com.passpony.android.ui.AppViewModel
+import com.passpony.android.ui.Routes
 import com.passpony.android.ui.components.TotpRing
 import com.passpony.android.ui.util.Clipboard
 import com.passpony.android.ui.util.SecureScreenEffect
@@ -61,7 +63,7 @@ import uniffi.pass_ffi.entryTotp
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EntryDetailScreen(name: String, viewModel: AppViewModel) {
+fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavHostController) {
     var content by remember(name) { mutableStateOf<ByteArray?>(null) }
     var loadAttempted by remember(name) { mutableStateOf(false) }
     var revealed by remember(name) { mutableStateOf(false) }
@@ -101,7 +103,7 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel) {
                                 leadingIcon = { Icon(Icons.Filled.Edit, contentDescription = null) },
                                 onClick = {
                                     showOverflowMenu = false
-                                    // P08 wires the real edit-fields destination.
+                                    navController.navigate(Routes.editEntry(name))
                                 }
                             )
                             DropdownMenuItem(
@@ -109,7 +111,7 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel) {
                                 leadingIcon = { Icon(Icons.Filled.DriveFileMove, contentDescription = null) },
                                 onClick = {
                                     showOverflowMenu = false
-                                    // P08 wires the real move/rename destination.
+                                    navController.navigate(Routes.moveEntry(name))
                                 }
                             )
                         }

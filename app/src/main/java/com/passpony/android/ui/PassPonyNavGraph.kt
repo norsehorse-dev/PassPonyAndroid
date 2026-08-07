@@ -7,17 +7,25 @@ import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
 import com.passpony.android.ui.detail.EntryDetailScreen
+import com.passpony.android.ui.edit.AddEntryScreen
+import com.passpony.android.ui.edit.EditEntryScreen
+import com.passpony.android.ui.edit.MoveEntryScreen
 
 object Routes {
     const val STORE_LIST = "store_list"
     const val FOLDER_PATTERN = "folder/{path}"
     const val ENTRY_PATTERN = "entry/{name}"
+    const val ADD_ENTRY = "add_entry"
+    const val EDIT_ENTRY_PATTERN = "entry/{name}/edit"
+    const val MOVE_ENTRY_PATTERN = "entry/{name}/move"
 
-    // P07 to P10 add their own destinations here as those packets land.
+    // P10 adds its own destinations here as that packet lands.
 
     /** Path segments can contain slashes; encode so the route stays one segment. */
     fun folder(path: String): String = "folder/" + Uri.encode(path)
     fun entry(name: String): String = "entry/" + Uri.encode(name)
+    fun editEntry(name: String): String = "entry/" + Uri.encode(name) + "/edit"
+    fun moveEntry(name: String): String = "entry/" + Uri.encode(name) + "/move"
 }
 
 @Composable
@@ -40,7 +48,30 @@ fun PassPonyNavGraph() {
         }
         composable(Routes.ENTRY_PATTERN) { backStackEntry ->
             val name = Uri.decode(backStackEntry.arguments?.getString("name").orEmpty())
-            EntryDetailScreen(name, appViewModel)
+            EntryDetailScreen(name, appViewModel, navController)
+        }
+        composable(Routes.ADD_ENTRY) {
+            AddEntryScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.EDIT_ENTRY_PATTERN) { backStackEntry ->
+            val name = Uri.decode(backStackEntry.arguments?.getString("name").orEmpty())
+            EditEntryScreen(name, appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.MOVE_ENTRY_PATTERN) { backStackEntry ->
+            val name = Uri.decode(backStackEntry.arguments?.getString("name").orEmpty())
+            MoveEntryScreen(
+                currentName = name,
+                viewModel = appViewModel,
+                onMoved = {
+                    // Pop the move screen and the now-stale detail screen
+                    // underneath it, landing back on whichever list/folder
+                    // screen was open before -- matches iOS's
+                    // MoveEntryView dismiss() + onMoved { dismiss() }.
+                    navController.popBackStack()
+                    navController.popBackStack()
+                },
+                onCancel = { navController.popBackStack() }
+            )
         }
     }
 }

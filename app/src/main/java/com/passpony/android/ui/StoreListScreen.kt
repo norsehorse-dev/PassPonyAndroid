@@ -15,6 +15,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
@@ -34,6 +35,9 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
@@ -42,6 +46,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.passpony.android.R
 import com.passpony.android.store.BrowseModel
+import com.passpony.android.ui.edit.DeleteEntryDialog
 import uniffi.pass_ffi.EntryRef
 
 /** Root store browser: unpushed banner, search, folder-level browsing. */
@@ -53,15 +58,16 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
     val visibleEntries by viewModel.visibleEntries.collectAsState()
     val searchText by viewModel.searchText.collectAsState()
     val ahead by viewModel.syncStatusAhead.collectAsState()
+    var pendingDelete by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = {
             TopAppBar(
                 title = { Text(stringResource(R.string.store_list_title)) },
                 actions = {
-                    // Placeholders: P09 wires sync, P08 wires add. The
-                    // settings gear is wired to AppViewModel.debugToggleFormat()
-                    // (P06 developer-only pass/passage switch, a no-op in
+                    // Placeholder: P09 wires sync. The settings gear is
+                    // wired to AppViewModel.debugToggleFormat() (P06
+                    // developer-only pass/passage switch, a no-op in
                     // release builds) until P10 lands a real Settings screen.
                     IconButton(onClick = {}) {
                         Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.store_list_sync))
@@ -69,7 +75,7 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                     IconButton(onClick = viewModel::debugToggleFormat) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.store_list_settings))
                     }
-                    IconButton(onClick = {}) {
+                    IconButton(onClick = { navController.navigate(Routes.ADD_ENTRY) }) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.store_list_add))
                     }
                 }
@@ -92,7 +98,12 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                 EmptyState()
             } else if (searchText.isEmpty()) {
                 LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
-                    browseLevel(visibleEntries, prefix = "", navController = navController)
+                    browseLevel(
+                        visibleEntries,
+                        prefix = "",
+                        navController = navController,
+                        onDeleteRequest = { pendingDelete = it }
+                    )
                 }
             } else {
                 LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -100,12 +111,24 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                         EntryRow(
                             name = entry.name,
                             showFolder = true,
-                            onClick = { navController.navigate(Routes.entry(entry.name)) }
+                            onClick = { navController.navigate(Routes.entry(entry.name)) },
+                            onDeleteRequest = { pendingDelete = entry.name }
                         )
                     }
                 }
             }
         }
+    }
+
+    pendingDelete?.let { name ->
+        DeleteEntryDialog(
+            name = name,
+            onConfirm = {
+                viewModel.deleteEntry(name)
+                pendingDelete = null
+            },
+            onDismiss = { pendingDelete = null }
+        )
     }
 }
 
@@ -115,6 +138,7 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
 fun FolderScreen(path: String, navController: NavHostController, viewModel: AppViewModel = viewModel()) {
     val visibleEntries by viewModel.visibleEntries.collectAsState()
     val title = path.substringAfterLast('/')
+    var pendingDelete by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
         topBar = { TopAppBar(title = { Text(title) }) }
@@ -123,8 +147,24 @@ fun FolderScreen(path: String, navController: NavHostController, viewModel: AppV
             modifier = Modifier.fillMaxSize().padding(innerPadding),
             contentPadding = PaddingValues(bottom = 24.dp)
         ) {
-            browseLevel(visibleEntries, prefix = "$path/", navController = navController)
+            browseLevel(
+                visibleEntries,
+                prefix = "$path/",
+                navController = navController,
+                onDeleteRequest = { pendingDelete = it }
+            )
         }
+    }
+
+    pendingDelete?.let { name ->
+        DeleteEntryDialog(
+            name = name,
+            onConfirm = {
+                viewModel.deleteEntry(name)
+                pendingDelete = null
+            },
+            onDismiss = { pendingDelete = null }
+        )
     }
 }
 
@@ -132,7 +172,8 @@ fun FolderScreen(path: String, navController: NavHostController, viewModel: AppV
 private fun LazyListScope.browseLevel(
     visibleEntries: List<EntryRef>,
     prefix: String,
-    navController: NavHostController
+    navController: NavHostController,
+    onDeleteRequest: (String) -> Unit
 ) {
     val level = BrowseModel.level(visibleEntries, prefix)
 
@@ -151,7 +192,8 @@ private fun LazyListScope.browseLevel(
             EntryRow(
                 name = prefix + leaf,
                 showFolder = false,
-                onClick = { navController.navigate(Routes.entry(prefix + leaf)) }
+                onClick = { navController.navigate(Routes.entry(prefix + leaf)) },
+                onDeleteRequest = { onDeleteRequest(prefix + leaf) }
             )
         }
     }
@@ -206,7 +248,12 @@ private fun FolderRow(name: String, count: Int, onClick: () -> Unit) {
 }
 
 @Composable
-private fun EntryRow(name: String, showFolder: Boolean, onClick: () -> Unit) {
+private fun EntryRow(
+    name: String,
+    showFolder: Boolean,
+    onClick: () -> Unit,
+    onDeleteRequest: () -> Unit
+) {
     val leaf = name.substringAfterLast('/')
     val folder = name.substringBeforeLast('/', missingDelimiterValue = "")
 
@@ -219,11 +266,14 @@ private fun EntryRow(name: String, showFolder: Boolean, onClick: () -> Unit) {
             verticalAlignment = Alignment.CenterVertically
         ) {
             Icon(Icons.Filled.VpnKey, contentDescription = null, modifier = Modifier.padding(end = 12.dp))
-            Column {
+            Column(modifier = Modifier.weight(1f)) {
                 Text(leaf)
                 if (showFolder && folder.isNotEmpty()) {
                     Text(folder, style = MaterialTheme.typography.bodySmall)
                 }
+            }
+            IconButton(onClick = onDeleteRequest) {
+                Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.store_list_delete_entry))
             }
         }
         HorizontalDivider()

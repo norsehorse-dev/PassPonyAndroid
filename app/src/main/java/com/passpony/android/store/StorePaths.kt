@@ -64,4 +64,15 @@ object StorePaths {
     }
 
     fun storeRoot(context: Context): File = storeRoot(context, currentFormatSnapshot(context))
+
+    /**
+     * Store-relative filename for a git commitPaths call: `name` plus
+     * the format's extension. pass-core exposes StoreFormat.entry_extension()
+     * on the Rust side only; this is the Kotlin-side equivalent used
+     * wherever a path (not just a display name) is needed.
+     */
+    fun entryFileName(name: String, format: StoreFormat): String {
+        val extension = if (format == StoreFormat.PASSAGE) "age" else "gpg"
+        return "$name.$extension"
+    }
 }

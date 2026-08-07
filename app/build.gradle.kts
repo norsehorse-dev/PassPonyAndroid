@@ -148,4 +148,12 @@ dependencies {
     androidTestImplementation("androidx.test.espresso:espresso-core:3.6.1")
     androidTestImplementation(platform("androidx.compose:compose-bom:2024.12.01"))
     androidTestImplementation("androidx.compose.ui:ui-test-junit4")
+    // P08: GitCommitMessageTest reads real commit history off the git
+    // repo GitSync (git2-rs) writes, to confirm AppViewModel's git
+    // wiring produces the exact commitMessage* strings -- there is no
+    // FFI-exposed "read the log" call, and no git CLI binary on-device
+    // to shell out to, so a pure-JVM git-log reader is the only way to
+    // verify this from the app side rather than re-testing pass-core's
+    // own git.rs in isolation.
+    androidTestImplementation("org.eclipse.jgit:org.eclipse.jgit:7.7.0.202606012155-r")
 }

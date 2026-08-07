@@ -1,0 +1,7 @@
+gamma-pw
+username:kevin
+line two
+
+line four with trailing spaces  
+otpauth://totp/Example:kevin?secret=JBSWY3DPEHPK3PXP&issuer=Example
+url:example.com
