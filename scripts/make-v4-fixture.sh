@@ -30,7 +30,7 @@ gpg --batch --quiet --pinentry-mode loopback --passphrase '' \
     --quick-add-key "$FPR" cv25519 encr never
 
 mkdir -p "$OUT/store" "$OUT/goldens"
-printf '%s' "$FPR" > "$OUT/store/gpg-id"
+printf '%s\n' "$FPR" > "$OUT/store/gpg-id"
 gpg --batch --pinentry-mode loopback --passphrase '' \
     --export-secret-keys --armor "$FPR" > "$OUT/identity.asc"
 
