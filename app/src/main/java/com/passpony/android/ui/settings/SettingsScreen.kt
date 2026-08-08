@@ -471,27 +471,26 @@ private fun LinkRow(title: String, subtitle: String, url: String, context: Conte
     }
 }
 
-/**
- * TODO(P10 follow-up): these point at the norsehorse-dev GitHub org
- * page rather than each app's real Play Store / F-Droid listing --
- * unlike PassPony's own About links, there is no verified Android
- * distribution URL for PGPony/AgePony/QuorumPony/CarrierPony/BurnPony/
- * RelayPony on hand yet. Swap in the real links once they exist.
- */
 private data class OtherApp(val name: String, val tagline: String, val url: String)
 
 private val OTHER_APPS = listOf(
-    OtherApp("PGPony", "OpenPGP messages, files, and keys", "https://github.com/norsehorse-dev/PGPonyAndroid"),
-    OtherApp("AgePony", "Simple, modern file encryption (age)", "https://github.com/norsehorse-dev"),
-    OtherApp("QuorumPony", "Quorum key backup & recovery", "https://github.com/norsehorse-dev"),
-    OtherApp("CarrierPony", "PGP chat and encrypted files", "https://github.com/norsehorse-dev"),
-    OtherApp("BurnPony", "Self-destructing encrypted messages", "https://github.com/norsehorse-dev"),
-    OtherApp("RelayPony", "Encrypted file transfer", "https://github.com/norsehorse-dev"),
+    OtherApp("PGPony", "OpenPGP messages, files, and keys", "https://pgpony.app"),
+    OtherApp("AgePony", "Simple, modern file encryption (age)", "https://agepony.com"),
+    OtherApp("QuorumPony", "Quorum key backup & recovery", "https://quorumpony.com"),
+    OtherApp("CarrierPony", "PGP chat and encrypted files", "https://carrierpony.com"),
+    OtherApp("BurnPony", "Self-destructing encrypted messages", "https://burnpony.app"),
+    OtherApp("RelayPony", "Encrypted file transfer", "https://relaypony.app"),
 )
 
 @Composable
 private fun OtherAppsSection(context: Context) {
     SectionHeader(stringResource(R.string.settings_other_apps_header))
+    LinkRow(
+        title = stringResource(R.string.settings_other_apps_site_title),
+        subtitle = stringResource(R.string.settings_other_apps_site_subtitle),
+        url = NORSEHORSE_SITE_URL,
+        context = context
+    )
     for (app in OTHER_APPS) {
         LinkRow(title = app.name, subtitle = app.tagline, url = app.url, context = context)
     }
@@ -504,6 +503,7 @@ private fun OtherAppsSection(context: Context) {
 
 private const val APP_REPO_URL = "https://github.com/norsehorse-dev/PassPonyAndroid"
 private const val CORE_REPO_URL = "https://github.com/norsehorse-dev/PassPonyCore"
+private const val NORSEHORSE_SITE_URL = "https://pony.norsehor.se"
 
 @Composable
 private fun DiagnosticsSection(storePath: String, format: StoreFormat, entryCount: Int, syncStatus: SyncStatus?) {

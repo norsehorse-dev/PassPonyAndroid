@@ -115,6 +115,8 @@
     <string name="settings_core_repo_subtitle">Open source (Apache-2.0). Inspect the cryptography.</string>
     <string name="settings_contact">Contact</string>
     <string name="settings_other_apps_header">More from NorseHorse</string>
+    <string name="settings_other_apps_site_title">All NorseHorse Pony apps</string>
+    <string name="settings_other_apps_site_subtitle">pony.norsehor.se</string>
     <string name="settings_other_apps_footer">Other apps from the same developer.</string>
     <string name="settings_diagnostics_header">Diagnostics</string>
     <string name="settings_diagnostics_store_path">Store path</string>
