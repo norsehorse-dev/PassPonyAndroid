@@ -6,6 +6,7 @@ import android.security.keystore.KeyProperties
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.longPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
+import com.passpony.android.store.UnlockGate
 import java.io.File
 import java.security.KeyStore
 import javax.crypto.Cipher
@@ -23,11 +24,10 @@ private val Context.pgpCacheDataStore by preferencesDataStore(name = "passpony_p
  * secret key. Port of iOS's PassphraseCache.swift: there the secret lives
  * in the app-group Keychain and the expiry stamp in group UserDefaults;
  * here the secret is Keystore-AES-GCM-sealed in this app's private files
- * dir and the stamp lives in DataStore. Same 5-minute grace window,
- * defined here rather than a shared UnlockGate constant since Android has
- * no P11 unlock gate yet — that packet should read GRACE_PERIOD_MILLIS
- * from here when it lands, the way iOS's UnlockGate and PassphraseCache
- * already share one constant.
+ * dir and the stamp lives in DataStore. Same 5-minute grace window as
+ * P11's UnlockGate -- reads UnlockGate.GRACE_PERIOD_MILLIS rather than
+ * keeping its own copy, the way iOS's PassphraseCache.swift reads
+ * UnlockGate.gracePeriod directly.
  *
  * androidx.security:security-crypto (EncryptedSharedPreferences) had every
  * API deprecated as of 1.1.0-beta01 in favor of using Android Keystore
@@ -36,9 +36,6 @@ private val Context.pgpCacheDataStore by preferencesDataStore(name = "passpony_p
  * written.
  */
 object PassphraseCache {
-    /** Grace period between required unlocks. */
-    const val GRACE_PERIOD_MILLIS: Long = 5 * 60 * 1000
-
     private const val KEYSTORE_ALIAS = "passpony_pgp_passphrase_key"
     private const val ANDROID_KEYSTORE = "AndroidKeyStore"
     private const val TRANSFORMATION = "AES/GCM/NoPadding"
@@ -88,7 +85,7 @@ object PassphraseCache {
         val stamp = runBlocking {
             context.pgpCacheDataStore.data.map { it[STAMP_KEY] }.first()
         } ?: return null
-        if (System.currentTimeMillis() - stamp >= GRACE_PERIOD_MILLIS) {
+        if (System.currentTimeMillis() - stamp >= UnlockGate.GRACE_PERIOD_MILLIS) {
             clear(context)
             return null
         }

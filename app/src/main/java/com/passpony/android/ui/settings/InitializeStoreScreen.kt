@@ -36,6 +36,7 @@ import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
+import com.passpony.android.ui.util.SecureScreenEffect
 import uniffi.pass_ffi.StoreFormat
 
 /**
@@ -53,6 +54,10 @@ fun InitializeStoreScreen(
     onCancel: () -> Unit,
 ) {
     val context = LocalContext.current
+
+    // Shows imported keys' fingerprints -- key material, same standard
+    // as SettingsScreen and EntryDetailScreen.
+    SecureScreenEffect()
 
     var keys by remember { mutableStateOf(emptyList<PgpKeyStore.KeyFileInfo>()) }
     var selected by remember { mutableStateOf(emptySet<String>()) }

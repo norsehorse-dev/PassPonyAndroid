@@ -145,4 +145,16 @@
     <string name="reencrypt_will_rewrite">Will rewrite %1$d entries</string>
     <string name="reencrypt_now">Re-encrypt now</string>
     <string name="reencrypt_success">Re-encrypted %1$d entries.</string>
+
+    <string name="lock_reason">Unlock your password store</string>
+    <string name="lock_screen_tagline">Your passwords, locked down.</string>
+    <string name="lock_screen_unlock_button">Unlock</string>
+    <string name="lock_screen_authenticating">Authenticating…</string>
+
+    <string name="store_list_more">More</string>
+    <string name="store_list_lock_now">Lock now</string>
+
+    <string name="settings_session_header">Session</string>
+    <string name="settings_lock_now">Lock now</string>
+    <string name="settings_session_footer">Locks immediately and clears the cached key passphrase. Auto-locks after %1$d minutes of inactivity either way.</string>
 </resources>

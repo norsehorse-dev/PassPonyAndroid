@@ -23,6 +23,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -57,7 +58,9 @@ import com.passpony.android.crypto.PassphraseCache
 import com.passpony.android.crypto.PgpEngine
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.StorePaths
+import com.passpony.android.store.UnlockGate
 import com.passpony.android.ui.AppViewModel
+import com.passpony.android.ui.util.SecureScreenEffect
 import java.io.File
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.StoreFormat
@@ -80,9 +83,15 @@ fun SettingsScreen(
     onDone: () -> Unit,
     onInitializeStore: () -> Unit,
     onReencrypt: () -> Unit,
+    onLock: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+
+    // Settings shows key fingerprints, .gpg-id recipients, and the pass
+    // key passphrase field -- all key material, per SecureWindow.kt's
+    // own doc comment anticipating this screen.
+    SecureScreenEffect()
 
     var format by remember { mutableStateOf(appViewModel.format) }
     var keyFiles by remember { mutableStateOf(emptyList<PgpKeyStore.KeyFileInfo>()) }
@@ -152,6 +161,9 @@ fun SettingsScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            SessionSection(onLock = onLock)
+
+            Spacer(Modifier.height(16.dp))
             FormatSection(
                 format = format,
                 onSelect = { newFormat ->
@@ -287,6 +299,22 @@ private fun LabeledRow(label: String, value: String) {
 }
 
 @Composable
+private fun SessionSection(onLock: () -> Unit) {
+    SectionHeader(stringResource(R.string.settings_session_header))
+    TextButton(
+        onClick = onLock,
+        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+    ) {
+        Text(stringResource(R.string.settings_lock_now))
+    }
+    Text(
+        stringResource(R.string.settings_session_footer, (UnlockGate.GRACE_PERIOD_MILLIS / 60000L).toInt()),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.secondary
+    )
+}
+
+@Composable
 private fun FormatSection(format: StoreFormat, onSelect: (StoreFormat) -> Unit) {
     Row {
         TextButton(onClick = { onSelect(StoreFormat.PASSAGE) }) {
@@ -374,7 +402,7 @@ private fun LockedKeysSection(
         Text(stringResource(R.string.settings_unlock))
     }
     Text(
-        stringResource(R.string.settings_locked_keys_footer, (PassphraseCache.GRACE_PERIOD_MILLIS / 60000L).toInt()),
+        stringResource(R.string.settings_locked_keys_footer, (UnlockGate.GRACE_PERIOD_MILLIS / 60000L).toInt()),
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.secondary
     )

@@ -35,7 +35,7 @@ object Routes {
 }
 
 @Composable
-fun PassPonyNavGraph() {
+fun PassPonyNavGraph(onLock: () -> Unit) {
     val navController = rememberNavController()
     // Created here rather than inside each destination: androidx.navigation
     // scopes a default viewModel() call to that destination's own
@@ -46,7 +46,7 @@ fun PassPonyNavGraph() {
     val appViewModel: AppViewModel = viewModel()
     NavHost(navController = navController, startDestination = Routes.STORE_LIST) {
         composable(Routes.STORE_LIST) {
-            StoreListScreen(navController, appViewModel)
+            StoreListScreen(navController, appViewModel, onLock)
         }
         composable(Routes.FOLDER_PATTERN) { backStackEntry ->
             val path = Uri.decode(backStackEntry.arguments?.getString("path").orEmpty())
@@ -88,6 +88,7 @@ fun PassPonyNavGraph() {
                 onDone = { navController.popBackStack() },
                 onInitializeStore = { navController.navigate(Routes.INITIALIZE_STORE) },
                 onReencrypt = { navController.navigate(Routes.REENCRYPT) },
+                onLock = onLock,
             )
         }
         composable(Routes.INITIALIZE_STORE) {

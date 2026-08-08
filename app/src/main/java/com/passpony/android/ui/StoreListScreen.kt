@@ -18,10 +18,13 @@ import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.ArrowUpward
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Folder
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.DropdownMenu
+import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
@@ -53,7 +56,7 @@ import uniffi.pass_ffi.EntryRef
 /** Root store browser: unpushed banner, search, folder-level browsing. */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = viewModel()) {
+fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = viewModel(), onLock: () -> Unit) {
     LaunchedEffect(Unit) { viewModel.openStore() }
 
     val visibleEntries by viewModel.visibleEntries.collectAsState()
@@ -74,6 +77,19 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                     }
                     IconButton(onClick = { navController.navigate(Routes.ADD_ENTRY) }) {
                         Icon(Icons.Filled.Add, contentDescription = stringResource(R.string.store_list_add))
+                    }
+                    var menuExpanded by remember { mutableStateOf(false) }
+                    IconButton(onClick = { menuExpanded = true }) {
+                        Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.store_list_more))
+                    }
+                    DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.store_list_lock_now)) },
+                            onClick = {
+                                menuExpanded = false
+                                onLock()
+                            }
+                        )
                     }
                 }
             )
