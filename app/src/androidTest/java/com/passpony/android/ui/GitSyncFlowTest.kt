@@ -6,6 +6,7 @@ import androidx.test.ext.junit.runners.AndroidJUnit4
 import java.io.File
 import kotlinx.coroutines.runBlocking
 import org.eclipse.jgit.api.Git
+import org.eclipse.jgit.lib.Constants
 import org.junit.Assert.assertArrayEquals
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertTrue
@@ -56,9 +57,24 @@ class GitSyncFlowTest {
         return dir
     }
 
+    /**
+     * A bare repo's HEAD defaults to whatever JGit considers the default
+     * branch (historically "master"), independent of the "main" branch
+     * GitSync.init() always uses locally -- and unlike a hosting
+     * provider (GitHub, Forgejo, ...), a plain bare repo never repoints
+     * HEAD to whatever branch was first pushed. Left alone, a clone
+     * checks out HEAD's target, a branch that was never pushed -- an
+     * empty working tree even though refs/heads/main has every commit.
+     * PassPonyCore's own git_matrix.rs sidesteps this by creating its
+     * bare fixture with .initial_head("main") directly; JGit's bare
+     * init has no equivalent knob, so pin HEAD by hand instead, exactly
+     * like `git symbolic-ref HEAD refs/heads/main`.
+     */
     private fun bareRemote(name: String): File {
         val dir = freshDir(name)
-        Git.init().setBare(true).setDirectory(dir).call().use { }
+        Git.init().setBare(true).setDirectory(dir).call().use { git ->
+            git.repository.updateRef(Constants.HEAD).link("refs/heads/main")
+        }
         return dir
     }
 
