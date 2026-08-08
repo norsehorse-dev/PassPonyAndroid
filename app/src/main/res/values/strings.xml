@@ -9,6 +9,7 @@
     <string name="store_list_unpushed">%1$d unpushed changes</string>
     <string name="store_list_no_entries">No entries</string>
     <string name="store_list_no_entries_hint">Add an entry, or clone your store in Sync.</string>
+    <string name="action_back">Back</string>
     <string name="store_list_delete_entry">Delete entry</string>
     <string name="action_cancel">Cancel</string>
     <string name="action_save">Save</string>
