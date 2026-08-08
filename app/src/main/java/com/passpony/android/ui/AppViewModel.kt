@@ -9,6 +9,7 @@ import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
+import com.passpony.android.ui.settings.ReencryptOps
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
@@ -23,11 +24,13 @@ import uniffi.pass_ffi.EntryRef
 import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.GitSync
 import uniffi.pass_ffi.PassStore
+import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.StoreFormat
 import uniffi.pass_ffi.SyncOutcome
 import uniffi.pass_ffi.SyncStatus
 import uniffi.pass_ffi.commitMessageAdd
 import uniffi.pass_ffi.commitMessageEdit
+import uniffi.pass_ffi.commitMessageReencrypt
 import uniffi.pass_ffi.commitMessageRemove
 import uniffi.pass_ffi.commitMessageRename
 
@@ -88,16 +91,16 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * P06 debug-only developer toggle for verifying the pass engine end
-     * to end before P10 adds a real format switch in Settings. Wired to
-     * the (currently otherwise inert) settings gear in StoreListScreen;
-     * a real Settings screen replaces this entirely in P10. No-op in a
-     * release build.
+     * Switch the store format and reopen. Each format keeps its own
+     * store directory (see StorePaths.storeRoot), so this never touches
+     * the other format's data -- matches iOS's SettingsView format
+     * picker. Supersedes the P06 debug-only toggle this replaced.
      */
-    fun debugToggleFormat() {
-        if (!BuildConfig.DEBUG) return
-        format = if (format == StoreFormat.PASSAGE) StoreFormat.PASS else StoreFormat.PASSAGE
-        engine = EngineProvider.engine(context, format)
+    suspend fun switchFormat(newFormat: StoreFormat) {
+        if (newFormat == format) return
+        StorePaths.setFormat(context, newFormat)
+        format = newFormat
+        engine = EngineProvider.engine(context, newFormat)
         store = null
         openStore()
     }
@@ -277,6 +280,33 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         openStore()
+    }
+
+    /**
+     * Preview of what a re-encrypt of [subpath] ("" = entire store)
+     * would rewrite. Read-only, and -- like Sync's actions -- surfaces
+     * failures to the caller rather than swallowing them into
+     * lastError: this is a deliberate maintenance action the user wants
+     * to know failed. Matches iOS's ReencryptView.preview().
+     */
+    fun reencryptPreview(subpath: String): List<String> = ReencryptOps.preview(store, subpath)
+
+    /**
+     * Re-encrypt [subpath] to its currently-resolved recipients and
+     * best-effort commit the rewritten files -- matches iOS: a failed
+     * commit here does not undo or fail the re-encrypt itself, which by
+     * this point already succeeded. Returns the rewritten entry names.
+     */
+    suspend fun reencryptNow(subpath: String): List<String> {
+        val current = store ?: throw StoreException.NoStore()
+        val result = withContext(Dispatchers.IO) {
+            ReencryptOps.run(current, subpath, engine, format)
+        }
+        if (result.files.isNotEmpty()) {
+            runCatching { git?.commitPaths(result.files, commitMessageReencrypt(subpath)) }
+        }
+        refresh()
+        return result.entries
     }
 
     private fun seedDemoStore(store: PassStore) {

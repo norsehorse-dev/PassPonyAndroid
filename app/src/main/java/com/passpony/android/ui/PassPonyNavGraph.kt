@@ -10,6 +10,9 @@ import com.passpony.android.ui.detail.EntryDetailScreen
 import com.passpony.android.ui.edit.AddEntryScreen
 import com.passpony.android.ui.edit.EditEntryScreen
 import com.passpony.android.ui.edit.MoveEntryScreen
+import com.passpony.android.ui.settings.InitializeStoreScreen
+import com.passpony.android.ui.settings.ReencryptScreen
+import com.passpony.android.ui.settings.SettingsScreen
 import com.passpony.android.ui.sync.SyncScreen
 
 object Routes {
@@ -20,8 +23,9 @@ object Routes {
     const val EDIT_ENTRY_PATTERN = "entry/{name}/edit"
     const val MOVE_ENTRY_PATTERN = "entry/{name}/move"
     const val SYNC = "sync"
-
-    // P10 adds its own destinations here as that packet lands.
+    const val SETTINGS = "settings"
+    const val INITIALIZE_STORE = "settings/initialize_store"
+    const val REENCRYPT = "settings/reencrypt"
 
     /** Path segments can contain slashes; encode so the route stays one segment. */
     fun folder(path: String): String = "folder/" + Uri.encode(path)
@@ -77,6 +81,24 @@ fun PassPonyNavGraph() {
         }
         composable(Routes.SYNC) {
             SyncScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.SETTINGS) {
+            SettingsScreen(
+                appViewModel,
+                onDone = { navController.popBackStack() },
+                onInitializeStore = { navController.navigate(Routes.INITIALIZE_STORE) },
+                onReencrypt = { navController.navigate(Routes.REENCRYPT) },
+            )
+        }
+        composable(Routes.INITIALIZE_STORE) {
+            InitializeStoreScreen(
+                appViewModel,
+                onDone = { navController.popBackStack() },
+                onCancel = { navController.popBackStack() },
+            )
+        }
+        composable(Routes.REENCRYPT) {
+            ReencryptScreen(appViewModel, onDone = { navController.popBackStack() })
         }
     }
 }

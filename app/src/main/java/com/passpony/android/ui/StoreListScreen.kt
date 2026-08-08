@@ -66,14 +66,10 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
             TopAppBar(
                 title = { Text(stringResource(R.string.store_list_title)) },
                 actions = {
-                    // The settings gear is wired to
-                    // AppViewModel.debugToggleFormat() (P06 developer-only
-                    // pass/passage switch, a no-op in release builds)
-                    // until P10 lands a real Settings screen.
                     IconButton(onClick = { navController.navigate(Routes.SYNC) }) {
                         Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.store_list_sync))
                     }
-                    IconButton(onClick = viewModel::debugToggleFormat) {
+                    IconButton(onClick = { navController.navigate(Routes.SETTINGS) }) {
                         Icon(Icons.Filled.Settings, contentDescription = stringResource(R.string.store_list_settings))
                     }
                     IconButton(onClick = { navController.navigate(Routes.ADD_ENTRY) }) {

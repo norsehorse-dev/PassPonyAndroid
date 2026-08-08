@@ -63,7 +63,21 @@ object StorePaths {
         stored ?: BuildConfig.DEBUG
     }
 
+    /** Settings' "Show welcome tour again" is the only writer until P14
+     * wires this up to the real first-run onboarding flow. */
+    suspend fun setOnboardingCompleted(context: Context, completed: Boolean) {
+        context.passPonyDataStore.edit { prefs -> prefs[DEMO_SEED_GATE_KEY] = completed }
+    }
+
     fun storeRoot(context: Context): File = storeRoot(context, currentFormatSnapshot(context))
+
+    /**
+     * The pass (OpenPGP) store's recipients file -- pass-core's own
+     * `.gpg-id`, read and written directly since there is no FFI call
+     * for it (mirrors iOS's direct File access in SettingsView /
+     * InitializeStoreView).
+     */
+    fun gpgIdFile(context: Context): File = File(storeRoot(context, StoreFormat.PASS), ".gpg-id")
 
     /**
      * Store-relative filename for a git commitPaths call: `name` plus
