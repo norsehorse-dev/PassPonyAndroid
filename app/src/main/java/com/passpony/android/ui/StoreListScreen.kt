@@ -58,7 +58,7 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
 
     val visibleEntries by viewModel.visibleEntries.collectAsState()
     val searchText by viewModel.searchText.collectAsState()
-    val ahead by viewModel.syncStatusAhead.collectAsState()
+    val syncStatus by viewModel.syncStatus.collectAsState()
     var pendingDelete by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
@@ -66,11 +66,11 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
             TopAppBar(
                 title = { Text(stringResource(R.string.store_list_title)) },
                 actions = {
-                    // Placeholder: P09 wires sync. The settings gear is
-                    // wired to AppViewModel.debugToggleFormat() (P06
-                    // developer-only pass/passage switch, a no-op in
-                    // release builds) until P10 lands a real Settings screen.
-                    IconButton(onClick = {}) {
+                    // The settings gear is wired to
+                    // AppViewModel.debugToggleFormat() (P06 developer-only
+                    // pass/passage switch, a no-op in release builds)
+                    // until P10 lands a real Settings screen.
+                    IconButton(onClick = { navController.navigate(Routes.SYNC) }) {
                         Icon(Icons.Filled.Sync, contentDescription = stringResource(R.string.store_list_sync))
                     }
                     IconButton(onClick = viewModel::debugToggleFormat) {
@@ -91,8 +91,8 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             )
 
-            if (ahead > 0) {
-                UnpushedBanner(ahead)
+            if ((syncStatus?.ahead ?: 0u) > 0u) {
+                UnpushedBanner((syncStatus?.ahead ?: 0u).toInt())
             }
 
             if (visibleEntries.isEmpty()) {

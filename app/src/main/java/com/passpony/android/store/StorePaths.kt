@@ -75,4 +75,14 @@ object StorePaths {
         val extension = if (format == StoreFormat.PASSAGE) "age" else "gpg"
         return "$name.$extension"
     }
+
+    /**
+     * Scratch landing spot for Sync's clone-then-swap flow (P09): a
+     * fresh clone lands here first, so a failed clone never touches the
+     * real store -- only on success does it replace [storeRoot]. One
+     * scratch dir shared by both formats is fine; a clone always
+     * finishes (success and swap, or failure and cleanup) before
+     * another can start.
+     */
+    fun cloneScratchDir(context: Context): File = File(context.filesDir, "clone-tmp")
 }

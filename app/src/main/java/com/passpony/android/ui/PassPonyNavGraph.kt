@@ -10,6 +10,7 @@ import com.passpony.android.ui.detail.EntryDetailScreen
 import com.passpony.android.ui.edit.AddEntryScreen
 import com.passpony.android.ui.edit.EditEntryScreen
 import com.passpony.android.ui.edit.MoveEntryScreen
+import com.passpony.android.ui.sync.SyncScreen
 
 object Routes {
     const val STORE_LIST = "store_list"
@@ -18,6 +19,7 @@ object Routes {
     const val ADD_ENTRY = "add_entry"
     const val EDIT_ENTRY_PATTERN = "entry/{name}/edit"
     const val MOVE_ENTRY_PATTERN = "entry/{name}/move"
+    const val SYNC = "sync"
 
     // P10 adds its own destinations here as that packet lands.
 
@@ -72,6 +74,9 @@ fun PassPonyNavGraph() {
                 },
                 onCancel = { navController.popBackStack() }
             )
+        }
+        composable(Routes.SYNC) {
+            SyncScreen(appViewModel, onDone = { navController.popBackStack() })
         }
     }
 }

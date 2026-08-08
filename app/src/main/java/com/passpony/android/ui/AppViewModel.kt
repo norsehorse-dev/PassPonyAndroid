@@ -9,17 +9,23 @@ import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.SharingStarted
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.withContext
+import uniffi.pass_ffi.ConflictResolver
 import uniffi.pass_ffi.CryptoBackend
 import uniffi.pass_ffi.EntryRef
+import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.GitSync
 import uniffi.pass_ffi.PassStore
 import uniffi.pass_ffi.StoreFormat
+import uniffi.pass_ffi.SyncOutcome
+import uniffi.pass_ffi.SyncStatus
 import uniffi.pass_ffi.commitMessageAdd
 import uniffi.pass_ffi.commitMessageEdit
 import uniffi.pass_ffi.commitMessageRemove
@@ -28,10 +34,13 @@ import uniffi.pass_ffi.commitMessageRename
 /**
  * Same structure as PassPony iOS's AppModel: open/refresh/read/save/move/
  * delete plus the debug demo seed, StateFlow standing in for @Published.
- * P08 wires best-effort commit-on-write through [git], matching iOS;
- * reading back sync status (ahead/behind/push/pull) is still P09's job,
- * so syncStatusAhead stays at zero until then and the unpushed-changes
- * banner exists but never shows in this packet.
+ * P08 wires best-effort commit-on-write through [git], matching iOS.
+ * P09 adds [syncStatus] (refreshed alongside entries, so the P03
+ * unpushed-changes banner goes live) plus the git actions the Sync
+ * screen drives directly: push, sync, remote management, publish, and
+ * clone-then-swap. Those surface real GitExceptions to their caller
+ * rather than swallowing them like [saveEntry]/[moveEntry]/[deleteEntry]
+ * do -- Sync is where the user actually wants to know a push failed.
  */
 class AppViewModel(application: Application) : AndroidViewModel(application) {
 
@@ -51,8 +60,15 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _lastError = MutableStateFlow<String?>(null)
     val lastError: StateFlow<String?> = _lastError.asStateFlow()
 
-    /** P09 replaces this with the real GitSync status; the banner reads it. */
-    val syncStatusAhead: StateFlow<Int> = MutableStateFlow(0)
+    private val _syncStatus = MutableStateFlow<SyncStatus?>(null)
+
+    /**
+     * Null exactly when this store has no git repo (mirrors iOS's
+     * `model.git == nil` check); refreshed alongside [entries] so the
+     * P03 unpushed-changes banner and the Sync screen's status section
+     * both stay live without a separate poll.
+     */
+    val syncStatus: StateFlow<SyncStatus?> = _syncStatus.asStateFlow()
 
     val visibleEntries: StateFlow<List<EntryRef>> =
         combine(_entries, _searchText) { all, query -> BrowseModel.visibleEntries(all, query) }
@@ -122,6 +138,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val current = store ?: return
         try {
             _entries.value = current.entries()
+            // status() can throw GitException (e.g. a genuinely broken
+            // repo); that's a Sync-screen concern, not a reason to
+            // surface an error here or drop the freshly-read entries.
+            _syncStatus.value = runCatching { git?.status() }.getOrNull()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
         }
@@ -189,6 +209,74 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
         }
+    }
+
+    /** The `origin` remote's URL, if configured. Local config read, no network. */
+    fun remoteUrl(): String? = git?.remoteUrl()
+
+    /** Push the current branch to origin. Network I/O -- always off Main. */
+    suspend fun pushToRemote() {
+        withContext(Dispatchers.IO) {
+            git?.push() ?: throw GitException.NoRepository()
+        }
+        refresh()
+    }
+
+    /** Create or repoint `origin`. */
+    suspend fun updateRemote(url: String) {
+        withContext(Dispatchers.IO) {
+            git?.setRemote(url) ?: throw GitException.NoRepository()
+        }
+        refresh()
+    }
+
+    /**
+     * Fetch + rebase (or fast-forward, or nothing). [resolver] is asked
+     * once per conflicted file, on this IO-dispatcher thread -- see
+     * ui/sync/BlockingResolver, which bridges that blocking callback to
+     * the Sync screen's conflict dialog.
+     */
+    suspend fun syncNow(resolver: ConflictResolver): SyncOutcome {
+        val outcome = withContext(Dispatchers.IO) {
+            git?.sync(resolver) ?: throw GitException.NoRepository()
+        }
+        refresh()
+        return outcome
+    }
+
+    /**
+     * Publish the current local store to an empty remote: init (commits
+     * everything with CLI-style messages) if this store has no repo
+     * yet, then set the remote and push. Matches iOS's
+     * SyncView.publishSection.
+     */
+    suspend fun publishStore(url: String) {
+        withContext(Dispatchers.IO) {
+            val handle = git ?: GitSync.init(StorePaths.storeRoot(context, format).absolutePath, format)
+            handle.setRemote(url)
+            handle.push()
+        }
+        openStore()
+    }
+
+    /**
+     * Replace the local store with a freshly cloned one. The clone
+     * lands in a scratch directory first, so a failed clone never
+     * touches the current store; only on success does it replace the
+     * store for this format. Matches iOS's SyncView.cloneSection.
+     */
+    suspend fun cloneReplaceStore(url: String) {
+        val root = StorePaths.storeRoot(context, format)
+        val scratch = StorePaths.cloneScratchDir(context)
+        withContext(Dispatchers.IO) {
+            scratch.deleteRecursively()
+            GitSync.cloneFrom(url, scratch.absolutePath, null).close()
+            root.deleteRecursively()
+            if (!scratch.renameTo(root)) {
+                throw GitException.Other("couldn't move the cloned store into place")
+            }
+        }
+        openStore()
     }
 
     private fun seedDemoStore(store: PassStore) {
