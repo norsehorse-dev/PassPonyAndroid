@@ -60,7 +60,11 @@ fun SyncScreen(
     onDone: () -> Unit,
     syncViewModel: SyncViewModel = viewModel()
 ) {
-    val status by appViewModel.syncStatus.collectAsState()
+    // A plain val (not `by`), so the null checks below actually let
+    // Kotlin smart-cast to a non-null SyncStatus afterward -- a
+    // delegated property's getter can't be smart-cast even right after
+    // an == null check, since it doesn't know the getter is stable.
+    val status = appViewModel.syncStatus.collectAsState().value
     var cloneUrl by remember { mutableStateOf("") }
     var publishUrl by remember { mutableStateOf("") }
     val busy = syncViewModel.busy
