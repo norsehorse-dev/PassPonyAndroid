@@ -21,7 +21,11 @@
 #           per-dex SHA-256s and any embedded R8 marker. Requires network
 #           (clones the repo and, if PASSPONY_CORE_SHA is set, PassPonyCore
 #           too) and an Android SDK/NDK matching gradle.properties'
-#           ndkVersion.
+#           ndkVersion. Picks up a JDK 17 for both isolated builds from
+#           $JAVA_HOME, or failing that from org.gradle.java.home in your
+#           real gradle.properties (see resolve_java_home below) -- set
+#           JAVA_HOME yourself first if neither is already configured for
+#           JDK 17.
 # compare:  content comparison of two APKs via a per-entry SHA-256
 #           manifest, excluding only the signature files
 #           (META-INF/*.SF|*.RSA|*.DSA|*.EC|MANIFEST.MF). Prints IDENTICAL
@@ -48,6 +52,31 @@ PASSPONY_CORE_SHA="${PASSPONY_CORE_SHA:-}"
 # covered by F-Droid's own verification (see docs/REPRODUCIBLE.md, "How
 # F-Droid's verification actually works").
 SIG_FILE_RE='^META-INF/([^/]+\.(SF|RSA|DSA|EC)|MANIFEST\.MF)$'
+
+resolve_java_home() {
+  # rebuild deliberately points each clone at its own throwaway
+  # GRADLE_USER_HOME (isolation between the two builds, and from whatever
+  # is cached on this machine) -- but that also hides any org.gradle.java.
+  # home a developer has set in their *real*
+  # $GRADLE_USER_HOME/gradle.properties (commonly how a machine whose
+  # default `java` isn't 17, e.g. one where Android Studio's own bundled
+  # JBR is newer, points Gradle at a JDK 17 install). Without it, Gradle's
+  # toolchain resolution can fail outright on a machine that in fact has a
+  # JDK 17 available, just not somewhere auto-detection finds it, with
+  # toolchain auto-download off (no foojay-resolver-convention configured
+  # here). JAVA_HOME, if the caller already has it exported, wins outright;
+  # otherwise this reads the real global gradle.properties once, before it
+  # gets shadowed below. Prints nothing if neither is set, which leaves
+  # Gradle's own auto-detection exactly as before this existed.
+  if [[ -n "${JAVA_HOME:-}" ]]; then
+    printf '%s' "$JAVA_HOME"
+    return
+  fi
+  local props="${GRADLE_USER_HOME:-$HOME/.gradle}/gradle.properties"
+  if [[ -f "$props" ]]; then
+    sed -n 's/^org\.gradle\.java\.home=//p' "$props" | tail -n1
+  fi
+}
 
 manifest_py() {
   # $1 = apk path. Prints "name\tsha256", one per non-signature entry,
@@ -145,6 +174,12 @@ cmd_rebuild() {
     core="$work/passpony-core"
   fi
 
+  local java_home
+  java_home="$(resolve_java_home)"
+  if [[ -n "$java_home" ]]; then
+    echo "Using org.gradle.java.home=$java_home for both builds"
+  fi
+
   local root
   for root in srcA srcB; do
     echo "--- Cloning $tag into $root ---"
@@ -161,7 +196,9 @@ cmd_rebuild() {
         bash "$work/$root/scripts/build-core.sh"
       fi
     fi
-    ( cd "$work/$root" && env GRADLE_USER_HOME="$work/gradle-$root" ./gradlew --no-daemon "$GRADLE_TASK" )
+    local gradle_opts=()
+    [[ -n "$java_home" ]] && gradle_opts+=("-Dorg.gradle.java.home=$java_home")
+    ( cd "$work/$root" && env GRADLE_USER_HOME="$work/gradle-$root" ./gradlew --no-daemon "${gradle_opts[@]}" "$GRADLE_TASK" )
   done
 
   local apk_a="$work/srcA/$APK_REL_PATH"
