@@ -174,7 +174,14 @@ class PassPonyAutofillService : AutofillService() {
     }
 
     private fun addValue(builder: Dataset.Builder, id: AutofillId, presentation: RemoteViews, inline: InlinePresentation?) {
-        if (inline != null) {
+        // The extra SDK_INT check is redundant at runtime -- inline is only
+        // ever non-null when buildDataset's own SDK_INT >= R check already
+        // passed -- but lint's NewApi analysis can't trace that guard up
+        // through buildDataset into this method, so it flags the
+        // addValueWithInline call below as reachable pre-R. Repeating the
+        // check here locally is what lets lint verify the call itself,
+        // without changing behavior.
+        if (inline != null && Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
             addValueWithInline(builder, id, presentation, inline)
         } else {
             builder.setValue(id, null, presentation)
@@ -202,7 +209,15 @@ class PassPonyAutofillService : AutofillService() {
      * NoSuchMethodError, neither of which is an Exception -- an
      * Exception-only catch here would let that propagate uncaught out of
      * onFillRequest.
+     *
+     * `.slice` on androidx.autofill.inline's own Content type is annotated
+     * @RestrictTo by that library, but it's also the only way -- public or
+     * otherwise -- to obtain the Slice InlinePresentation's constructor
+     * needs; that's the documented pattern in Android's own inline
+     * autofill suggestions guide and sample code, which likewise
+     * suppresses this exact lint warning rather than avoiding the call.
      */
+    @Suppress("RestrictedApi")
     @RequiresApi(Build.VERSION_CODES.R)
     private fun buildInlinePresentationOrNull(label: String, pendingIntent: PendingIntent, spec: InlinePresentationSpec): InlinePresentation? =
         try {

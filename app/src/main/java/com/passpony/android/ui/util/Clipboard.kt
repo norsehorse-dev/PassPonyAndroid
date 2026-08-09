@@ -4,6 +4,7 @@ import android.content.ClipData
 import android.content.ClipDescription
 import android.content.ClipboardManager
 import android.content.Context
+import android.os.Build
 import android.os.Handler
 import android.os.Looper
 import android.os.PersistableBundle
@@ -51,7 +52,17 @@ object Clipboard {
         override fun currentClipLabel(): String? =
             manager.primaryClip?.description?.label?.toString()
 
-        override fun clearPrimaryClip() = manager.clearPrimaryClip()
+        override fun clearPrimaryClip() {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.P) {
+                manager.clearPrimaryClip()
+            } else {
+                // ClipboardManager#clearPrimaryClip doesn't exist before
+                // API 28 (minSdk here is 26); overwriting with an empty,
+                // unlabeled clip is the best available way on those
+                // versions to stop the sensitive value from lingering.
+                manager.setPrimaryClip(ClipData.newPlainText("", ""))
+            }
+        }
     }
 
     private val mainHandler by lazy { Handler(Looper.getMainLooper()) }
