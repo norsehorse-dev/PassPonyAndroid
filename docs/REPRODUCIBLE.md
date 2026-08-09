@@ -227,6 +227,6 @@ verification event, updated as each one actually happens:
 
 | Date | Step | Result |
 | --- | --- | --- |
-| | gate rebuild (main) | not yet run |
+| 2026-08-09 | gate rebuild (main @ `6c6bd24`), Kevin's Mac | IDENTICAL -- `tools/verify_repro.sh rebuild main`, two independent clones/builds byte-identical. Content hash `2c00bfc46561dcba9315a12fe08d220da1c8bd0d1d56b5417b9d650013e27950` |
 | | CI legs (JDK 17 / 21) | not yet run -- pending the first `v*` tag |
 | | F-Droid outcome | not submitted yet (P16) |
