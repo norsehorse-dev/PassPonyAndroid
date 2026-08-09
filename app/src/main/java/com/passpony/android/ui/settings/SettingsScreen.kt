@@ -85,6 +85,7 @@ fun SettingsScreen(
     onInitializeStore: () -> Unit,
     onReencrypt: () -> Unit,
     onLock: () -> Unit,
+    onRestartOnboarding: () -> Unit,
 ) {
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
@@ -236,8 +237,12 @@ fun SettingsScreen(
                 onSelect = { tag -> LanguageManager.apply(tag) }
             )
             TextButton(onClick = {
+                // onRestartOnboarding flips MainActivity's showOnboarding
+                // state directly -- popping back to onDone() would just
+                // land on the store list underneath Settings, since
+                // nothing here observes the flag this write persists.
                 scope.launch { StorePaths.setOnboardingCompleted(context, false) }
-                onDone()
+                onRestartOnboarding()
             }) {
                 Text(stringResource(R.string.settings_tour_replay))
             }

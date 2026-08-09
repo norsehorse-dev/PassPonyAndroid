@@ -35,7 +35,7 @@ object Routes {
 }
 
 @Composable
-fun PassPonyNavGraph(onLock: () -> Unit) {
+fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
     val navController = rememberNavController()
     // Created here rather than inside each destination: androidx.navigation
     // scopes a default viewModel() call to that destination's own
@@ -89,6 +89,7 @@ fun PassPonyNavGraph(onLock: () -> Unit) {
                 onInitializeStore = { navController.navigate(Routes.INITIALIZE_STORE) },
                 onReencrypt = { navController.navigate(Routes.REENCRYPT) },
                 onLock = onLock,
+                onRestartOnboarding = onRestartOnboarding,
             )
         }
         composable(Routes.INITIALIZE_STORE) {

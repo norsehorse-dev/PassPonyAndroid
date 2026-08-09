@@ -91,7 +91,8 @@ class MainActivity : AppCompatActivity() {
                             onLock = {
                                 UnlockGate.lock(context)
                                 locked = true
-                            }
+                            },
+                            onRestartOnboarding = { showOnboarding = true }
                         )
                     }
                 }

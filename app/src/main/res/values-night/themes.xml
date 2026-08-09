@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!--
+      Same placeholder-only role as values/themes.xml (Compose owns all
+      real theming); exists so the brief window shown during any
+      Activity recreate (locale switch, config change) is dark rather
+      than flashing the light variant's white background against a
+      dark system theme. Plain dark gray rather than pure black to
+      match Compose M3 dark scheme's usual surface tone reasonably
+      well; doesn't need to match exactly since Compose repaints within
+      a frame or two.
+    -->
+    <style name="Theme.PassPony" parent="Theme.AppCompat.DayNight.NoActionBar">
+        <item name="android:windowBackground">#121212</item>
+    </style>
+</resources>
