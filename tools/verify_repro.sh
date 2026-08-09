@@ -158,6 +158,17 @@ cmd_rebuild() {
   local tag="${1:?usage: verify_repro.sh rebuild <tag> [candidate.apk]}"
   local candidate="${2:-}"
   [[ -n "$REPO_URL" ]] || { echo "REPO_URL not set and no 'origin' remote found" >&2; exit 1; }
+  if [[ -z "${ANDROID_HOME:-}${ANDROID_SDK_ROOT:-}" ]]; then
+    # AGP needs one or the other -- local.properties' sdk.dir is the usual
+    # source, but it's gitignored (per-machine, never committed) so a
+    # fresh clone never has it; only an env var survives into one. Failing
+    # here, before either clone/build even starts, beats a Gradle stack
+    # trace ~40s into the second of two builds. Your own working copy's
+    # local.properties already has the right path for this machine:
+    #   export ANDROID_HOME=$(sed -n 's/^sdk.dir=//p' local.properties)
+    echo "ANDROID_HOME (or ANDROID_SDK_ROOT) is not set -- export one before running rebuild." >&2
+    exit 1
+  fi
 
   local work
   work="$(mktemp -d "${TMPDIR:-/tmp}/verify-repro.XXXXXX")"
