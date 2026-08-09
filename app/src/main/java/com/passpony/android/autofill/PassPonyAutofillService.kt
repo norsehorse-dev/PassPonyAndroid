@@ -13,6 +13,7 @@ import android.service.autofill.FillResponse
 import android.service.autofill.InlinePresentation
 import android.service.autofill.SaveCallback
 import android.service.autofill.SaveRequest
+import android.util.Log
 import android.view.autofill.AutofillId
 import android.widget.RemoteViews
 import android.widget.inline.InlinePresentationSpec
@@ -40,35 +41,42 @@ import uniffi.pass_ffi.EntryRef
 class PassPonyAutofillService : AutofillService() {
 
     override fun onFillRequest(request: FillRequest, cancellationSignal: CancellationSignal, callback: FillCallback) {
+        Log.d(TAG, "onFillRequest: called")
         try {
             val structure = request.fillContexts.lastOrNull()?.structure
             if (structure == null) {
+                Log.d(TAG, "onFillRequest: no structure in fillContexts, bailing")
                 callback.onSuccess(null)
                 return
             }
 
             val parsed = parseAll(structure)
+            Log.d(TAG, "onFillRequest: parsed ${parsed.fields.size} field(s), webDomain=${parsed.webDomain}")
             val passwordId = parsed.fields.firstOrNull { it.kind == FieldKind.PASSWORD }?.id
             if (passwordId == null) {
                 // Nothing this service can offer to fill -- plan item 1's
                 // "bail with callback.onSuccess(null)" case.
+                Log.d(TAG, "onFillRequest: no PASSWORD field classified, bailing")
                 callback.onSuccess(null)
                 return
             }
             val usernameId = parsed.fields.firstOrNull { it.kind == FieldKind.USERNAME }?.id
             val domain = parsed.webDomain ?: structure.activityComponent?.packageName ?: ""
+            Log.d(TAG, "onFillRequest: passwordId found, usernameId=${usernameId != null}, domain=$domain")
 
             val entries = AutofillCredential.entries(this)
             val matches = entries
                 .filter { !it.hidden }
                 .filter { ServiceHint.matchesDomain(ServiceHint.forEntryName(it.name), domain) }
                 .take(MAX_DATASETS)
+            Log.d(TAG, "onFillRequest: ${entries.size} total entries, ${matches.size} matched domain '$domain'")
 
             val inlineSpecs = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.R) {
                 inlineSpecsFor(request)
             } else {
                 emptyList()
             }
+            Log.d(TAG, "onFillRequest: ${inlineSpecs.size} inline presentation spec(s) requested")
 
             val response = FillResponse.Builder()
             matches.forEachIndexed { index, entry ->
@@ -81,12 +89,14 @@ class PassPonyAutofillService : AutofillService() {
             )
 
             callback.onSuccess(response.build())
+            Log.d(TAG, "onFillRequest: responded with ${matches.size + 1} dataset(s)")
         } catch (e: Throwable) {
             // Throwable, not Exception: a bad guess anywhere in the inline
             // presentation API surface fails as a LinkageError/NoSuchMethodError,
             // not an Exception -- this must still degrade to no suggestions
             // rather than silently hang the fill request (no callback call at
             // all reads to the host app as an autofill service that's stuck).
+            Log.e(TAG, "onFillRequest: failed, returning no suggestions", e)
             callback.onSuccess(null)
         }
     }
@@ -195,6 +205,7 @@ class PassPonyAutofillService : AutofillService() {
                 .slice
             InlinePresentation(slice, spec, false)
         } catch (e: Throwable) {
+            Log.w(TAG, "buildInlinePresentationOrNull: falling back to RemoteViews only", e)
             null
         }
 
@@ -224,6 +235,8 @@ class PassPonyAutofillService : AutofillService() {
     }
 
     companion object {
+        private const val TAG = "PassPonyAutofillService"
+
         /** Plan item 1: "up to N (5)". */
         private const val MAX_DATASETS = 5
     }
