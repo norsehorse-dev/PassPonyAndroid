@@ -81,10 +81,12 @@ class PassPonyAutofillService : AutofillService() {
             )
 
             callback.onSuccess(response.build())
-        } catch (e: Exception) {
-            // A fill request is never user-initiated in the way a pick or
-            // a save is -- swallow and offer nothing rather than crash the
-            // host app the user is trying to use.
+        } catch (e: Throwable) {
+            // Throwable, not Exception: a bad guess anywhere in the inline
+            // presentation API surface fails as a LinkageError/NoSuchMethodError,
+            // not an Exception -- this must still degrade to no suggestions
+            // rather than silently hang the fill request (no callback call at
+            // all reads to the host app as an autofill service that's stuck).
             callback.onSuccess(null)
         }
     }
@@ -177,7 +179,12 @@ class PassPonyAutofillService : AutofillService() {
      * the call site) so a wrong guess anywhere in this API surface -- the
      * least-verified part of this packet -- throws inside a try/catch
      * that falls back to the plain RemoteViews presentation instead of
-     * failing the whole fill request.
+     * failing the whole fill request. Catches Throwable, not Exception:
+     * a missing/renamed method in this surface (e.g. androidx.autofill
+     * failing to resolve at runtime) raises a LinkageError or
+     * NoSuchMethodError, neither of which is an Exception -- an
+     * Exception-only catch here would let that propagate uncaught out of
+     * onFillRequest.
      */
     @RequiresApi(Build.VERSION_CODES.R)
     private fun buildInlinePresentationOrNull(label: String, pendingIntent: PendingIntent, spec: InlinePresentationSpec): InlinePresentation? =
@@ -187,7 +194,7 @@ class PassPonyAutofillService : AutofillService() {
                 .build()
                 .slice
             InlinePresentation(slice, spec, false)
-        } catch (e: Exception) {
+        } catch (e: Throwable) {
             null
         }
 
