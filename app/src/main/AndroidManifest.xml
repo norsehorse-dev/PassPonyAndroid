@@ -21,6 +21,36 @@
             </intent-filter>
         </activity>
 
+        <!--
+          P12: both autofill activities are only ever started by the
+          system itself, via the PendingIntents PassPonyAutofillService
+          attaches to a Dataset's authentication - never by another app,
+          so both are unexported.
+        -->
+        <activity
+            android:name=".autofill.AutofillAuthActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PassPony.Translucent"
+            android:excludeFromRecents="true" />
+
+        <activity
+            android:name=".autofill.AutofillPickerActivity"
+            android:exported="false"
+            android:theme="@style/Theme.PassPony"
+            android:excludeFromRecents="true" />
+
+        <service
+            android:name=".autofill.PassPonyAutofillService"
+            android:permission="android.permission.BIND_AUTOFILL_SERVICE"
+            android:exported="true">
+            <intent-filter>
+                <action android:name="android.service.autofill.AutofillService" />
+            </intent-filter>
+            <meta-data
+                android:name="android.autofill"
+                android:resource="@xml/autofill_service_config" />
+        </service>
+
     </application>
 
 </manifest>

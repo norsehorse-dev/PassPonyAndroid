@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  Declares PassPonyAutofillService to the platform. settingsActivity
+  points Settings' own "Turn on autofill" affordance (and the system
+  autofill-service picker's "Settings" entry) at MainActivity - there is
+  no dedicated autofill-settings screen; onboarding integration is P14.
+  supportsInlineSuggestions opts in to the platform sending a
+  FillRequest.inlineSuggestionsRequest on API30+ (Chrome and most IMEs
+  otherwise never ask); PassPonyAutofillService falls back to the
+  RemoteViews dropdown whenever that's absent or empty either way.
+-->
+<autofill-service xmlns:android="http://schemas.android.com/apk/res/android"
+    android:settingsActivity="com.passpony.android.MainActivity"
+    android:supportsInlineSuggestions="true" />

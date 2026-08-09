@@ -141,6 +141,14 @@ dependencies {
     // -- Biometric unlock gate (P11) --
     implementation("androidx.biometric:biometric:1.2.0-alpha05")
 
+    // -- Autofill inline suggestions (P12) --
+    // androidx.autofill.inline.v1.InlineSuggestionUi: the API30+ chip
+    // presentation PassPonyAutofillService builds alongside every
+    // dataset's RemoteViews. Isolated behind SDK_INT/@RequiresApi checks
+    // in the service, so a problem here never affects the RemoteViews
+    // dropdown or the picker fallback, which don't depend on it.
+    implementation("androidx.autofill:autofill:1.3.0")
+
     // -- Testing --
     testImplementation("junit:junit:4.13.2")
     testImplementation("org.jetbrains.kotlinx:kotlinx-coroutines-test:1.9.0")

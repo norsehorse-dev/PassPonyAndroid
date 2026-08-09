@@ -6,4 +6,13 @@
       first Compose frame draws.
     -->
     <style name="Theme.PassPony" parent="android:Theme.Material.Light.NoActionBar" />
+
+    <!--
+      AutofillAuthActivity: it never draws a frame of its own (the
+      biometric prompt, or on a fresh grace window nothing at all - it
+      resolves and finishes immediately), so a translucent theme avoids
+      a flash of blank content behind the system UI it launches on top
+      of.
+    -->
+    <style name="Theme.PassPony.Translucent" parent="android:Theme.Translucent.NoTitleBar" />
 </resources>

@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  RemoteViews row for the pre-API30 autofill dropdown (and the base
+  presentation always attached alongside an InlinePresentation on
+  API30+, which the platform falls back to if the IME doesn't actually
+  render inline suggestions). One line of text: the entry name, or
+  "Search in PassPony" for the picker-fallback dataset.
+-->
+<TextView xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/autofill_dataset_text"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="16dp"
+    android:paddingVertical="12dp"
+    android:textSize="16sp"
+    android:textColor="?android:attr/textColorPrimary"
+    android:background="?android:attr/selectableItemBackground"
+    android:ellipsize="end"
+    android:singleLine="true" />

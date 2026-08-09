@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Build
 import android.provider.OpenableColumns
+import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
@@ -228,6 +229,9 @@ fun SettingsScreen(
             MaintenanceSection(onReencrypt = onReencrypt)
 
             Spacer(Modifier.height(16.dp))
+            AutofillSection(context)
+
+            Spacer(Modifier.height(16.dp))
             LanguageSection(
                 onSelect = { tag ->
                     LanguageManager.activityOf(context)?.let { LanguageManager.apply(it, tag) }
@@ -274,6 +278,18 @@ private fun displayName(context: Context, uri: Uri): String? {
 
 private fun openUrl(context: Context, url: String) {
     runCatching { context.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url))) }
+}
+
+/**
+ * P12: the system picker for setting PassPony as the default autofill
+ * service. Full first-run onboarding for this is P14 -- this row is the
+ * only way to reach it before then. runCatching mirrors openUrl(): some
+ * OEM builds omit this action entirely, and a no-op tap beats a crash.
+ */
+private fun openAutofillSettings(context: Context) {
+    runCatching {
+        context.startActivity(Intent(Settings.ACTION_REQUEST_SET_AUTOFILL_SERVICE, Uri.parse("package:" + context.packageName)))
+    }
 }
 
 @Composable
@@ -438,6 +454,19 @@ private fun MaintenanceSection(onReencrypt: () -> Unit) {
     TextButton(onClick = onReencrypt) {
         Text(stringResource(R.string.settings_reencrypt))
     }
+}
+
+@Composable
+private fun AutofillSection(context: Context) {
+    SectionHeader(stringResource(R.string.settings_autofill_header))
+    TextButton(onClick = { openAutofillSettings(context) }) {
+        Text(stringResource(R.string.settings_autofill_row_title))
+    }
+    Text(
+        stringResource(R.string.settings_autofill_footer),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.secondary
+    )
 }
 
 @Composable

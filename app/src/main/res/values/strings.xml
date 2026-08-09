@@ -157,4 +157,15 @@
     <string name="settings_session_header">Session</string>
     <string name="settings_lock_now">Lock now</string>
     <string name="settings_session_footer">Locks immediately and clears the cached key passphrase. Auto-locks after %1$d minutes of inactivity either way.</string>
+
+    <string name="settings_autofill_header">Autofill</string>
+    <string name="settings_autofill_row_title">Set PassPony as autofill service…</string>
+    <string name="settings_autofill_footer">Lets other apps and browsers ask PassPony to fill logins. Nothing decrypts until you pick an entry.</string>
+
+    <string name="autofill_unlock_reason">Unlock PassPony to fill this password</string>
+    <string name="autofill_search_dataset_label">Search in PassPony</string>
+    <string name="autofill_picker_title">Fill from PassPony</string>
+    <string name="autofill_picker_search_hint">Search entries</string>
+    <string name="autofill_pick_failed">Couldn\'t fill that entry.</string>
+    <string name="autofill_save_not_supported">Saving new entries from autofill isn\'t supported yet.</string>
 </resources>
