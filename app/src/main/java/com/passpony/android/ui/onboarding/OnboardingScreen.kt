@@ -42,11 +42,12 @@ import kotlinx.coroutines.launch
  * slide lands in a working app").
  *
  * [HorizontalPager]'s [rememberPagerState] is itself rememberSaveable
- * internally, so the current page survives the LanguageManager-driven
- * Activity.recreate() the language slide triggers -- no separate
- * .id()-based re-key trick is needed the way iOS uses one, since
- * recreate() already rebuilds this whole composition against the new
- * locale from scratch.
+ * internally, so the current page survives even where the language
+ * slide still does trigger a real Activity.recreate() (API 26-32's
+ * AppCompat compat shim; API 33+ recomposes in place instead, per
+ * MainActivity's configChanges="locale", so there's nothing to survive
+ * there at all) -- no separate .id()-based re-key trick is needed the
+ * way iOS uses one.
  */
 @Composable
 fun OnboardingScreen(appViewModel: AppViewModel, onComplete: () -> Unit) {

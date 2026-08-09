@@ -11,9 +11,25 @@
         android:theme="@style/Theme.PassPony"
         android:localeConfig="@xml/locales_config">
 
+        <!--
+          configChanges="locale|layoutDirection": on API 33+, a locale
+          change is delivered to a running Activity as a normal
+          Configuration change rather than a destroy+recreate the moment
+          it declares it handles that dimension itself; Compose already
+          recomposes stringResource() calls against the new Configuration
+          automatically, so nothing else is needed here. Without this,
+          AppCompatDelegate.setApplicationLocales() (see LanguageManager.kt)
+          tears the whole window down and rebuilds it, which is what was
+          showing as a black flash on every language switch. Only affects
+          API 33+ (the framework LocaleManager path); AppCompat's own
+          API 26-32 compat shim still forces a real recreate regardless of
+          this attribute, since that path isn't a real Configuration
+          change at all.
+        -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
+            android:configChanges="locale|layoutDirection"
             android:theme="@style/Theme.PassPony">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

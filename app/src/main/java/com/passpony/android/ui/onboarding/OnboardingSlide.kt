@@ -20,14 +20,14 @@ import com.passpony.android.R
  * slide hosts. Titles/bodies are @StringRes/@PluralsRes ints rather than
  * resolved strings so they always read against the CURRENT locale --
  * important because slide 1's language picker changes the app locale live
- * via LanguageManager.apply(), which AppCompatActivity reacts to with
- * its own automatic recreate(). Unlike iOS (which re-keys the pager
- * subtree with .id(model.language) to force re-resolution), Android's
- * recreate() already rebuilds the whole composition from scratch
- * against the new Configuration, so a plain stringResource() call at
- * render time is sufficient -- see OnboardingScreen's rememberSaveable
- * page state for the other half of that: what recreate() would
- * otherwise lose.
+ * via LanguageManager.apply(). On API 33+, MainActivity's
+ * configChanges="locale" means that just recomposes this composition in
+ * place against the new Configuration -- no Activity.recreate() at all
+ * (see AndroidManifest.xml). On API 26-32, AppCompat's compat shim still
+ * forces a real recreate, which also lands here fine since a plain
+ * stringResource() call at render time re-resolves either way. Unlike
+ * iOS (which re-keys the pager subtree with .id(model.language) to
+ * force re-resolution), neither Android path needs an explicit re-key.
  */
 enum class OnboardingAction {
     NONE, LANGUAGE, FORMAT, IMPORT_STORE, TRY_PASS, BIOMETRIC, AUTOFILL
