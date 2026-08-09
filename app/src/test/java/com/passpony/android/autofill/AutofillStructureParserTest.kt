@@ -45,6 +45,42 @@ class AutofillStructureParserTest {
         assertEquals(FieldKind.USERNAME, AutofillStructureParser.classify(node))
     }
 
+    // Chrome/WebView passes the page's raw HTML autocomplete token straight
+    // through as the hint string, rather than translating it to Android's
+    // own View.AUTOFILL_HINT_* constants -- confirmed via a live structure
+    // dump on github.com/login, where the password field's hint was
+    // literally "current-password" and inputType was 0. Regression
+    // coverage for the bug that shipped from assuming only the Android
+    // constants would ever appear.
+
+    @Test
+    fun classify_whatwgCurrentPasswordHint_isPassword() {
+        // github.com/login's actual password field: hint "current-password",
+        // inputType 0 (Chrome never populates inputType on web content).
+        val node = FakeNode(autofillId = 1, autofillHints = arrayOf("current-password"), inputType = 0)
+        assertEquals(FieldKind.PASSWORD, AutofillStructureParser.classify(node))
+    }
+
+    @Test
+    fun classify_whatwgNewPasswordHint_isPassword() {
+        val node = FakeNode(autofillId = 1, autofillHints = arrayOf("new-password"), inputType = 0)
+        assertEquals(FieldKind.PASSWORD, AutofillStructureParser.classify(node))
+    }
+
+    @Test
+    fun classify_whatwgEmailHint_isUsername() {
+        val node = FakeNode(autofillId = 1, autofillHints = arrayOf("email"), inputType = 0)
+        assertEquals(FieldKind.USERNAME, AutofillStructureParser.classify(node))
+    }
+
+    @Test
+    fun classify_whatwgUsernameHint_isUsername() {
+        // "username" happens to be spelled the same in both vocabularies --
+        // covered for completeness alongside the ones that aren't.
+        val node = FakeNode(autofillId = 1, autofillHints = arrayOf("username"), inputType = 0)
+        assertEquals(FieldKind.USERNAME, AutofillStructureParser.classify(node))
+    }
+
     @Test
     fun classify_passwordInputTypeVariation_isPassword() {
         val inputType = InputType.TYPE_CLASS_TEXT or InputType.TYPE_TEXT_VARIATION_WEB_PASSWORD
@@ -113,6 +149,25 @@ class AutofillStructureParserTest {
         )
         val result = AutofillStructureParser.parse(tree)
         assertEquals(listOf(AutofillField(10, FieldKind.USERNAME), AutofillField(11, FieldKind.PASSWORD)), result.fields)
+    }
+
+    @Test
+    fun parse_findsBothFieldsFromRealChromeStructure() {
+        // Reproduces github.com/login's actual structure (captured via
+        // logcat): two <input> nodes, hints as WHATWG tokens, inputType 0
+        // on both -- the exact shape that silently dropped the password
+        // field before the WHATWG hint fix.
+        val tree = FakeNode(
+            children = listOf(
+                FakeNode(autofillId = 100, autofillHints = arrayOf("username"), inputType = 0),
+                FakeNode(autofillId = 101, autofillHints = arrayOf("current-password"), inputType = 0),
+            )
+        )
+        val result = AutofillStructureParser.parse(tree)
+        assertEquals(
+            listOf(AutofillField(100, FieldKind.USERNAME), AutofillField(101, FieldKind.PASSWORD)),
+            result.fields
+        )
     }
 
     @Test

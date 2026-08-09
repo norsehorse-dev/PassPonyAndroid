@@ -44,6 +44,18 @@ data class ParsedStructure<Id>(val fields: List<AutofillField<Id>>, val webDomai
  * too ambiguous (search boxes, names, anything) to guess at without an
  * explicit signal, and under-detecting just means a smaller (never
  * wrong) set of chips, not a broken fill.
+ *
+ * The hint check has to recognize two different vocabularies, confirmed
+ * against a real Chrome structure dump: a native Android EditText sets
+ * View.AUTOFILL_HINT_* constants ("password", "emailAddress", ...), but
+ * Chrome/WebView passes the page's raw HTML autocomplete token straight
+ * through instead ("current-password", "new-password", "email", ...).
+ * "username" happens to be spelled the same in both, which is what made
+ * the gap here easy to miss -- the password/email hints are not. The
+ * inputType fallback below is native-app-only for the same reason:
+ * Chrome never populates inputType on its virtual autofill nodes (it's
+ * always 0), so a WebView field with an unrecognized/missing hint is
+ * simply not classified, same as before.
  */
 object AutofillStructureParser {
     fun <Id> parse(root: ParsedNode<Id>): ParsedStructure<Id> {
@@ -65,8 +77,10 @@ object AutofillStructureParser {
         node.autofillHints?.let { hints ->
             for (hint in hints) {
                 when (hint) {
-                    View.AUTOFILL_HINT_PASSWORD -> return FieldKind.PASSWORD
-                    View.AUTOFILL_HINT_USERNAME, View.AUTOFILL_HINT_EMAIL_ADDRESS -> return FieldKind.USERNAME
+                    View.AUTOFILL_HINT_PASSWORD, WHATWG_CURRENT_PASSWORD, WHATWG_NEW_PASSWORD ->
+                        return FieldKind.PASSWORD
+                    View.AUTOFILL_HINT_USERNAME, View.AUTOFILL_HINT_EMAIL_ADDRESS, WHATWG_EMAIL ->
+                        return FieldKind.USERNAME
                 }
             }
         }
@@ -83,4 +97,10 @@ object AutofillStructureParser {
             else -> null
         }
     }
+
+    // Raw WHATWG HTML autocomplete tokens, confirmed via a live Chrome
+    // structure dump on github.com/login -- see the class doc comment.
+    private const val WHATWG_CURRENT_PASSWORD = "current-password"
+    private const val WHATWG_NEW_PASSWORD = "new-password"
+    private const val WHATWG_EMAIL = "email"
 }

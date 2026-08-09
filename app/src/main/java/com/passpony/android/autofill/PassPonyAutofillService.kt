@@ -234,36 +234,11 @@ class PassPonyAutofillService : AutofillService() {
         val fields = mutableListOf<AutofillField<AutofillId>>()
         var webDomain: String? = null
         for (i in 0 until structure.windowNodeCount) {
-            val root = structure.getWindowNodeAt(i).rootViewNode
-            dumpNodeForDebugging(root, depth = 0)
-            val parsed = AutofillStructureParser.parse(ViewNodeAdapter(root))
+            val parsed = AutofillStructureParser.parse(ViewNodeAdapter(structure.getWindowNodeAt(i).rootViewNode))
             fields += parsed.fields
             if (webDomain == null) webDomain = parsed.webDomain
         }
         return ParsedStructure(fields, webDomain)
-    }
-
-    /**
-     * TEMPORARY diagnostic: dumps every <input>-like node's raw hints,
-     * inputType, and HTML tag/attributes (never the typed value) so we
-     * can see exactly what Chrome hands us for a field that isn't
-     * classifying the way its HTML suggests it should. Remove once P12's
-     * classify() gap is root-caused.
-     */
-    private fun dumpNodeForDebugging(node: AssistStructure.ViewNode, depth: Int) {
-        val htmlTag = node.htmlInfo?.tag
-        if (node.autofillId != null || htmlTag != null) {
-            val attrs = node.htmlInfo?.attributes?.joinToString { "${it.first}=${it.second}" }
-            Log.d(
-                TAG,
-                "structure: depth=$depth class=${node.className} idPresent=${node.autofillId != null} " +
-                    "hints=${node.autofillHints?.joinToString()} inputType=0x${Integer.toHexString(node.inputType)} " +
-                    "htmlTag=$htmlTag htmlAttrs=[$attrs]"
-            )
-        }
-        for (i in 0 until node.childCount) {
-            dumpNodeForDebugging(node.getChildAt(i), depth + 1)
-        }
     }
 
     companion object {
