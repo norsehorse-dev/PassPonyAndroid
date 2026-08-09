@@ -23,6 +23,10 @@ android {
     // (see docs/plan/P15-ci-reproducible.md). Bump this deliberately
     // alongside an AGP upgrade, matching the PGPonyAndroid convention.
     buildToolsVersion = "35.0.0"
+    // Read from gradle.properties, which scripts/build-core.sh's
+    // independent cargo-ndk cross-compile also reads -- one pinned
+    // value for both toolchains rather than two that can drift.
+    ndkVersion = providers.gradleProperty("ndkVersion").get()
 
     defaultConfig {
         applicationId = "com.passpony.android"

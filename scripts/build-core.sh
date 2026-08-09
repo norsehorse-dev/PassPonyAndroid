@@ -2,9 +2,9 @@
 # Cross-compile pass-ffi from PassPonyCore for Android and generate the
 # Kotlin UniFFI bindings. Run from the repo root: bash scripts/build-core.sh
 # Prereqs: rustup with the toolchain pinned by PassPonyCore, cargo-ndk
-# (cargo install cargo-ndk), an Android NDK (via Android Studio's SDK
-# manager), perl and make on PATH (needed by pass-core's vendored OpenSSL
-# build for mobile targets).
+# (cargo install cargo-ndk), an Android NDK matching gradle.properties'
+# ndkVersion (via Android Studio's SDK manager), perl and make on PATH
+# (needed by pass-core's vendored OpenSSL build for mobile targets).
 
 set -euo pipefail
 
@@ -28,12 +28,19 @@ command -v make >/dev/null || {
   echo "make not found; required to cross-compile vendored OpenSSL for Android"; exit 1; }
 
 if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
+  # gradle.properties' ndkVersion is the single source of truth (see its
+  # own comment there, and docs/REPRODUCIBLE.md) -- read it here instead
+  # of picking whatever's newest installed, so this cross-compile and
+  # AGP's own NDK resolution always agree without a second place to edit.
+  NDK_VERSION="$(sed -n 's/^ndkVersion=//p' "$REPO/gradle.properties")"
+  [[ -n "$NDK_VERSION" ]] || {
+    echo "Could not read ndkVersion from $REPO/gradle.properties"; exit 1; }
   NDK_ROOT="$HOME/Library/Android/sdk/ndk"
-  [[ -d "$NDK_ROOT" ]] || {
-    echo "No NDK found under $NDK_ROOT and ANDROID_NDK_HOME is unset; install one via Android Studio's SDK manager"
+  ANDROID_NDK_HOME="$NDK_ROOT/$NDK_VERSION"
+  [[ -d "$ANDROID_NDK_HOME" ]] || {
+    echo "NDK $NDK_VERSION not found at $ANDROID_NDK_HOME; install it via Android Studio's SDK manager (SDK Tools > NDK, pick $NDK_VERSION), or set ANDROID_NDK_HOME to override"
     exit 1
   }
-  ANDROID_NDK_HOME="$NDK_ROOT/$(ls "$NDK_ROOT" | sort -V | tail -n1)"
   export ANDROID_NDK_HOME
 fi
 
@@ -42,6 +49,18 @@ pushd "$CORE" >/dev/null
 # Run inside the core dir so rustup targets the toolchain pinned by its
 # rust-toolchain.toml, not whatever default toolchain the shell has.
 rustup target add aarch64-linux-android x86_64-linux-android
+
+# Deterministic builds: rustc otherwise bakes the absolute PassPonyCore
+# checkout path and $HOME into panic-location strings (file!()/line!()
+# macro expansions), which survive PassPonyCore's `strip = "symbols"`
+# release profile since they're plain string data, not debug info --
+# two machines building from different checkout paths would otherwise
+# never produce a byte-identical binary. Always on, not opt-in, so dev
+# and CI builds already agree without a second flag to remember (see
+# docs/plan/P15-ci-reproducible.md, docs/REPRODUCIBLE.md). Applied to
+# both cargo invocations below for consistency, even though the host
+# debug build isn't itself shipped.
+export RUSTFLAGS="--remap-path-prefix=$CORE=/passpony-core --remap-path-prefix=$HOME=/home${RUSTFLAGS:+ $RUSTFLAGS}"
 
 echo "Cross-compiling pass-ffi (features: $FEATURES) for arm64-v8a and x86_64"
 cargo ndk --platform 26 -t arm64-v8a -t x86_64 -o "$REPO/core/src/main/jniLibs" \

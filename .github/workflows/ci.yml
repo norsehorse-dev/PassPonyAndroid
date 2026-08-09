@@ -1,0 +1,198 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  schedule:
+    # Weekly reproducible-build verification (see the verify-reproducible
+    # job below and docs/REPRODUCIBLE.md) -- Mondays at 06:00 UTC.
+    - cron: '0 6 * * 1'
+  workflow_dispatch:
+
+env:
+  JAVA_VERSION: '17'
+  # PassPonyCore is a separate repo, not a submodule of this one (unlike
+  # PGPonyCore-Kotlin, which is). Pinned to a specific commit rather than a
+  # tag: v1.0.0 predates the age-engine feature this build depends on. Bump
+  # deliberately, alongside a local PassPonyCore upgrade -- see
+  # docs/REPRODUCIBLE.md for how this pin is chosen and verified.
+  PASSPONY_CORE_SHA: be1aba698d8815f4749c4889ac304229d5c17d9a
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    name: Build, unit test, lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PassPonyAndroid
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Checkout PassPonyCore (pinned)
+        uses: actions/checkout@v4
+        with:
+          repository: norsehorse-dev/PassPonyCore
+          ref: ${{ env.PASSPONY_CORE_SHA }}
+          path: passpony-core
+
+      - name: Reject dynamic dependency versions
+        run: |
+          set -euo pipefail
+          if grep -RnE "[0-9]\.\+[\"']" --include="*.kts" . \
+             || grep -RniE "latest\.(release|integration)" --include="*.kts" .; then
+            echo "::error::Dynamic dependency version found -- pin an exact version for reproducible builds (see docs/REPRODUCIBLE.md)."
+            exit 1
+          fi
+          echo "No dynamic dependency versions found."
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+        # Baseline only -- PassPonyCore's own rust-toolchain.toml pins the
+        # actual channel once cargo runs from inside passpony-core/ below.
+
+      - name: Cache Cargo registry and build artifacts
+        uses: Swatinem/rust-cache@v2
+        with:
+          workspaces: passpony-core -> target
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Read pinned NDK version
+        id: ndk
+        run: echo "version=$(sed -n 's/^ndkVersion=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned NDK
+        run: sdkmanager --install "ndk;${{ steps.ndk.outputs.version }}"
+
+      - name: Cross-compile pass-ffi and generate Kotlin bindings
+        env:
+          PASSPONY_CORE: ${{ github.workspace }}/passpony-core
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/${{ steps.ndk.outputs.version }}
+        run: bash scripts/build-core.sh
+
+      - name: Gradle build, unit tests, lint
+        run: ./gradlew test assembleFossDebug assemblePlayDebug lint --stacktrace
+
+      - name: Upload generated core sources for the emulator job
+        uses: actions/upload-artifact@v4
+        with:
+          name: core-generated
+          path: |
+            core/src/main/jniLibs
+            core/src/main/kotlin/uniffi
+          retention-days: 1
+
+      - name: Upload debug APK
+        uses: actions/upload-artifact@v4
+        with:
+          name: foss-debug-apk
+          path: app/build/outputs/apk/foss/debug/*.apk
+          retention-days: 7
+
+  emulator:
+    name: Emulator fixture round-trip
+    needs: build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PassPonyAndroid
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Download generated core sources
+        uses: actions/download-artifact@v4
+        with:
+          name: core-generated
+          path: core/src/main
+
+      - name: Enable KVM for the emulator
+        run: |
+          echo 'KERNEL=="kvm", GROUP="kvm", MODE="0666", OPTIONS+="static_node=kvm"' | sudo tee /etc/udev/rules.d/99-kvm4all.rules
+          sudo udevadm control --reload-rules
+          sudo udevadm trigger --name-match=kvm
+
+      - name: Run instrumented tests (emulator fixture round-trip)
+        uses: reactivecircus/android-emulator-runner@v2
+        with:
+          api-level: 34
+          target: default
+          arch: x86_64
+          profile: pixel_6
+          disable-animations: true
+          script: ./gradlew connectedFossDebugAndroidTest
+
+  verify-reproducible:
+    name: Weekly reproducible-build verification
+    needs: build
+    if: github.event_name == 'schedule' || github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout PassPonyAndroid
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up JDK
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ env.JAVA_VERSION }}
+
+      - name: Set up Gradle
+        uses: gradle/actions/setup-gradle@v4
+
+      - name: Set up Rust
+        uses: dtolnay/rust-toolchain@stable
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - name: Set up Android SDK
+        uses: android-actions/setup-android@v3
+
+      - name: Read pinned NDK version
+        id: ndk
+        run: echo "version=$(sed -n 's/^ndkVersion=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned NDK
+        run: sdkmanager --install "ndk;${{ steps.ndk.outputs.version }}"
+
+      - name: Run the double-build comparison
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/${{ steps.ndk.outputs.version }}
+          PASSPONY_CORE_SHA: ${{ env.PASSPONY_CORE_SHA }}
+        run: bash scripts/verify-reproducible.sh
+
+      - name: Upload comparison report on failure
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: reproducible-build-report
+          path: build-verify/report.txt
+          retention-days: 14
