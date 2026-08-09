@@ -5,7 +5,6 @@ import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
 import androidx.datastore.preferences.preferencesDataStore
-import com.passpony.android.BuildConfig
 import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
@@ -23,12 +22,11 @@ object StorePaths {
     private val FORMAT_KEY = stringPreferencesKey("store_format")
 
     /**
-     * P14 will replace this with the real onboarding-completed flag. Until
-     * then, demo seeding gates on this same key, defaulting to true in
-     * debug builds (so there is something to seed against before
-     * onboarding exists) and false in release (where seeding never runs
-     * anyway, since it is also gated on BuildConfig.DEBUG at the call
-     * site).
+     * Real onboarding-completed flag (P14): false until the carousel's
+     * Skip/Get Started finishes it, true forever after (Settings' "Show
+     * welcome tour again" is the only way back to false). Demo seeding
+     * gates on this same key so the import/try-pass slides see a
+     * genuinely empty store -- see AppViewModel.openStore().
      */
     private val DEMO_SEED_GATE_KEY = booleanPreferencesKey("onboarding_completed")
 
@@ -60,11 +58,11 @@ object StorePaths {
 
     fun onboardingCompletedSnapshot(context: Context): Boolean = runBlocking {
         val stored = context.passPonyDataStore.data.map { it[DEMO_SEED_GATE_KEY] }.first()
-        stored ?: BuildConfig.DEBUG
+        stored ?: false
     }
 
-    /** Settings' "Show welcome tour again" is the only writer until P14
-     * wires this up to the real first-run onboarding flow. */
+    /** Also called by MainActivity when the onboarding carousel finishes,
+     * and by Settings' "Show welcome tour again" to reset it. */
     suspend fun setOnboardingCompleted(context: Context, completed: Boolean) {
         context.passPonyDataStore.edit { prefs -> prefs[DEMO_SEED_GATE_KEY] = completed }
     }

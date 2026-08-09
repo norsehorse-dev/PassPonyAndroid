@@ -4,7 +4,6 @@ import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
-import android.provider.OpenableColumns
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -62,6 +61,7 @@ import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.util.SecureScreenEffect
+import com.passpony.android.ui.util.safDisplayName
 import java.io.File
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.StoreFormat
@@ -128,7 +128,7 @@ fun SettingsScreen(
         val keyDir = PgpKeyStore.keyDirectory(context)
         var imported = 0
         for (uri in uris) {
-            val name = displayName(context, uri) ?: continue
+            val name = safDisplayName(context, uri) ?: continue
             try {
                 val bytes = context.contentResolver.openInputStream(uri)?.use { it.readBytes() }
                     ?: continue
@@ -264,16 +264,6 @@ fun SettingsScreen(
             }
         }
     }
-}
-
-private fun displayName(context: Context, uri: Uri): String? {
-    context.contentResolver.query(uri, arrayOf(OpenableColumns.DISPLAY_NAME), null, null, null)?.use { cursor ->
-        if (cursor.moveToFirst()) {
-            val idx = cursor.getColumnIndex(OpenableColumns.DISPLAY_NAME)
-            if (idx >= 0) return cursor.getString(idx)
-        }
-    }
-    return uri.lastPathSegment
 }
 
 private fun openUrl(context: Context, url: String) {

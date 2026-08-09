@@ -9,24 +9,30 @@ import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import androidx.lifecycle.viewmodel.compose.viewModel
+import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.store.UnlockGateLogic
+import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.LockScreen
 import com.passpony.android.ui.PassPonyNavGraph
+import com.passpony.android.ui.onboarding.OnboardingScreen
 import com.passpony.android.ui.theme.PassPonyTheme
+import kotlinx.coroutines.launch
 
 /**
  * Single activity, Compose navigation. FragmentActivity (bumped from
  * ComponentActivity this packet) since BiometricPrompt needs a
- * FragmentManager host. LockScreen gates PassPonyNavGraph until
- * UnlockGate.isFresh(); P14's onboarding carousel will gate the very
- * first launch ahead of both, once it lands.
+ * FragmentManager host. OnboardingScreen gates everything else on the
+ * very first launch (StorePaths.onboardingCompletedSnapshot); once past
+ * it, LockScreen gates PassPonyNavGraph until UnlockGate.isFresh().
  */
 class MainActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -36,6 +42,10 @@ class MainActivity : FragmentActivity() {
             PassPonyTheme {
                 Surface(modifier = Modifier.fillMaxSize()) {
                     val context = LocalContext.current
+                    val scope = rememberCoroutineScope()
+                    var showOnboarding by remember {
+                        mutableStateOf(!StorePaths.onboardingCompletedSnapshot(context))
+                    }
                     var locked by remember { mutableStateOf(!UnlockGate.isFresh(context)) }
 
                     // Re-checked on every ON_START -- covers a lapsed grace
@@ -56,7 +66,21 @@ class MainActivity : FragmentActivity() {
                         onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
                     }
 
-                    if (locked) {
+                    if (showOnboarding) {
+                        // Same viewModel() call PassPonyNavGraph makes below,
+                        // called here at the same (Activity-scoped) point in
+                        // composition -- both resolve to one shared
+                        // AppViewModel instance, so the store onboarding
+                        // opens is still open once the nav graph takes over.
+                        val appViewModel: AppViewModel = viewModel()
+                        OnboardingScreen(
+                            appViewModel = appViewModel,
+                            onComplete = {
+                                scope.launch { StorePaths.setOnboardingCompleted(context, true) }
+                                showOnboarding = false
+                            }
+                        )
+                    } else if (locked) {
                         LockScreen(onUnlock = { locked = false })
                     } else {
                         PassPonyNavGraph(

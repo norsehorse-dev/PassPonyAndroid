@@ -175,6 +175,16 @@
     <string name="autofill_pick_failed">Couldn\'t fill that entry.</string>
     <string name="autofill_save_not_supported">Saving new entries from autofill isn\'t supported yet.</string>
 
+    <!-- P14: content that can't come from the iOS string corpus verbatim;
+         the corpus text names iOS-specific affordances (Face ID/Touch ID,
+         "iOS Settings") that don't exist on Android. Deliberately English-
+         only for now, same fallback policy as any other untranslated key. -->
+    <plurals name="onboarding_biometric_body">
+        <item quantity="one">PassPony locks behind your fingerprint, face, or device PIN.\n\nAfter you unlock, it stays open for %1$d minute (shared with autofill), then locks again.</item>
+        <item quantity="other">PassPony locks behind your fingerprint, face, or device PIN.\n\nAfter you unlock, it stays open for %1$d minutes (shared with autofill), then locks again.</item>
+    </plurals>
+    <string name="onboarding_autofill_body">Turn on autofill and your passes appear right in the keyboard suggestions when you sign in.\n\nYou can manage this anytime in Settings under Passwords &amp; autofill.</string>
+
     <!-- P13: imported from the shared iOS string corpus (Localizable.xcstrings) -->
     <string name="xc_a_pass_is_one_encrypted_file_the_password_on_the">A pass is one encrypted file: the password on the first line, anything else after it.
 
