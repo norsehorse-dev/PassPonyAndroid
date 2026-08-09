@@ -1,5 +1,7 @@
 # PassPony (Android)
 
+[![CI](https://github.com/norsehorse-dev/PassPonyAndroid/actions/workflows/ci.yml/badge.svg)](https://github.com/norsehorse-dev/PassPonyAndroid/actions/workflows/ci.yml)
+
 A password manager that speaks pass and passage: plain encrypted files,
 your keys, git sync. Kotlin and Jetpack Compose over the shared Rust core
 ([PassPonyCore](https://github.com/norsehorse-dev/passponycore)), the
