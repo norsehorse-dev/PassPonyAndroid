@@ -24,6 +24,13 @@ android {
     kotlinOptions {
         jvmTarget = "17"
     }
+
+    lint {
+        // See lint.xml: suppresses a known false-positive NewApi warning
+        // in UniFFI's generated Cleaner fallback code, scoped to the
+        // generated uniffi/ path only.
+        lintConfig = file("lint.xml")
+    }
 }
 
 dependencies {
