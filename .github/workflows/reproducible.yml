@@ -1,0 +1,106 @@
+name: Reproducible build check
+
+on:
+  push:
+    tags:
+      - 'v*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: Tag to verify (defaults to the pushed tag)
+        required: false
+
+env:
+  REPO_URL: https://github.com/norsehorse-dev/PassPonyAndroid.git
+  PASSPONY_CORE_SHA: be1aba698d8815f4749c4889ac304229d5c17d9a
+  GRADLE_TASK: ':app:assembleFossRelease'
+  APK_REL_PATH: app/build/outputs/apk/foss/release/app-foss-release.apk
+
+permissions:
+  contents: read
+
+jobs:
+  determinism:
+    name: Determinism (JDK ${{ matrix.jdk }})
+    runs-on: ubuntu-24.04
+    strategy:
+      fail-fast: false
+      matrix:
+        jdk: [17, 21]
+    steps:
+      - name: Resolve tag
+        id: tag
+        run: echo "tag=${{ inputs.tag || github.ref_name }}" >> "$GITHUB_OUTPUT"
+
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ steps.tag.outputs.tag }}
+          submodules: recursive
+
+      - name: Set up JDK ${{ matrix.jdk }}
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ matrix.jdk }}
+
+      - uses: dtolnay/rust-toolchain@stable
+      - uses: Swatinem/rust-cache@v2
+
+      - name: Install perl and make
+        run: sudo apt-get update && sudo apt-get install -y perl make
+
+      - name: Add Android Rust targets
+        run: rustup target add aarch64-linux-android x86_64-linux-android
+
+      - name: Install cargo-ndk
+        run: cargo install cargo-ndk --locked
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Read pinned NDK version
+        id: ndk
+        run: echo "version=$(sed -n 's/^ndkVersion=//p' gradle.properties)" >> "$GITHUB_OUTPUT"
+
+      - name: Install pinned NDK
+        run: sdkmanager --install "ndk;${{ steps.ndk.outputs.version }}"
+
+      - name: Run the determinism gate (two clean clones, content-compared)
+        # This clones the tag fresh into its own work directory rather than
+        # reusing this job's checkout, so it genuinely proves "clone this
+        # tag from scratch, twice" -- not "rebuild what's already on disk".
+        env:
+          ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/${{ steps.ndk.outputs.version }}
+        run: bash tools/verify_repro.sh rebuild "${{ steps.tag.outputs.tag }}" | tee rebuild.log
+
+      - name: Record the work directory and content hash
+        id: rebuild
+        run: |
+          work="$(grep '^Work directory: ' rebuild.log | sed 's/^Work directory: //')"
+          hash="$(grep '^Content hash: ' rebuild.log | sed 's/^Content hash: //')"
+          echo "work=$work" >> "$GITHUB_OUTPUT"
+          echo "hash=$hash" >> "$GITHUB_OUTPUT"
+          echo "Content hash: $hash"
+
+      - name: Upload unsigned build (JDK ${{ matrix.jdk }})
+        uses: actions/upload-artifact@v4
+        with:
+          name: unsigned-apk-jdk${{ matrix.jdk }}
+          path: ${{ steps.rebuild.outputs.work }}/srcA/${{ env.APK_REL_PATH }}
+          retention-days: 30
+
+      - name: Check for a published release asset
+        id: asset
+        run: |
+          version="${{ steps.tag.outputs.tag }}"
+          version="${version#v}"
+          url="https://github.com/norsehorse-dev/PassPonyAndroid/releases/download/${{ steps.tag.outputs.tag }}/PassPonyAndroid-${version}-foss.apk"
+          if curl -sfL -o /tmp/release.apk "$url"; then
+            echo "found=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "No release asset at $url yet -- skipping the asset comparison."
+            echo "found=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Compare the published release asset against a fresh clean build
+        if: steps.asset.outputs.found == 'true'
+        run: bash tools/verify_repro.sh compare /tmp/release.apk "${{ steps.rebuild.outputs.work }}/srcA/${{ env.APK_REL_PATH }}"
