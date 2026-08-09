@@ -188,6 +188,41 @@ def test_merge_into_english_leaves_hand_authored_entries_byte_identical():
     assert "a hand-written comment" in result
 
 
+# --- duplicate-name regression (this shipped broken once already) --------------
+
+
+def test_select_new_english_resources_drops_matched_names():
+    resources = [
+        m.Resource("settings_language", "Language", None),  # matched: hand-authored name
+        m.Resource("xc_welcome_to_passpony", "Welcome to PassPony", None),  # generated
+    ]
+    kept = m.select_new_english_resources(resources)
+    assert [r.name for r in kept] == ["xc_welcome_to_passpony"]
+
+
+def test_validate_no_duplicate_names_catches_repeated_string_and_plurals():
+    xml = (
+        "<resources>\n"
+        '    <string name="a">One</string>\n'
+        '    <string name="b">Two</string>\n'
+        '    <string name="a">One again</string>\n'
+        '    <plurals name="c"><item quantity="other">x</item></plurals>\n'
+        '    <plurals name="c"><item quantity="other">y</item></plurals>\n'
+        "</resources>\n"
+    )
+    assert m.validate_no_duplicate_names(xml) == ["a", "c"]
+
+
+def test_validate_no_duplicate_names_clean_file_reports_nothing():
+    xml = (
+        "<resources>\n"
+        '    <string name="a">One</string>\n'
+        '    <string name="b">Two</string>\n'
+        "</resources>\n"
+    )
+    assert m.validate_no_duplicate_names(xml) == []
+
+
 # --- name map round-trip ---------------------------------------------------------
 
 

@@ -318,6 +318,34 @@ def render_resource(r: Resource) -> str:
     return f'    <string name="{r.name}">{r.simple}</string>'
 
 
+def select_new_english_resources(all_resources: list[Resource]) -> list[Resource]:
+    """Of every resource built for English, keep only the newly generated
+    (xc_-prefixed) ones -- a matched resource's value is already declared
+    verbatim under its existing hand-authored name elsewhere in
+    values/strings.xml, so re-emitting it in the appended block would
+    declare that Android resource name twice. Duplicate <string>/
+    <plurals> names are syntactically valid XML but fail AAPT2 resource
+    compilation -- this is a real regression check, not a style
+    preference (see validate_no_duplicate_names)."""
+    return [r for r in all_resources if r.name.startswith("xc_")]
+
+
+_RESOURCE_NAME_RE = re.compile(r'<(?:string|plurals) name="([^"]+)"')
+
+
+def validate_no_duplicate_names(xml_content: str) -> list[str]:
+    """Returns every resource name declared more than once in a
+    strings.xml document. Empty means clean."""
+    names = _RESOURCE_NAME_RE.findall(xml_content)
+    seen: set[str] = set()
+    dupes: list[str] = []
+    for name in names:
+        if name in seen and name not in dupes:
+            dupes.append(name)
+        seen.add(name)
+    return dupes
+
+
 def render_locale_file(resources: list[Resource]) -> str:
     body = "\n".join(render_resource(r) for r in resources)
     return GENERATED_HEADER + "<resources>\n" + body + "\n</resources>\n"
@@ -415,7 +443,16 @@ def main() -> int:
 
     outputs: dict[Path, str] = {}
     outputs[NAME_MAP_PATH] = render_name_map(name_map)
-    en_resources = build_resources_for_locale("en", xc_strings, key_to_name, selected_keys)
+    all_en_resources = build_resources_for_locale("en", xc_strings, key_to_name, selected_keys)
+    # Only genuinely new (xc_-prefixed) keys belong in the appended
+    # block: a "matched" key's English value is, by definition, already
+    # sitting verbatim under its existing hand-authored name elsewhere
+    # in this same file (that identity is the matching criterion) --
+    # re-emitting it here would declare the same Android resource name
+    # twice, which fails resource compilation (this shipped broken once
+    # already: settings_language/action_save/delete_entry_cancel each
+    # ended up declared at two different lines in the same file).
+    en_resources = select_new_english_resources(all_en_resources)
     outputs[STRINGS_EN] = merge_into_english(STRINGS_EN, en_resources)
 
     coverage: dict[str, tuple[int, int]] = {}
@@ -455,6 +492,19 @@ def main() -> int:
     report = "\n".join(report_lines) + "\n"
 
     outputs[REPORT_PATH] = report
+
+    dup_problems = []
+    for path_, new_content in outputs.items():
+        if path_.suffix != ".xml":
+            continue
+        dupes = validate_no_duplicate_names(new_content)
+        if dupes:
+            dup_problems.append((path_, dupes))
+    if dup_problems:
+        print("xcstrings_to_strings: duplicate resource names detected, refusing to write:", file=sys.stderr)
+        for path_, dupes in dup_problems:
+            print(f"  {path_.relative_to(REPO_ROOT)}: {', '.join(dupes)}", file=sys.stderr)
+        return 3
 
     if args.check:
         changed = []
