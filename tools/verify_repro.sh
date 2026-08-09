@@ -21,11 +21,12 @@
 #           per-dex SHA-256s and any embedded R8 marker. Requires network
 #           (clones the repo and, if PASSPONY_CORE_SHA is set, PassPonyCore
 #           too) and an Android SDK/NDK matching gradle.properties'
-#           ndkVersion. Picks up a JDK 17 for both isolated builds from
-#           $JAVA_HOME, or failing that from org.gradle.java.home in your
-#           real gradle.properties (see resolve_java_home below) -- set
-#           JAVA_HOME yourself first if neither is already configured for
-#           JDK 17.
+#           ndkVersion. A JDK 17 satisfying pgponycore's jvmToolchain(17)
+#           comes from settings.gradle.kts's foojay-resolver-convention
+#           plugin auto-downloading one, from Gradle's own auto-detection
+#           if one is already installed somewhere it looks, or -- if
+#           neither finds one -- from an explicit JAVA_HOME you export
+#           yourself before running this (see resolve_java_home below).
 # compare:  content comparison of two APKs via a per-entry SHA-256
 #           manifest, excluding only the signature files
 #           (META-INF/*.SF|*.RSA|*.DSA|*.EC|MANIFEST.MF). Prints IDENTICAL
@@ -54,27 +55,23 @@ PASSPONY_CORE_SHA="${PASSPONY_CORE_SHA:-}"
 SIG_FILE_RE='^META-INF/([^/]+\.(SF|RSA|DSA|EC)|MANIFEST\.MF)$'
 
 resolve_java_home() {
-  # rebuild deliberately points each clone at its own throwaway
-  # GRADLE_USER_HOME (isolation between the two builds, and from whatever
-  # is cached on this machine) -- but that also hides any org.gradle.java.
-  # home a developer has set in their *real*
-  # $GRADLE_USER_HOME/gradle.properties (commonly how a machine whose
-  # default `java` isn't 17, e.g. one where Android Studio's own bundled
-  # JBR is newer, points Gradle at a JDK 17 install). Without it, Gradle's
-  # toolchain resolution can fail outright on a machine that in fact has a
-  # JDK 17 available, just not somewhere auto-detection finds it, with
-  # toolchain auto-download off (no foojay-resolver-convention configured
-  # here). JAVA_HOME, if the caller already has it exported, wins outright;
-  # otherwise this reads the real global gradle.properties once, before it
-  # gets shadowed below. Prints nothing if neither is set, which leaves
-  # Gradle's own auto-detection exactly as before this existed.
+  # Deliberately only trusts an explicit, caller-exported JAVA_HOME -- an
+  # earlier version of this function also fell back to reading
+  # org.gradle.java.home out of the real (pre-isolation) gradle.properties,
+  # on the theory that whatever JDK a developer's day-to-day builds
+  # resolve to was a safe bet for pgponycore's `jvmToolchain(17)`
+  # requirement too. That's wrong whenever the machine's default JDK
+  # isn't actually 17 itself (a JDK N can compile *targeting* bytecode 17
+  # via sourceCompatibility/targetCompatibility without being a JDK 17
+  # runtime, but an explicit jvmToolchain(17) call requires the real
+  # thing) -- it silently pointed at the wrong major version instead of
+  # surfacing the problem. Rather than guess, this only acts on a JAVA_HOME
+  # the caller set on purpose; every other case is left to the
+  # foojay-resolver-convention plugin (settings.gradle.kts) to auto-
+  # provision a real JDK 17, or to Gradle's own auto-detection if a JDK 17
+  # happens to already be installed somewhere it looks.
   if [[ -n "${JAVA_HOME:-}" ]]; then
     printf '%s' "$JAVA_HOME"
-    return
-  fi
-  local props="${GRADLE_USER_HOME:-$HOME/.gradle}/gradle.properties"
-  if [[ -f "$props" ]]; then
-    sed -n 's/^org\.gradle\.java\.home=//p' "$props" | tail -n1
   fi
 }
 
