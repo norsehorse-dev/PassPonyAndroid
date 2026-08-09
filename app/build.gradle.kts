@@ -97,6 +97,29 @@ android {
         buildConfig = true
     }
 
+    lint {
+        // Android's strings.xml corpus (226 keys) is larger than the
+        // shared iOS Localizable.xcstrings corpus scripts/xcstrings_to_
+        // strings.py translates from (174 keys, growing as later packets
+        // -- autofill, settings, and so on -- add Android-only UI ahead
+        // of iOS). Per P13's own design (docs/plan/P13-localization.md),
+        // a key with no translation for a given language is deliberately
+        // omitted from that locale's file rather than block on it; the
+        // resource system falls back to the default values/ (English)
+        // string automatically. `scripts/xcstrings_to_strings.py --check`
+        // confirms the committed locale files are already byte-identical
+        // to what the converter produces from the current source, so
+        // this isn't stale output -- it's the intended state.
+        //
+        // Lint's MissingTranslation check has no way to know an omission
+        // is deliberate, so at its default Error severity it blocks the
+        // build on every such key. Downgrading to Warning keeps the
+        // signal (still visible in the lint report, same as this
+        // project's other 100+ non-blocking warnings) without treating
+        // an intentional, documented gap as a build-breaking error.
+        warning += "MissingTranslation"
+    }
+
     // Drop the Google-signed dependency-metadata blob from build outputs.
     // F-Droid and IzzyOnDroid prefer it gone; has no effect on behavior.
     dependenciesInfo {
