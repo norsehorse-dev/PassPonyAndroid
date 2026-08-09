@@ -1,7 +1,5 @@
 package com.passpony.android.ui.settings
 
-import android.app.Activity
-import android.content.Context
 import androidx.appcompat.app.AppCompatDelegate
 import androidx.core.os.LocaleListCompat
 
@@ -13,13 +11,13 @@ import androidx.core.os.LocaleListCompat
  * LanguageManager (backed by AppModel.language / RootView's locale
  * environment) onto AppCompatDelegate's per-app locale API.
  *
- * MainActivity is a plain ComponentActivity, not AppCompatActivity, so
- * the automatic recreate-on-locale-change AppCompatDelegate normally
- * wires up for AppCompatActivity subclasses does not fire here --
- * [apply] recreates the passed Activity itself instead. That is safe on
- * every API level this app supports (recreate() is a base Activity
- * method) and avoids taking on an AppCompatActivity + AppCompat theme
- * migration just for this one feature.
+ * Requires MainActivity to be an AppCompatActivity (not just any
+ * FragmentActivity) -- per Android's own docs, a Compose app using
+ * AppCompatDelegate.setApplicationLocales() from a non-AppCompatActivity
+ * silently does nothing. Once that's true, AppCompatActivity's own
+ * lifecycle wiring reacts to the locale change and recreates itself
+ * automatically, matching Google's reference per-app-language sample --
+ * no manual Activity.recreate() call needed here.
  */
 object LanguageManager {
     /** Tag to display name, in that language, verbatim -- never run
@@ -42,27 +40,15 @@ object LanguageManager {
         return if (locales.isEmpty) "" else locales.toLanguageTags()
     }
 
-    /** Apply [tag] (one of [supported]'s first values) and recreate
-     * [activity] so every composable rebuilds against the new locale. */
-    fun apply(activity: Activity, tag: String) {
+    /** Apply [tag] (one of [supported]'s first values). AppCompatActivity
+     * picks up the change and recreates itself; no explicit Activity
+     * reference or manual recreate() needed. */
+    fun apply(tag: String) {
         val locales = if (tag.isEmpty()) {
             LocaleListCompat.getEmptyLocaleList()
         } else {
             LocaleListCompat.forLanguageTags(tag)
         }
         AppCompatDelegate.setApplicationLocales(locales)
-        activity.recreate()
-    }
-
-    /** Best-effort Activity lookup from a Compose Context, which may be
-     * wrapped (Application context, or a ContextWrapper around the
-     * Activity) rather than the Activity itself. */
-    fun activityOf(context: Context): Activity? {
-        var ctx = context
-        while (ctx is android.content.ContextWrapper) {
-            if (ctx is Activity) return ctx
-            ctx = ctx.baseContext
-        }
-        return ctx as? Activity
     }
 }

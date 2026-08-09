@@ -233,9 +233,7 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(16.dp))
             LanguageSection(
-                onSelect = { tag ->
-                    LanguageManager.activityOf(context)?.let { LanguageManager.apply(it, tag) }
-                }
+                onSelect = { tag -> LanguageManager.apply(tag) }
             )
             TextButton(onClick = {
                 scope.launch { StorePaths.setOnboardingCompleted(context, false) }

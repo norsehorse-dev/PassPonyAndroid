@@ -139,21 +139,18 @@ fun OnboardingPage(slide: OnboardingSlide, appViewModel: AppViewModel, onAdvance
 }
 
 /** Slide 1: sets the real app language immediately on tap, same as the
- * Settings language picker -- LanguageManager.apply() recreates the
- * Activity, which is what makes every subsequent slide (and this one,
- * on rebuild) resolve against the new locale. */
+ * Settings language picker -- LanguageManager.apply() is what makes
+ * every subsequent slide (and this one, once AppCompatActivity
+ * recreates) resolve against the new locale. */
 @Composable
 private fun LanguageAction() {
-    val context = LocalContext.current
     val currentTag = LanguageManager.currentTag()
     Column(modifier = Modifier.fillMaxWidth()) {
         for ((tag, name) in LanguageManager.supported) {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
-                    .clickable {
-                        LanguageManager.activityOf(context)?.let { LanguageManager.apply(it, tag) }
-                    }
+                    .clickable { LanguageManager.apply(tag) }
                     .padding(vertical = 10.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {

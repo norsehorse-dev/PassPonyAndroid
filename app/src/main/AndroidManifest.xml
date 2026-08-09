@@ -22,6 +22,23 @@
         </activity>
 
         <!--
+          Required for AppCompatDelegate.setApplicationLocales() to persist
+          across process restarts on API 26-32 (API 33+ delegates straight
+          to the platform LocaleManager and needs none of this; see
+          LanguageManager.kt). Without this, a locale picked on an old
+          device would apply for the current session only and silently
+          revert to system default on next launch.
+        -->
+        <service
+            android:name="androidx.appcompat.app.AppLocalesMetadataHolderService"
+            android:enabled="false"
+            android:exported="false">
+            <meta-data
+                android:name="autoStoreLocales"
+                android:value="true" />
+        </service>
+
+        <!--
           P12: both autofill activities are only ever started by the
           system itself, via the PendingIntents PassPonyAutofillService
           attaches to a Dataset's authentication - never by another app,

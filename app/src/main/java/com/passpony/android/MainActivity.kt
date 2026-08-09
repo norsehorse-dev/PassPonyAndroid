@@ -3,6 +3,7 @@ package com.passpony.android
 import android.os.Bundle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
+import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.DisposableEffect
@@ -13,7 +14,6 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
-import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -28,13 +28,17 @@ import com.passpony.android.ui.theme.PassPonyTheme
 import kotlinx.coroutines.launch
 
 /**
- * Single activity, Compose navigation. FragmentActivity (bumped from
- * ComponentActivity this packet) since BiometricPrompt needs a
- * FragmentManager host. OnboardingScreen gates everything else on the
- * very first launch (StorePaths.onboardingCompletedSnapshot); once past
- * it, LockScreen gates PassPonyNavGraph until UnlockGate.isFresh().
+ * Single activity, Compose navigation. AppCompatActivity (bumped from
+ * FragmentActivity this packet, which it extends, so BiometricPrompt's
+ * FragmentManager-host requirement still holds) -- required for
+ * AppCompatDelegate.setApplicationLocales() to actually take effect in
+ * a Compose app; a plain FragmentActivity silently no-ops per-app
+ * language changes (see LanguageManager.kt). OnboardingScreen gates
+ * everything else on the very first launch
+ * (StorePaths.onboardingCompletedSnapshot); once past it, LockScreen
+ * gates PassPonyNavGraph until UnlockGate.isFresh().
  */
-class MainActivity : FragmentActivity() {
+class MainActivity : AppCompatActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
