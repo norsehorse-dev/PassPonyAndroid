@@ -292,6 +292,20 @@ private fun openAutofillSettings(context: Context) {
     }
 }
 
+/**
+ * P12 follow-up: launches Chrome itself so the user can navigate to its
+ * own Autofill Services setting (there's no Intent action for that screen
+ * directly). runCatching mirrors the other open* helpers -- Chrome may not
+ * be installed on every device.
+ */
+private fun openChrome(context: Context) {
+    runCatching {
+        context.packageManager.getLaunchIntentForPackage("com.android.chrome")?.let {
+            context.startActivity(it)
+        }
+    }
+}
+
 @Composable
 private fun SectionHeader(text: String) {
     Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
@@ -458,6 +472,8 @@ private fun MaintenanceSection(onReencrypt: () -> Unit) {
 
 @Composable
 private fun AutofillSection(context: Context) {
+    var showChromeHelp by remember { mutableStateOf(false) }
+
     SectionHeader(stringResource(R.string.settings_autofill_header))
     TextButton(onClick = { openAutofillSettings(context) }) {
         Text(stringResource(R.string.settings_autofill_row_title))
@@ -467,6 +483,19 @@ private fun AutofillSection(context: Context) {
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.secondary
     )
+    TextButton(onClick = { showChromeHelp = true }) {
+        Text(stringResource(R.string.settings_autofill_chrome_help_link))
+    }
+
+    if (showChromeHelp) {
+        ChromeAutofillHelpDialog(
+            onOpenChrome = {
+                showChromeHelp = false
+                openChrome(context)
+            },
+            onDismiss = { showChromeHelp = false }
+        )
+    }
 }
 
 @Composable

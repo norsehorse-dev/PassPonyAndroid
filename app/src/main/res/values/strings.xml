@@ -161,6 +161,12 @@
     <string name="settings_autofill_header">Autofill</string>
     <string name="settings_autofill_row_title">Set PassPony as autofill service…</string>
     <string name="settings_autofill_footer">Lets other apps and browsers ask PassPony to fill logins. Nothing decrypts until you pick an entry.</string>
+    <string name="settings_autofill_chrome_help_link">Chrome not offering PassPony?</string>
+
+    <string name="chrome_autofill_help_title">One more step for Chrome</string>
+    <string name="chrome_autofill_help_body">Chrome has its own Autofill Services setting that overrides the Android default you just picked. To let PassPony fill logins inside Chrome: open Chrome\'s ⋮ menu → Settings → Autofill Services, switch it to \"Autofill using another service,\" then fully close and reopen Chrome (not just switch away and back). This only affects Chrome -- other apps and browsers already use the Android setting.</string>
+    <string name="chrome_autofill_help_open_chrome">Open Chrome</string>
+    <string name="chrome_autofill_help_close">Got it</string>
 
     <string name="autofill_unlock_reason">Unlock PassPony to fill this password</string>
     <string name="autofill_search_dataset_label">Search in PassPony</string>
