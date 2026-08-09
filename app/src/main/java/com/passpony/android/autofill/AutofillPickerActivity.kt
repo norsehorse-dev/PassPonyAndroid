@@ -59,7 +59,10 @@ class AutofillPickerActivity : FragmentActivity() {
         val passwordId: AutofillId? = intent.getParcelableExtraCompat(AutofillAuthActivity.EXTRA_PASSWORD_ID)
         val serviceHint = intent.getStringExtra(EXTRA_SERVICE_HINT).orEmpty()
 
-        if (passwordId == null) {
+        // Not "passwordId == null": see AutofillAuthActivity -- a
+        // username-only request (Chrome scoping the structure to just the
+        // focused field) is legitimate, only bail if there's nothing to fill.
+        if (passwordId == null && usernameId == null) {
             setResult(Activity.RESULT_CANCELED)
             finish()
             return
@@ -76,7 +79,7 @@ class AutofillPickerActivity : FragmentActivity() {
                             onSuccess = { credential ->
                                 val dataset = Dataset.Builder().apply {
                                     usernameId?.let { setValue(it, AutofillValue.forText(credential.username)) }
-                                    setValue(passwordId, AutofillValue.forText(credential.password))
+                                    passwordId?.let { setValue(it, AutofillValue.forText(credential.password)) }
                                 }.build()
                                 val result = Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)
                                 setResult(Activity.RESULT_OK, result)

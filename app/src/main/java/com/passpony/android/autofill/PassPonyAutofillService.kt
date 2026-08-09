@@ -53,16 +53,20 @@ class PassPonyAutofillService : AutofillService() {
             val parsed = parseAll(structure)
             Log.d(TAG, "onFillRequest: parsed ${parsed.fields.size} field(s), webDomain=${parsed.webDomain}")
             val passwordId = parsed.fields.firstOrNull { it.kind == FieldKind.PASSWORD }?.id
-            if (passwordId == null) {
+            val usernameId = parsed.fields.firstOrNull { it.kind == FieldKind.USERNAME }?.id
+            if (passwordId == null && usernameId == null) {
                 // Nothing this service can offer to fill -- plan item 1's
-                // "bail with callback.onSuccess(null)" case.
-                Log.d(TAG, "onFillRequest: no PASSWORD field classified, bailing")
+                // "bail with callback.onSuccess(null)" case. Deliberately
+                // not "passwordId == null" alone: Chrome sometimes scopes
+                // the AssistStructure to just the currently-focused field,
+                // so a request with only a username field (password not
+                // focused yet) is common and legitimate, not an empty form.
+                Log.d(TAG, "onFillRequest: no USERNAME or PASSWORD field classified, bailing")
                 callback.onSuccess(null)
                 return
             }
-            val usernameId = parsed.fields.firstOrNull { it.kind == FieldKind.USERNAME }?.id
             val domain = parsed.webDomain ?: structure.activityComponent?.packageName ?: ""
-            Log.d(TAG, "onFillRequest: passwordId found, usernameId=${usernameId != null}, domain=$domain")
+            Log.d(TAG, "onFillRequest: passwordId=${passwordId != null}, usernameId=${usernameId != null}, domain=$domain")
 
             val entries = AutofillCredential.entries(this)
             val matches = entries
@@ -110,13 +114,13 @@ class PassPonyAutofillService : AutofillService() {
     private fun matchDataset(
         entry: EntryRef,
         usernameId: AutofillId?,
-        passwordId: AutofillId,
+        passwordId: AutofillId?,
         requestCode: Int,
         inlineSpec: InlinePresentationSpec?,
     ): Dataset {
         val pendingIntent = pendingIntentFor(AutofillAuthActivity::class.java, requestCode) {
             putExtra(AutofillAuthActivity.EXTRA_ENTRY_NAME, entry.name)
-            putExtra(AutofillAuthActivity.EXTRA_PASSWORD_ID, passwordId)
+            passwordId?.let { putExtra(AutofillAuthActivity.EXTRA_PASSWORD_ID, it) }
             usernameId?.let { putExtra(AutofillAuthActivity.EXTRA_USERNAME_ID, it) }
         }
         return buildDataset(entry.name, usernameId, passwordId, pendingIntent, inlineSpec)
@@ -125,14 +129,14 @@ class PassPonyAutofillService : AutofillService() {
     private fun pickerDataset(
         domain: String,
         usernameId: AutofillId?,
-        passwordId: AutofillId,
+        passwordId: AutofillId?,
         requestCode: Int,
         inlineSpec: InlinePresentationSpec?,
     ): Dataset {
         val label = getString(R.string.autofill_search_dataset_label)
         val pendingIntent = pendingIntentFor(AutofillPickerActivity::class.java, requestCode) {
             putExtra(AutofillPickerActivity.EXTRA_SERVICE_HINT, domain)
-            putExtra(AutofillAuthActivity.EXTRA_PASSWORD_ID, passwordId)
+            passwordId?.let { putExtra(AutofillAuthActivity.EXTRA_PASSWORD_ID, it) }
             usernameId?.let { putExtra(AutofillAuthActivity.EXTRA_USERNAME_ID, it) }
         }
         return buildDataset(label, usernameId, passwordId, pendingIntent, inlineSpec)
@@ -143,12 +147,15 @@ class PassPonyAutofillService : AutofillService() {
      * AutofillValue (the platform accepts that for an authenticated
      * dataset -- nothing decrypts until the pick, per the plan's threat
      * model) paired with [label]'s RemoteViews, plus an InlinePresentation
-     * too when [inlineSpec] is present.
+     * too when [inlineSpec] is present. [usernameId]/[passwordId] are both
+     * nullable and at least one is always non-null (onFillRequest's own
+     * bail check guarantees that) -- a request scoped to a single focused
+     * field only fills that field.
      */
     private fun buildDataset(
         label: String,
         usernameId: AutofillId?,
-        passwordId: AutofillId,
+        passwordId: AutofillId?,
         pendingIntent: PendingIntent,
         inlineSpec: InlinePresentationSpec?,
     ): Dataset {
@@ -161,7 +168,7 @@ class PassPonyAutofillService : AutofillService() {
 
         val builder = Dataset.Builder()
         usernameId?.let { addValue(builder, it, presentation, inline) }
-        addValue(builder, passwordId, presentation, inline)
+        passwordId?.let { addValue(builder, it, presentation, inline) }
         builder.setAuthentication(pendingIntent.intentSender)
         return builder.build()
     }

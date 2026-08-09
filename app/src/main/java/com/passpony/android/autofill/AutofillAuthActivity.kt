@@ -31,7 +31,12 @@ class AutofillAuthActivity : FragmentActivity() {
         val passwordId: AutofillId? = intent.getParcelableExtraCompat(EXTRA_PASSWORD_ID)
         val usernameId: AutofillId? = intent.getParcelableExtraCompat(EXTRA_USERNAME_ID)
 
-        if (entryName.isNullOrEmpty() || passwordId == null) {
+        // Not "passwordId == null": Chrome's AssistStructure is sometimes
+        // scoped to just the focused field (e.g. a username-only structure
+        // while the password field isn't focused yet), so a request with
+        // only a username field is legitimate -- only bail if there is
+        // nothing at all to fill.
+        if (entryName.isNullOrEmpty() || (passwordId == null && usernameId == null)) {
             finishCanceled()
             return
         }
@@ -42,7 +47,7 @@ class AutofillAuthActivity : FragmentActivity() {
             onSuccess = { credential ->
                 val dataset = Dataset.Builder().apply {
                     usernameId?.let { setValue(it, AutofillValue.forText(credential.username)) }
-                    setValue(passwordId, AutofillValue.forText(credential.password))
+                    passwordId?.let { setValue(it, AutofillValue.forText(credential.password)) }
                 }.build()
                 val result = Intent().putExtra(AutofillManager.EXTRA_AUTHENTICATION_RESULT, dataset)
                 setResult(Activity.RESULT_OK, result)
