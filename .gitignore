@@ -22,3 +22,7 @@ core/src/main/kotlin/uniffi/
 
 # Git submodule scratch (PGPonyCore-Kotlin is checked out via
 # third_party/pgponycore-kotlin, tracked as a submodule pointer, not here)
+
+# Python tooling (scripts/xcstrings_to_strings.py, P13)
+__pycache__/
+*.pyc

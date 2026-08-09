@@ -102,14 +102,14 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
-                label = { Text("username") },
+                label = { Text(stringResource(R.string.xc_username)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             )
             OutlinedTextField(
                 value = url,
                 onValueChange = { url = it },
-                label = { Text("url") },
+                label = { Text(stringResource(R.string.xc_url)) },
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             )
