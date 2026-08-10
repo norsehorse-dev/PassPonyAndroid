@@ -4,7 +4,8 @@
 # Prereqs: rustup with the toolchain pinned by PassPonyCore, cargo-ndk
 # (cargo install cargo-ndk), an Android NDK matching gradle.properties'
 # ndkVersion (via Android Studio's SDK manager), perl and make on PATH
-# (needed by pass-core's vendored OpenSSL build for mobile targets).
+# (needed by pass-core's vendored OpenSSL build for mobile targets),
+# python3 (standard library only -- used to read cargo metadata's JSON).
 
 set -euo pipefail
 
@@ -79,12 +80,23 @@ cargo ndk --platform 26 -t arm64-v8a -t x86_64 -o "$REPO/core/src/main/jniLibs" 
 echo "Building host library for bindgen (debug profile; release strips the metadata bindgen reads)"
 cargo build -p pass-ffi --features "$FEATURES"
 
+# Resolve cargo's actual target dir via `cargo metadata` rather than
+# assuming "$CORE/target" -- PassPonyCore's own .cargo/config.toml pins
+# target-dir to a fixed absolute path (/tmp/passponycore-cargo-target, see
+# docs/REPRODUCIBLE.md) so the vendored OpenSSL build's baked-in
+# ENGINESDIR/MODULESDIR don't depend on checkout location; asking cargo
+# directly (instead of hardcoding that path here too) keeps this script
+# correct regardless of whether that pin ever changes or is overridden.
+CARGO_TARGET_DIR_RESOLVED="$(cargo metadata --no-deps --format-version 1 2>/dev/null | python3 -c 'import json, sys; print(json.load(sys.stdin)["target_directory"])')"
+[[ -n "$CARGO_TARGET_DIR_RESOLVED" ]] || {
+  echo "Could not resolve cargo's target directory via 'cargo metadata'"; exit 1; }
+
 # crate-type = cdylib names its output per host platform: .dylib on macOS,
 # .so on Linux. Check both rather than assuming the CI (Linux) extension.
-HOST_LIB="target/debug/libpass_ffi.dylib"
-[[ -f "$HOST_LIB" ]] || HOST_LIB="target/debug/libpass_ffi.so"
+HOST_LIB="$CARGO_TARGET_DIR_RESOLVED/debug/libpass_ffi.dylib"
+[[ -f "$HOST_LIB" ]] || HOST_LIB="$CARGO_TARGET_DIR_RESOLVED/debug/libpass_ffi.so"
 [[ -f "$HOST_LIB" ]] || {
-  echo "Host library not found at target/debug/libpass_ffi.{dylib,so}"; exit 1; }
+  echo "Host library not found at $CARGO_TARGET_DIR_RESOLVED/debug/libpass_ffi.{dylib,so}"; exit 1; }
 
 BINDINGS_OUT="$(mktemp -d)"
 cargo run -q -p pass-ffi --features "cli,$FEATURES" --bin uniffi-bindgen -- \
