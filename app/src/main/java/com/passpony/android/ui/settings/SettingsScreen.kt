@@ -559,6 +559,7 @@ private val OTHER_APPS = listOf(
     OtherApp("CarrierPony", "PGP chat and encrypted files", "https://carrierpony.com"),
     OtherApp("BurnPony", "Self-destructing encrypted messages", "https://burnpony.app"),
     OtherApp("RelayPony", "Encrypted file transfer", "https://relaypony.app"),
+    OtherApp("VaultPony", "VeraCrypt compatible encrypted vaults, entirely on your device", "https://vaultpony.app"),
 )
 
 @Composable
