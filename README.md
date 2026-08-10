@@ -7,9 +7,11 @@ your keys, git sync. Kotlin and Jetpack Compose over the shared Rust core
 ([PassPonyCore](https://github.com/norsehorse-dev/passponycore)), the
 same core that backs [PassPony iOS](https://github.com/norsehorse-dev/passpony).
 
-This repository is a work in progress, built packet by packet against the
-plan in `PLAN.md` and `docs/plan/`. The features below are the v1 target,
-not all of them exist yet; see `docs/plan/` for what has landed.
+Built packet by packet against the plan in `PLAN.md` and `docs/plan/`; see
+that directory for how each feature below landed. The v1 feature set below
+is implemented and CI-green; release engineering (packaging, storefront
+listings, the signed release flow) is the packet in progress now -- see
+`docs/plan/P16-release.md` and `docs/RELEASE_CHECKLIST.md`.
 
 - Browse, search, and edit entries in pass (OpenPGP) and passage (age)
   stores. Each format keeps its own store; switching never touches the
@@ -69,9 +71,18 @@ updated submodule reference.
   crypto engines that implement the FFI's `CryptoBackend` interface.
 - `third_party/pgponycore-kotlin`: git submodule, pinned to a commit (no
   tagged release exists upstream yet, see the build section above).
-- `scripts/`: the core build script and the xcstrings-to-strings.xml
-  localization converter.
+- `scripts/`: the core build script, the xcstrings-to-strings.xml
+  localization converter, the `make-*-fixture.sh` crypto test fixture
+  generators, and `release.sh` (the signed dry-run release build driver,
+  see `docs/RELEASE_CHECKLIST.md`).
+- `tools/verify_repro.sh`: the reproducible-build determinism gate --
+  rebuilds a ref twice from clean clones and diffs the result. See
+  `docs/REPRODUCIBLE.md`.
 - `docs/plan/`: the packet-by-packet build plan.
+- `docs/REPRODUCIBLE.md`, `docs/RELEASE_CHECKLIST.md`, `docs/fdroid/`:
+  reproducibility documentation and the release process (P15/P16).
+- `fastlane/metadata/`: Play/F-Droid store listing text, one directory
+  per locale.
 
 ## Crypto
 
@@ -85,8 +96,10 @@ deliberate capability difference, not an oversight. The recipient-resolution
 rule (fingerprint or 16-hex key ID, `.gpg-id` per entry) is the same rule
 PassPony iOS uses. A passphrase-protected pass secret key is cached for 5
 minutes after entry, sealed with an Android Keystore AES-GCM key
-(`crypto/PassphraseCache.kt`); no shared Android unlock gate exists yet to
-read that same constant, unlike iOS's UnlockGate.
+(`crypto/PassphraseCache.kt`), reading the same grace-period constant as
+Android's own `store/UnlockGate.kt` -- one 5-minute window shared across
+biometric unlock, autofill, and the pass passphrase cache, matching iOS's
+UnlockGate parity.
 
 ## Not yet
 
