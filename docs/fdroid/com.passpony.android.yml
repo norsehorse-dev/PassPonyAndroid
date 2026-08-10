@@ -25,15 +25,22 @@
 # $$COMMIT$$ and declared srclib names are substituted). Paths below are
 # relative to app/ accordingly.
 #
+# No Summary:/Description: fields below on purpose. fdroidserver's
+# `fdroid update` reads fastlane/metadata/android/en-US/short_description.txt
+# and full_description.txt straight from this repo (P16 item 2) and uses
+# those for the store listing when the metadata file doesn't set its own
+# -- confirmed by running `fdroid lint` against this file with both
+# fields removed once the fastlane text existed: clean pass, since lint's
+# only hard requirement is that a summary/description exist somewhere,
+# not specifically inline here. One source of truth instead of two
+# copies that can drift.
+#
 # The `commit:` below is a placeholder -- current main HEAD as of this
 # draft, standing in until an actual vX.Y.Z release is tagged. Replace it
 # with `git rev-list -n 1 <tag>` at submission time (never the tag name
 # itself -- the playbook's rule; reviewers ask for the hash even when a
 # tag would resolve), and update versionName/versionCode/CurrentVersion/
-# CurrentVersionCode to match. Also replace Summary/Description below
-# once fastlane/metadata/android/en-US/{short,full}_description.txt exist
-# (P16 item 2, still blocked on Kevin's iOS ASO bundle) -- modern
-# fdroidserver can read those files directly instead of this inline text.
+# CurrentVersionCode to match.
 #
 # Not opting into Reproducible Builds (Binaries:/AllowedAPKSigningKeys:)
 # in this draft -- both need a real signed release APK's cert SHA-256,
@@ -54,21 +61,6 @@ IssueTracker: https://github.com/norsehorse-dev/PassPonyAndroid/issues
 Changelog: https://github.com/norsehorse-dev/PassPonyAndroid/releases
 
 AutoName: PassPony
-
-# Summary/Description here are placeholders -- see the note above about
-# P16 item 2's fastlane/metadata.
-Summary: Password manager for pass and passage stores
-Description: |-
-  PassPony opens and edits pass (OpenPGP) and passage (age) password
-  stores: plain encrypted files, your own keys, synced with git. No
-  server, no account -- the store is just files, the same format the
-  pass and passage command-line tools use, so it stays interoperable
-  with desktop clients.
-
-  Features: browse and search entries, live TOTP codes, an ephemeral
-  clipboard that clears itself, git sync with per-entry conflict
-  resolution, system Autofill (entries are indexed by name only --
-  nothing decrypts until you actually fill), and biometric unlock.
 
 RepoType: git
 Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git

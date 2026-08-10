@@ -1,0 +1,24 @@
+PassPony opens and edits pass (OpenPGP) and passage (age) password
+stores. Your keys, your files, synced with your own git remote.
+There is no server and no account. The store is just files, the
+same format the pass and passage command line tools use, so it
+stays interoperable with desktop clients.
+
+Features:
+
+* Browse and search entries across a pass or passage store
+* Live TOTP codes with a countdown ring
+* An ephemeral clipboard that clears itself after 45 seconds
+* Git sync: clone, push, and per-entry conflict resolution
+* System Autofill. Only entry names are indexed; nothing decrypts
+  until you fill
+* Biometric unlock with a shared grace window
+* Localized in English, Spanish, French, German, Simplified
+  Chinese, Brazilian Portuguese, and Russian, with live in-app
+  language switching
+* A first-run tour: pick a language, choose a format, clone an
+  existing store or import keys, add a first entry, and turn on
+  autofill without leaving the app
+
+Open source, Apache-2.0. The crypto core is a separate,
+independently auditable Rust library shared with PassPony iOS.

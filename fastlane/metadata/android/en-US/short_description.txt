@@ -1,0 +1,1 @@
+Password manager for pass and passage stores, synced with git
