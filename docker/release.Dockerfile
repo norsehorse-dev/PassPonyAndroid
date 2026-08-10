@@ -19,7 +19,19 @@
 # pinned directly; keep it in sync with gradle.properties' ndkVersion and
 # docs/REPRODUCIBLE.md's pinned-inputs table by hand), same
 # ANDROID_SDK_ROOT path, same Rust target setup.
-FROM ubuntu:24.04
+#
+# --platform=linux/amd64 is pinned rather than left to the build host: the
+# NDK only ships an x86_64 prebuilt clang for Linux (there's no
+# linux-aarch64 NDK toolchain), and GitHub's ubuntu-24.04 runners are
+# x86_64 too. Without this pin, `docker build` on an Apple Silicon Mac
+# defaults to a linux/arm64 image, whose rootfs has no x86_64 shared
+# libraries -- the NDK's clang then fails under qemu with
+# "qemu-x86_64: Could not open '/lib64/ld-linux-x86-64.so.2'" the moment
+# it's invoked. Pinning amd64 here makes Docker emulate the whole image
+# consistently (via Rosetta or qemu, whichever Docker Desktop is set to
+# use) instead of mixing a native arm64 rootfs with a foreign x86_64
+# binary, and keeps the CPU architecture matched to CI on every host.
+FROM --platform=linux/amd64 ubuntu:24.04
 
 ENV DEBIAN_FRONTEND=noninteractive
 ENV ANDROID_HOME=/usr/local/lib/android/sdk
