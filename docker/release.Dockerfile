@@ -33,7 +33,14 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
       curl unzip git perl make python3 ca-certificates openjdk-17-jdk-headless \
     && rm -rf /var/lib/apt/lists/*
 
-RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
+# stable, not none: `cargo install cargo-ndk` below needs an active
+# toolchain to build itself with. The actual PassPonyCore build later
+# (inside release-entrypoint.sh, via scripts/build-core.sh) runs from
+# inside the PassPonyCore checkout, where rust-toolchain.toml overrides
+# this and rustup auto-installs the pinned version (1.95.0 as of this
+# writing) on first use -- this "stable" toolchain is only for cargo-ndk
+# itself and whatever `rustup target add` below applies to.
+RUN curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain stable
 RUN rustup target add aarch64-linux-android x86_64-linux-android
 RUN cargo install cargo-ndk --locked
 
