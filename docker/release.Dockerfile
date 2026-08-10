@@ -31,6 +31,7 @@ ENV PATH=${CARGO_HOME}/bin:${ANDROID_SDK_ROOT}/cmdline-tools/latest/bin:${ANDROI
 
 RUN apt-get update && apt-get install -y --no-install-recommends \
       curl unzip git perl make python3 ca-certificates openjdk-17-jdk-headless \
+      build-essential \
     && rm -rf /var/lib/apt/lists/*
 
 # stable, not none: `cargo install cargo-ndk` below needs an active
