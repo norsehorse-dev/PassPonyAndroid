@@ -68,7 +68,7 @@ Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
 Builds:
   - versionName: "1.0.0"
     versionCode: 100
-    commit: c4b50a18ce5689c09dd75dd3413d51dedc7a888d
+    commit: 14572f9a57822e00ca79ebd6f8f3443b4fcd01cf
     subdir: app
     submodules: true
     sudo:
