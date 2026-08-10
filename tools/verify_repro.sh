@@ -19,14 +19,17 @@
 #           fails unless the two builds are content-identical, then fails
 #           unless the optional candidate APK also matches them. Prints
 #           per-dex SHA-256s and any embedded R8 marker. Requires network
-#           (clones the repo and, if PASSPONY_CORE_SHA is set, PassPonyCore
-#           too) and an Android SDK/NDK matching gradle.properties'
-#           ndkVersion. A JDK 17 satisfying pgponycore's jvmToolchain(17)
-#           comes from settings.gradle.kts's foojay-resolver-convention
-#           plugin auto-downloading one, from Gradle's own auto-detection
-#           if one is already installed somewhere it looks, or -- if
-#           neither finds one -- from an explicit JAVA_HOME you export
-#           yourself before running this (see resolve_java_home below).
+#           (clones the repo; PassPonyCore comes along automatically via
+#           each clone's own `git submodule update --init --recursive`,
+#           pinned to whatever commit third_party/passponycore points at
+#           for <tag> -- see P16) and an Android SDK/NDK matching
+#           gradle.properties' ndkVersion. A JDK 17 satisfying
+#           pgponycore's jvmToolchain(17) comes from settings.gradle.kts's
+#           foojay-resolver-convention plugin auto-downloading one, from
+#           Gradle's own auto-detection if one is already installed
+#           somewhere it looks, or -- if neither finds one -- from an
+#           explicit JAVA_HOME you export yourself before running this
+#           (see resolve_java_home below).
 # compare:  content comparison of two APKs via a per-entry SHA-256
 #           manifest, excluding only the signature files
 #           (META-INF/*.SF|*.RSA|*.DSA|*.EC|MANIFEST.MF). Prints IDENTICAL
@@ -41,13 +44,6 @@ REPO_ROOT="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 REPO_URL="${REPO_URL:-$(git -C "$REPO_ROOT" remote get-url origin 2>/dev/null || true)}"
 GRADLE_TASK="${GRADLE_TASK:-:app:assembleFossRelease}"
 APK_REL_PATH="${APK_REL_PATH:-app/build/outputs/apk/foss/release/app-foss-release.apk}"
-# Only meaningful for rebuild: if set, PassPonyCore is cloned fresh and
-# pinned to this commit and shared read-only between both builds, matching
-# how CI pins it (see .github/workflows/ci.yml). If unset, each clone's own
-# scripts/build-core.sh falls back to its own default ($HOME/Apps/PassPonyCore),
-# which is the right thing for an ad hoc local run against whatever
-# PassPonyCore checkout is already on the machine.
-PASSPONY_CORE_SHA="${PASSPONY_CORE_SHA:-}"
 
 # Excludes exactly the files the signing step touches -- everything else is
 # covered by F-Droid's own verification (see docs/REPRODUCIBLE.md, "How
@@ -174,14 +170,6 @@ cmd_rebuild() {
   work="$(mktemp -d "${TMPDIR:-/tmp}/verify-repro.XXXXXX")"
   echo "Work directory: $work"
 
-  local core=""
-  if [[ -n "$PASSPONY_CORE_SHA" ]]; then
-    echo "--- Cloning PassPonyCore @ $PASSPONY_CORE_SHA (shared, read-only) ---"
-    git clone --quiet https://github.com/norsehorse-dev/PassPonyCore.git "$work/passpony-core"
-    git -C "$work/passpony-core" checkout --quiet "$PASSPONY_CORE_SHA"
-    core="$work/passpony-core"
-  fi
-
   local java_home
   java_home="$(resolve_java_home)"
   if [[ -n "$java_home" ]]; then
@@ -192,17 +180,17 @@ cmd_rebuild() {
   for root in srcA srcB; do
     echo "--- Cloning $tag into $root ---"
     git clone --quiet --branch "$tag" --depth 1 "$REPO_URL" "$work/$root"
+    # PassPonyCore comes in here, pinned to whatever commit third_party/
+    # passponycore points at for this tag (see P16 -- it used to be a
+    # separate PASSPONY_CORE_SHA-pinned clone this script and ci.yml each
+    # had to pass around; the submodule pointer replaces that).
     git -C "$work/$root" submodule update --init --recursive --quiet
   done
 
   for root in srcA srcB; do
     echo "--- Building $root ($GRADLE_TASK) ---"
     if [[ -f "$work/$root/scripts/build-core.sh" ]]; then
-      if [[ -n "$core" ]]; then
-        PASSPONY_CORE="$core" bash "$work/$root/scripts/build-core.sh"
-      else
-        bash "$work/$root/scripts/build-core.sh"
-      fi
+      bash "$work/$root/scripts/build-core.sh"
     fi
     local gradle_opts=()
     [[ -n "$java_home" ]] && gradle_opts+=("-Dorg.gradle.java.home=$java_home")

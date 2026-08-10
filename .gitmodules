@@ -1,3 +1,6 @@
 [submodule "third_party/pgponycore-kotlin"]
 	path = third_party/pgponycore-kotlin
 	url = https://github.com/norsehorse-dev/PGPonyCore-Kotlin.git
+[submodule "third_party/passponycore"]
+	path = third_party/passponycore
+	url = https://github.com/norsehorse-dev/PassPonyCore.git

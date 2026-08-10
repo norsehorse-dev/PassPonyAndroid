@@ -12,12 +12,6 @@ on:
 
 env:
   JAVA_VERSION: '17'
-  # PassPonyCore is a separate repo, not a submodule of this one (unlike
-  # PGPonyCore-Kotlin, which is). Pinned to a specific commit rather than a
-  # tag: v1.0.0 predates the age-engine feature this build depends on. Bump
-  # deliberately, alongside a local PassPonyCore upgrade -- see
-  # docs/REPRODUCIBLE.md for how this pin is chosen and verified.
-  PASSPONY_CORE_SHA: be1aba698d8815f4749c4889ac304229d5c17d9a
 
 permissions:
   contents: read
@@ -31,13 +25,6 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Checkout PassPonyCore (pinned)
-        uses: actions/checkout@v4
-        with:
-          repository: norsehorse-dev/PassPonyCore
-          ref: ${{ env.PASSPONY_CORE_SHA }}
-          path: passpony-core
 
       - name: Reject dynamic dependency versions
         run: |
@@ -61,12 +48,13 @@ jobs:
       - name: Set up Rust
         uses: dtolnay/rust-toolchain@stable
         # Baseline only -- PassPonyCore's own rust-toolchain.toml pins the
-        # actual channel once cargo runs from inside passpony-core/ below.
+        # actual channel once cargo runs from inside third_party/passponycore/
+        # below.
 
       - name: Cache Cargo registry and build artifacts
         uses: Swatinem/rust-cache@v2
         with:
-          workspaces: passpony-core -> target
+          workspaces: third_party/passponycore -> target
 
       - name: Install cargo-ndk
         run: cargo install cargo-ndk --locked
@@ -82,8 +70,12 @@ jobs:
         run: sdkmanager --install "ndk;${{ steps.ndk.outputs.version }}"
 
       - name: Cross-compile pass-ffi and generate Kotlin bindings
+        # PassPonyCore comes in as the third_party/passponycore submodule
+        # (see P16 -- previously a separate checkout pinned by a
+        # PASSPONY_CORE_SHA env var here and in tools/verify_repro.sh; the
+        # submodule pointer replaces that). scripts/build-core.sh's own
+        # PASSPONY_CORE default now finds it there without an override.
         env:
-          PASSPONY_CORE: ${{ github.workspace }}/passpony-core
           ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/${{ steps.ndk.outputs.version }}
         run: bash scripts/build-core.sh
 
@@ -191,8 +183,9 @@ jobs:
         # gate (.github/workflows/reproducible.yml) uses; this weekly run
         # is a drift check on main rather than a specific release, so it
         # points the gate at the "main" ref instead of a version tag --
-        # `rebuild` accepts any git ref, tag or branch.
+        # `rebuild` accepts any git ref, tag or branch. PassPonyCore comes
+        # in via each clone's own submodule init now (P16), not a separate
+        # PASSPONY_CORE_SHA-pinned checkout.
         env:
           ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/${{ steps.ndk.outputs.version }}
-          PASSPONY_CORE_SHA: ${{ env.PASSPONY_CORE_SHA }}
         run: bash tools/verify_repro.sh rebuild main

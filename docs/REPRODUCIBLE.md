@@ -27,15 +27,26 @@ doesn't cover.
 | Android build tools | 35.0.0 | `app/build.gradle.kts` (`android.buildToolsVersion`) -- used only for AGP's own build, never to re-sign an APK after the fact (see "Signing" below) |
 | JDK | 17 | `app/build.gradle.kts` / `core/build.gradle.kts` (`compileOptions`, `kotlinOptions.jvmTarget`); CI's main build job installs Temurin 17, the reproducible-build workflow additionally checks JDK 21 (see "CI" below) |
 | Rust toolchain | whatever `rust-toolchain.toml` in PassPonyCore pins (currently `1.95.0`) | PassPonyCore's own `rust-toolchain.toml`, picked up automatically by `rustup` when `cargo` runs from inside a PassPonyCore checkout |
-| PassPonyCore commit | `be1aba698d8815f4749c4889ac304229d5c17d9a` | `.github/workflows/ci.yml` / `.github/workflows/reproducible.yml` (`env.PASSPONY_CORE_SHA`) and `tools/verify_repro.sh` (same env var, passed in) |
+| PassPonyCore commit | `c673b8b1398bd9188015075fdc5a300c650c78cb` | the `third_party/passponycore` git submodule (see `.gitmodules`) -- a gitlink committed alongside the rest of the tree, not an env var. `tools/verify_repro.sh` and both CI workflows pick it up automatically via `git submodule update --init --recursive` on each clone |
 | Every Gradle dependency | no `+`, no `latest.release`/`latest.integration` | enforced by CI's "Reject dynamic dependency versions" step, which greps every `.kts` file |
 
-`be1aba69...` is the current PassPonyCore HEAD rather than the `v1.0.0` tag,
+`c673b8b1...` is the current PassPonyCore HEAD rather than the `v1.0.0` tag,
 because `v1.0.0` predates the `age-engine` feature this build depends on
 (confirmed via `git merge-base --is-ancestor v1.0.0 HEAD`, which fails). Bump
-this SHA deliberately when PassPonyCore's `age-engine` code changes, and bump
-the NDK/AGP/Kotlin/Gradle versions deliberately alongside a real toolchain
-upgrade -- never let any of these float to "whatever's newest installed."
+the submodule pointer deliberately when PassPonyCore's `age-engine` code
+changes -- `cd third_party/passponycore && git fetch && git checkout <sha>`,
+then from the repo root `git add third_party/passponycore && git commit` --
+and bump the NDK/AGP/Kotlin/Gradle versions deliberately alongside a real
+toolchain upgrade -- never let any of these float to "whatever's newest
+installed."
+
+(Before P16, PassPonyCore was a separate sibling checkout, pinned by a
+`PASSPONY_CORE_SHA` env var that `.github/workflows/ci.yml` /
+`reproducible.yml` and `tools/verify_repro.sh` each had to pass around
+independently -- one of the fragile patterns NorseHorse's F-Droid
+Submission Playbook flags, since a real F-Droid recipe has no way to
+inject an env var into the build it clones. The submodule pin replaces
+that: the pinned commit travels with the repo itself.)
 
 ## What else makes the build deterministic
 
@@ -109,8 +120,9 @@ tools/verify_repro.sh content-hash <apk>
   builds are content-identical, then fails unless the optional candidate
   APK also matches. Prints per-dex SHA-256s and any embedded R8 marker, and
   the work directory path (so you can grab `srcA`'s APK for the next
-  step). Requires network (clones this repo and, if `PASSPONY_CORE_SHA` is
-  set, PassPonyCore too) and an Android SDK/NDK matching `gradle.properties`'
+  step). Requires network (clones this repo; PassPonyCore comes along
+  automatically via each clone's own `git submodule update --init
+  --recursive`) and an Android SDK/NDK matching `gradle.properties`'
   `ndkVersion`.
 - **`compare`**: content comparison of two APKs via a per-entry SHA-256
   manifest, excluding only `META-INF/*.SF|*.RSA|*.DSA|*.EC|MANIFEST.MF`.
@@ -125,7 +137,7 @@ tools/verify_repro.sh content-hash <apk>
 Example, matching the "run it bare" step of the release procedure:
 
 ```
-PASSPONY_CORE_SHA=be1aba698d8815f4749c4889ac304229d5c17d9a tools/verify_repro.sh rebuild main
+tools/verify_repro.sh rebuild main
 ```
 
 Prerequisites are the same as `scripts/build-core.sh`'s: `rustup`,
@@ -169,7 +181,7 @@ like `v1.1.0`.
    produces the canonical clean build:
 
    ```
-   PASSPONY_CORE_SHA=be1aba698d8815f4749c4889ac304229d5c17d9a tools/verify_repro.sh rebuild <tag>
+   tools/verify_repro.sh rebuild <tag>
    ```
 
    Note the printed work directory (`<work>`) and content hash.

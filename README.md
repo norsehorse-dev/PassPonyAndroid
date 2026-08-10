@@ -33,11 +33,10 @@ listings, the signed release flow) is the packet in progress now -- see
 ## First build
 
 Prereqs: Android Studio (current stable), rustup, the Android NDK (via
-the SDK Manager), `cargo-ndk` (`cargo install cargo-ndk`), PassPonyCore
-checked out (default assumed at `~/Apps/PassPonyCore`, override with
-`PASSPONY_CORE`).
+the SDK Manager), `cargo-ndk` (`cargo install cargo-ndk`).
 
 ```
+git submodule update --init --recursive   # first time only, or after a plain clone
 bash scripts/build-core.sh
 ./gradlew assembleFossDebug
 ```
@@ -50,10 +49,19 @@ into `core/src/main/jniLibs/` and generates the Kotlin UniFFI bindings into
 `core/src/main/kotlin/`. Both outputs are gitignored; PassPonyCore is the
 source of truth. Rerun the script whenever PassPonyCore changes.
 
+PassPonyCore itself is pulled in as a git submodule at
+`third_party/passponycore`, pinned to a fixed commit rather than a
+sibling checkout you have to keep up to date by hand (that was the
+pre-P16 arrangement: a separate `~/Apps/PassPonyCore` checkout plus a
+`PASSPONY_CORE_SHA` env var CI and the reproducibility gate each had to
+pass around). Clone this repo with `--recurse-submodules`, or run
+`git submodule update --init --recursive` after a plain clone.
+`PASSPONY_CORE` still overrides `scripts/build-core.sh`'s default if you
+want to point it at some other PassPonyCore checkout for local dev.
+
 The pass-format engine is [PGPonyCore-Kotlin](https://github.com/norsehorse-dev/PGPonyCore-Kotlin)
-over BouncyCastle, pulled in as a git submodule at
-`third_party/pgponycore-kotlin`. Clone with `--recurse-submodules`, or run
-`git submodule update --init` after a plain clone.
+over BouncyCastle, pulled in the same way as a git submodule at
+`third_party/pgponycore-kotlin`.
 
 Pinned to commit `080815d80021a2f86e1245f5044c6f6f6218be0e`, not a tagged
 release: PGPonyCore-Kotlin has none yet (a single "Initial 3.0.0 Commit"
@@ -71,6 +79,9 @@ updated submodule reference.
   crypto engines that implement the FFI's `CryptoBackend` interface.
 - `third_party/pgponycore-kotlin`: git submodule, pinned to a commit (no
   tagged release exists upstream yet, see the build section above).
+- `third_party/passponycore`: git submodule, pinned to a commit -- the
+  Rust core cross-compiled by `scripts/build-core.sh` (see the build
+  section above and `docs/REPRODUCIBLE.md`).
 - `scripts/`: the core build script, the xcstrings-to-strings.xml
   localization converter, the `make-*-fixture.sh` crypto test fixture
   generators, and `release.sh` (the signed dry-run release build driver,

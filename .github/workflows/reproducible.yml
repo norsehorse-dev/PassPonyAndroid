@@ -12,7 +12,6 @@ on:
 
 env:
   REPO_URL: https://github.com/norsehorse-dev/PassPonyAndroid.git
-  PASSPONY_CORE_SHA: be1aba698d8815f4749c4889ac304229d5c17d9a
   GRADLE_TASK: ':app:assembleFossRelease'
   APK_REL_PATH: app/build/outputs/apk/foss/release/app-foss-release.apk
 
@@ -68,6 +67,9 @@ jobs:
         # This clones the tag fresh into its own work directory rather than
         # reusing this job's checkout, so it genuinely proves "clone this
         # tag from scratch, twice" -- not "rebuild what's already on disk".
+        # PassPonyCore comes in via each of those clones' own submodule
+        # init (third_party/passponycore, see P16), not a separate
+        # PASSPONY_CORE_SHA-pinned checkout this job used to set up.
         env:
           ANDROID_NDK_HOME: ${{ env.ANDROID_SDK_ROOT }}/ndk/${{ steps.ndk.outputs.version }}
         run: bash tools/verify_repro.sh rebuild "${{ steps.tag.outputs.tag }}" | tee rebuild.log

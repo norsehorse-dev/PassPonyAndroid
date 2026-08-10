@@ -8,12 +8,18 @@
 
 set -euo pipefail
 
-CORE="${PASSPONY_CORE:-$HOME/Apps/PassPonyCore}"
 REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
+# PassPonyCore is a git submodule (third_party/passponycore, see P16 --
+# it used to be a separate sibling checkout pinned by a SHA env var CI
+# and tools/verify_repro.sh each had to pass around, which is exactly the
+# pattern the F-Droid Submission Playbook flags as fragile; PGPonyCore-
+# Kotlin already worked this way). PASSPONY_CORE still overrides it for
+# local dev against some other checkout.
+CORE="${PASSPONY_CORE:-$REPO/third_party/passponycore}"
 FEATURES="${PASS_FFI_FEATURES:-age-engine}"
 
 [[ -d "$CORE/crates/pass-ffi" ]] || {
-  echo "PassPonyCore not found at $CORE (set PASSPONY_CORE)"; exit 1; }
+  echo "PassPonyCore not found at $CORE -- if this is a fresh clone, run: git submodule update --init --recursive (or set PASSPONY_CORE to point at an existing checkout)"; exit 1; }
 
 command -v cargo >/dev/null || {
   echo "cargo not found; install rustup first"; exit 1; }
