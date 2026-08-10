@@ -1,49 +1,62 @@
 # DRAFT F-Droid metadata for PassPony (Android) -- per P16
 # (docs/plan/P16-release.md item 3). Not yet submitted to fdroiddata;
 # lives here so it's reviewable in this repo's own history before it
-# becomes a PR against https://gitlab.com/fdroid/fdroiddata. Update the
-# `commit:`/`versionName:`/`versionCode:` fields for the actual tag being
-# submitted -- the values below are placeholders matching the current
-# unreleased 1.0.0 versioning (app/build.gradle.kts).
+# becomes an MR against https://gitlab.com/fdroid/fdroiddata. Canonicalize
+# with `fdroid rewritemeta`/`fdroid lint` (per NorseHorse's F-Droid
+# Submission Playbook) before it's ever pasted into the GitLab web editor
+# -- see docs/RELEASE_CHECKLIST.md for the manual steps only Kevin can do
+# (the GitLab fork/MR itself needs his account).
 #
-# Two things a reviewer unfamiliar with this app's build should know
-# going in:
+# PassPonyCore (the Rust crypto core) and PGPonyCore-Kotlin (the
+# pass/OpenPGP engine) are both git submodules of this repo
+# (third_party/passponycore, third_party/pgponycore-kotlin). No srclibs:
+# declaration is needed for either -- `submodules: true` below runs
+# `git submodule update --init --recursive` automatically right after the
+# clone, before prebuild runs (confirmed against F-Droid's own Build
+# Metadata Reference). See docs/REPRODUCIBLE.md for why PassPonyCore
+# specifically became a submodule in P16 rather than staying a separate,
+# SHA-pinned clone: a real F-Droid recipe has no way to inject an env var
+# into the build it clones, which that older architecture needed.
 #
-# 1. PassPonyCore (the Rust crypto core) is a *separate* repo, not a git
-#    submodule of this one -- scripts/build-core.sh clones it fresh and
-#    cross-compiles it into core/src/main/jniLibs/ + generates the UniFFI
-#    Kotlin bindings, both gitignored here. F-Droid's build environment is
-#    offline during the actual build, so PassPonyCore has to be fetched as
-#    a declared `srclibs:` (network access during the metadata-prep clone,
-#    not during build) rather than a plain `git clone` inside `prebuild:`.
-# 2. PGPonyCore-Kotlin (the pass/OpenPGP engine) *is* a git submodule
-#    (third_party/pgponycore-kotlin) and needs `submodules: true`.
+# prebuild: commands run from subdir: (app/), not the repo root -- also
+# confirmed against the Build Metadata Reference, since an earlier draft
+# of this file got that wrong (it referenced a $$PassPonyAndroid$$
+# variable that isn't real; only $$SDK$$/$$NDK$$/$$VERSION$$/$$VERCODE$$/
+# $$COMMIT$$ and declared srclib names are substituted). Paths below are
+# relative to app/ accordingly.
 #
-# Reproducibility: this app's determinism story is documented in
-# docs/REPRODUCIBLE.md and enforced by tools/verify_repro.sh + the tag-
-# triggered .github/workflows/reproducible.yml gate (P15). F-Droid's own
-# rebuilder should reproduce byte-identical output following the same
-# recipe this file describes -- if it doesn't, docs/REPRODUCIBLE.md's
-# "content-identical" three-way vocabulary and R4 (never diff APKs via a
-# filesystem unzip -- AGP's shortened resource names collide case-
-# insensitively) are the place to start debugging why.
+# The `commit:` below is a placeholder -- current main HEAD as of this
+# draft, standing in until an actual vX.Y.Z release is tagged. Replace it
+# with `git rev-list -n 1 <tag>` at submission time (never the tag name
+# itself -- the playbook's rule; reviewers ask for the hash even when a
+# tag would resolve), and update versionName/versionCode/CurrentVersion/
+# CurrentVersionCode to match. Also replace Summary/Description below
+# once fastlane/metadata/android/en-US/{short,full}_description.txt exist
+# (P16 item 2, still blocked on Kevin's iOS ASO bundle) -- modern
+# fdroidserver can read those files directly instead of this inline text.
+#
+# Not opting into Reproducible Builds (Binaries:/AllowedAPKSigningKeys:)
+# in this draft -- both need a real signed release APK's cert SHA-256,
+# which doesn't exist until scripts/release.sh produces the first actual
+# v1.0.0 release. docs/REPRODUCIBLE.md's determinism gate is already
+# proven green (tools/verify_repro.sh rebuild main: IDENTICAL), so
+# there's nothing else blocking opting in once that release exists --
+# add the two fields then.
 
 Categories:
-  - Security
+  - Password & 2FA
 License: Apache-2.0
 AuthorName: NorseHorse
+AuthorEmail: NorseHorse@norsehor.se
+WebSite: https://passpony.app
 SourceCode: https://github.com/norsehorse-dev/PassPonyAndroid
 IssueTracker: https://github.com/norsehorse-dev/PassPonyAndroid/issues
 Changelog: https://github.com/norsehorse-dev/PassPonyAndroid/releases
 
 AutoName: PassPony
 
-# Summary/Description here are placeholders -- P16 item 2's fastlane/
-# metadata (short_description.txt / full_description.txt, converted from
-# the iOS ASO bundle) is the actual source of truth once that lands;
-# F-Droid can either read those files directly (modern fdroidserver
-# supports pulling from an app's own fastlane/metadata/android/<locale>/)
-# or this block gets the same text pasted in at submission time.
+# Summary/Description here are placeholders -- see the note above about
+# P16 item 2's fastlane/metadata.
 Summary: Password manager for pass and passage stores
 Description: |-
   PassPony opens and edits pass (OpenPGP) and passage (age) password
@@ -60,41 +73,34 @@ Description: |-
 RepoType: git
 Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
 
-# See the note above: PassPonyCore is fetched as a srclib (declared here,
-# resolved with network access during metadata prep) rather than cloned
-# ad hoc inside prebuild (which runs offline). $$PassPonyCore$$ below
-# expands to wherever fdroidserver checks this out to.
-srclibs:
-  - PassPonyCore@<pin-to-the-same-commit-ci.yml-pins-PASSPONY_CORE_SHA-to>=https://github.com/norsehorse-dev/PassPonyCore.git
-
 Builds:
   - versionName: "1.0.0"
     versionCode: 100
-    # Set to the actual release tag (e.g. v1.0.0) at submission time.
-    commit: v1.0.0
+    commit: c4b50a18ce5689c09dd75dd3413d51dedc7a888d
     subdir: app
     submodules: true
     sudo:
-      # F-Droid's build container starts bare -- rustup, the Android NDK
-      # side-channel, and perl/make (pass-core's vendored OpenSSL build
-      # for mobile targets, see scripts/build-core.sh) all need to exist
-      # before prebuild can cross-compile pass-ffi.
+      # F-Droid's build container starts bare -- rustup, perl, and make
+      # (pass-core's vendored OpenSSL build for mobile targets, see
+      # scripts/build-core.sh) all need to exist before prebuild can
+      # cross-compile pass-ffi. The Android NDK itself comes from
+      # $$NDK$$, F-Droid's own build environment, not installed here.
       - apt-get update
       - apt-get install -y perl make
       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
     prebuild:
-      # Mirrors scripts/build-core.sh's own steps (see that script for the
-      # authoritative, commented version this must stay in sync with):
-      # pin the toolchain PassPonyCore's own rust-toolchain.toml names,
-      # add both Android targets, install cargo-ndk, then cross-compile
-      # with the same RUSTFLAGS remap-path-prefix determinism flags P15
-      # added, and the same ndkVersion gradle.properties pins.
+      # Mirrors scripts/build-core.sh's own steps (see that script for
+      # the authoritative, commented version this must stay in sync
+      # with): pin the toolchain PassPonyCore's own rust-toolchain.toml
+      # names, add both Android targets, install cargo-ndk, then
+      # cross-compile with the same RUSTFLAGS remap-path-prefix and
+      # SOURCE_DATE_EPOCH/target-dir determinism pins P15/P16 set up
+      # (see docs/REPRODUCIBLE.md). Paths are relative to subdir: (app/).
       - export PATH="$HOME/.cargo/bin:$PATH"
-      - export PASSPONY_CORE="$$PassPonyCore$$"
       - export ANDROID_NDK_HOME="$$NDK$$"
-      - cd "$PASSPONY_CORE" && rustup show
+      - cd ../third_party/passponycore && rustup show
       - cargo install cargo-ndk
-      - cd "$$PassPonyAndroid$$" && bash scripts/build-core.sh
+      - cd .. && bash scripts/build-core.sh
     gradle:
       - foss
     output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
