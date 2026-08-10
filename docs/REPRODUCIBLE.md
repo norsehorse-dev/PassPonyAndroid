@@ -96,6 +96,25 @@ that: the pinned commit travels with the repo itself.)
   `SOURCE_DATE_EPOCH` -- e.g. from F-Droid's buildserver, which commonly
   sets one as standard practice -- wins over this pin rather than being
   overridden.
+- **The build host itself.** The two gaps above are both about *where*
+  the checkout lives; this one is about *which OS builds it*. A
+  Mac-built release and a Linux-built release of the identical commit
+  turned out not to be byte-identical either, `libpass_ffi.so` differing
+  on both ABIs while `classes.dex` matched. The NDK ships separate
+  prebuilt clang binaries per host OS inside the "same" NDK version
+  (`darwin-x86_64` for macOS, `linux-x86_64` for Linux), and they pass
+  different default assembler flags into pass-core's vendored OpenSSL
+  build (`linux-x86_64`'s adds `-Wa,--noexecstack -Qunused-arguments`,
+  `darwin-x86_64`'s doesn't) -- confirmed via OpenSSL's own embedded
+  `compiler:` build-info line, which records the exact `CC` invocation
+  used. `--noexecstack` changes the compiled ELF layout, so this is a
+  real codegen difference, not an embedded path or timestamp string, and
+  neither `--remap-path-prefix` nor `SOURCE_DATE_EPOCH` can reach it.
+  Fixed by never building releases directly on macOS: `docker/` holds a
+  Linux release-build container (see `docker/README.md`) that mirrors
+  `.github/workflows/reproducible.yml`'s `ubuntu-24.04` toolchain, so
+  every release comes from the same host class CI and F-Droid's own
+  buildserver use, regardless of which machine runs `docker run`.
 - **AGP's VCS/dependency metadata** (playbook 4.2). `app/build.gradle.kts`
   sets `vcsInfo.include = false` and `dependenciesInfo { includeInApk =
   false; includeInBundle = false }`, so the APK doesn't embed the exact git
@@ -283,5 +302,5 @@ verification event, updated as each one actually happens:
 | 2026-08-10 | gate rebuild (main, `4fe1054`), Kevin's Mac -- after PassPonyCore `608d06a` (`target-dir` pin) | DIFFERS -- `ENGINESDIR`/`MODULESDIR` gap confirmed closed (full unfiltered `strings` diff of both `.so`s: 31,209 lines each, exactly one line differed). That one line was OpenSSL's `built on: <date>` build timestamp -- see the `SOURCE_DATE_EPOCH` entry above, added in response. |
 | 2026-08-10 | gate rebuild (main, `19d8a80`), Kevin's Mac -- after PassPonyCore `65792fc` (`SOURCE_DATE_EPOCH` pin) | IDENTICAL -- `tools/verify_repro.sh rebuild main`, two independent clones/builds byte-identical. Content hash `a9f75ddb03dd7d4d15f46235413b42596d7c21d228943f1dfb6c415b1553796a`. Reproducible-build gate fully green again: the `ENGINESDIR`/`MODULESDIR` and `built on:` gaps found once `third_party/passponycore` became a real submodule (see the two `DIFFERS` rows above) are both closed at the source in PassPonyCore, not papered over in this gate. |
 | 2026-08-10 | download verification (v1.0.0 GitHub release), fetched fresh from github.com, not the local build output | IDENTICAL -- downloaded `PassPonyAndroid-1.0.0-foss.apk` and `PassPonyAndroid-1.0.0-play.aab` straight from the release page and confirmed both SHA-256s match `PassPonyAndroid-1.0.0-SHA256SUMS.txt` exactly: foss `6040ddc1c1ae9bba4f1b3cde693ed127fb7b406f949461bf0eb3a7d1a727b788`, play `7fcb32c82172e3400dcd33365418b78dd3f66834d7ddb7ad09ca20492ba53da6`. Since the downloaded file is byte-identical to the local build, the content hash from `scripts/release.sh`'s run (`a9f75ddb03dd7d4d15f46235413b42596d7c21d228943f1dfb6c415b1553796a`) carries over without needing to be recomputed separately.
-| 2026-08-10 | CI legs (JDK 17 / 21), `.github/workflows/reproducible.yml` on tag `v1.0.0` | not checked from this session -- GitHub Actions API access isn't available here; confirm directly with `gh run list --workflow reproducible.yml` or the Actions tab |
+| 2026-08-10 | CI legs (JDK 17 / 21), `.github/workflows/reproducible.yml` on tag `v1.0.0` | FAILED on both legs, same step: "Compare the published release asset against a fresh clean build" -- `libpass_ffi.so` differed on both ABIs, `classes.dex` untouched. Both legs' own two-clone-on-Linux determinism gate passed, so this wasn't a JDK issue; it was the published (Mac-built) asset vs. a Linux CI build. Root-caused via a `strings` diff of the Mac-built and CI-built `.so`: OpenSSL's embedded `compiler:` line showed the NDK's `darwin-x86_64` clang prebuilt omitting `-Wa,--noexecstack -Qunused-arguments`, which the `linux-x86_64` prebuilt of the *same* NDK version (`27.2.12479018`) adds by default. That's a real codegen difference (`--noexecstack` changes the compiled ELF layout), not just an embedded path string, so it's outside what `--remap-path-prefix`/`SOURCE_DATE_EPOCH` can fix. See "What else makes the build deterministic" above for the resolution. |
 | | F-Droid outcome | not submitted yet (P16) |

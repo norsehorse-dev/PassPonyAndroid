@@ -30,8 +30,24 @@ not just the first one.
 
 ## 3. Build the dry-run release
 
-- On the machine holding the real release keystore (never CI):
-  `bash scripts/release.sh <version>`.
+- On the machine holding the real release keystore, inside the release
+  container (see `docker/README.md`) -- never directly on macOS, and
+  never CI. A Mac-built release and a Linux-built release of the same
+  commit are not byte-identical (the NDK's darwin-x86_64 and
+  linux-x86_64 clang prebuilts for the same NDK version pass different
+  default flags into pass-core's vendored OpenSSL build), and F-Droid's
+  own buildserver always builds on Linux, so a Mac-built release could
+  never pass F-Droid's Reproducible Builds verification. See
+  `docs/REPRODUCIBLE.md`'s verification log for how this was found.
+
+  ```
+  docker run --rm \
+    -v ~/Keys/PassPony/release.keystore:/keystore/release.keystore:ro \
+    -v ~/Apps/PassPonyAndroid/keystore.properties:/keystore-props/keystore.properties:ro \
+    -v ~/Apps/PassPonyAndroid:/out \
+    passpony-release <version> <commit-sha-just-pushed>
+  ```
+
 - This builds both flavors, signs via the real Gradle release build (see
   `scripts/release.sh`'s own note on why not standalone `apksigner`),
   writes checksums and a content hash, and drafts release notes from
