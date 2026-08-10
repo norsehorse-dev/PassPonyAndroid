@@ -27,10 +27,11 @@ doesn't cover.
 | Android build tools | 35.0.0 | `app/build.gradle.kts` (`android.buildToolsVersion`) -- used only for AGP's own build, never to re-sign an APK after the fact (see "Signing" below) |
 | JDK | 17 | `app/build.gradle.kts` / `core/build.gradle.kts` (`compileOptions`, `kotlinOptions.jvmTarget`); CI's main build job installs Temurin 17, the reproducible-build workflow additionally checks JDK 21 (see "CI" below) |
 | Rust toolchain | whatever `rust-toolchain.toml` in PassPonyCore pins (currently `1.95.0`) | PassPonyCore's own `rust-toolchain.toml`, picked up automatically by `rustup` when `cargo` runs from inside a PassPonyCore checkout |
-| PassPonyCore commit | `c673b8b1398bd9188015075fdc5a300c650c78cb` | the `third_party/passponycore` git submodule (see `.gitmodules`) -- a gitlink committed alongside the rest of the tree, not an env var. `tools/verify_repro.sh` and both CI workflows pick it up automatically via `git submodule update --init --recursive` on each clone |
+| PassPonyCore commit | `608d06a5b52dd70a157da2cf0060fa72891362eb` | the `third_party/passponycore` git submodule (see `.gitmodules`) -- a gitlink committed alongside the rest of the tree, not an env var. `tools/verify_repro.sh` and both CI workflows pick it up automatically via `git submodule update --init --recursive` on each clone |
+| Cargo `target-dir` for PassPonyCore | `/tmp/passponycore-cargo-target` | PassPonyCore's own `.cargo/config.toml`, so it applies no matter who checks the repo out -- see "What else makes the build deterministic" below |
 | Every Gradle dependency | no `+`, no `latest.release`/`latest.integration` | enforced by CI's "Reject dynamic dependency versions" step, which greps every `.kts` file |
 
-`c673b8b1...` is the current PassPonyCore HEAD rather than the `v1.0.0` tag,
+`608d06a5...` is the current PassPonyCore HEAD rather than the `v1.0.0` tag,
 because `v1.0.0` predates the `age-engine` feature this build depends on
 (confirmed via `git merge-base --is-ancestor v1.0.0 HEAD`, which fails). Bump
 the submodule pointer deliberately when PassPonyCore's `age-engine` code
@@ -57,6 +58,27 @@ that: the pinned commit travels with the repo itself.)
   byte-identical `.so` files. `scripts/build-core.sh` always sets
   `RUSTFLAGS="--remap-path-prefix=$CORE=/passpony-core --remap-path-prefix=$HOME=/home"`
   to normalize this, unconditionally rather than as an opt-in flag.
+- **`openssl-sys`'s vendored OpenSSL build.** `pass-core`'s Cargo.toml
+  depends directly on `openssl-sys = { vendored }` on mobile targets only
+  (`git2` needs an OpenSSL to link against and there's no system one to
+  find when cross-compiling), and that build bakes an absolute,
+  `OUT_DIR`-derived install path into `libcrypto` at two runtime constants,
+  `ENGINESDIR` and `MODULESDIR` -- functionally inert here (nothing in this
+  app dynamically loads OpenSSL engines/providers by name), but still
+  compiled-in bytes that differ whenever the checkout path differs.
+  `RUSTFLAGS --remap-path-prefix` doesn't touch this: that's a rustc
+  mechanism for panic-location/debuginfo strings, and this is OpenSSL's own
+  C build system (`openssl-src`'s `Build` struct hardcodes `--prefix` under
+  `OUT_DIR` with no override -- only `--openssldir` is exposed, via
+  `openssl_dir()`, and that's not what's leaking). First surfaced by this
+  gate once `third_party/passponycore` became a real submodule and srcA
+  and srcB's checkouts genuinely landed at different paths (a shared single
+  clone had been masking it by coincidence -- see the log entry below).
+  Fixed at the source: PassPonyCore's own `.cargo/config.toml` pins
+  `target-dir` to `/tmp/passponycore-cargo-target`, so `OUT_DIR` (and the
+  baked `ENGINESDIR`/`MODULESDIR`) is identical no matter who checks the
+  repo out -- this app's build scripts, this gate, or eventually F-Droid's
+  buildserver.
 - **AGP's VCS/dependency metadata** (playbook 4.2). `app/build.gradle.kts`
   sets `vcsInfo.include = false` and `dependenciesInfo { includeInApk =
   false; includeInBundle = false }`, so the APK doesn't embed the exact git
@@ -239,6 +261,8 @@ verification event, updated as each one actually happens:
 
 | Date | Step | Result |
 | --- | --- | --- |
-| 2026-08-09 | gate rebuild (main @ `6c6bd24`), Kevin's Mac | IDENTICAL -- `tools/verify_repro.sh rebuild main`, two independent clones/builds byte-identical. Content hash `2c00bfc46561dcba9315a12fe08d220da1c8bd0d1d56b5417b9d650013e27950` |
+| 2026-08-09 | gate rebuild (main @ `6c6bd24`), Kevin's Mac | IDENTICAL -- `tools/verify_repro.sh rebuild main`, two independent clones/builds byte-identical. Content hash `2c00bfc46561dcba9315a12fe08d220da1c8bd0d1d56b5417b9d650013e27950`. PassPonyCore was still a separate SHA-pinned clone shared by both builds at this point (pre-P16-submodule), which happened to mask the `openssl-sys` gap below. |
+| 2026-08-10 | gate rebuild (main, `feee09a`), GitHub Actions `workflow_dispatch` | DIFFERS -- `classes.dex` identical, `libpass_ffi.so` differed on both ABIs. Root-caused via `strings` diff to `openssl-sys`'s vendored OpenSSL build baking the absolute, checkout-path-derived `ENGINESDIR`/`MODULESDIR` into `libcrypto` (see "What else makes the build deterministic" above). First real double-build test since `third_party/passponycore` became a submodule with its own per-clone checkout path; the prior shared-clone architecture had been masking this by accident, not by fixing it. |
+| | gate rebuild (main), Kevin's Mac -- after PassPonyCore `608d06a` (`.cargo/config.toml` pinning `target-dir`) | pending re-run |
 | | CI legs (JDK 17 / 21) | not yet run -- pending the first `v*` tag |
 | | F-Droid outcome | not submitted yet (P16) |
