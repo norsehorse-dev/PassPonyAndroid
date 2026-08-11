@@ -35,20 +35,24 @@
 # not specifically inline here. One source of truth instead of two
 # copies that can drift.
 #
-# The `commit:` below is a placeholder -- current main HEAD as of this
-# draft, standing in until an actual vX.Y.Z release is tagged. Replace it
-# with `git rev-list -n 1 <tag>` at submission time (never the tag name
+# The `commit:` below is `git rev-list -n 1 v1.0.0` (never the tag name
 # itself -- the playbook's rule; reviewers ask for the hash even when a
-# tag would resolve), and update versionName/versionCode/CurrentVersion/
-# CurrentVersionCode to match.
+# tag would resolve), re-pinned once v1.0.0 was actually tagged and
+# published. It's no longer main HEAD -- later commits (the Docker
+# release container, this file's own JDK 17 fix) are build
+# infrastructure and docs, not app source, and don't bump versionName/
+# versionCode, so they have no bearing on what this Build: entry
+# describes. Re-pin again (and bump versionName/versionCode/
+# CurrentVersion/CurrentVersionCode together) only when a new tagged
+# release ships.
 #
 # Not opting into Reproducible Builds (Binaries:/AllowedAPKSigningKeys:)
-# in this draft -- both need a real signed release APK's cert SHA-256,
-# which doesn't exist until scripts/release.sh produces the first actual
-# v1.0.0 release. docs/REPRODUCIBLE.md's determinism gate is already
-# proven green (tools/verify_repro.sh rebuild main: IDENTICAL), so
-# there's nothing else blocking opting in once that release exists --
-# add the two fields then.
+# in this draft yet, though nothing blocks it now -- v1.0.0's Linux-built
+# release is verified reproducible (docs/REPRODUCIBLE.md's cross-machine
+# log, both CI JDK legs IDENTICAL against the published asset). Add the
+# two fields with the release APK's signing cert SHA-256
+# (`keytool -printcert -jarfile PassPonyAndroid-1.0.0-foss.apk`) before
+# submission.
 
 Categories:
   - Password & 2FA
@@ -68,7 +72,7 @@ Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
 Builds:
   - versionName: "1.0.0"
     versionCode: 100
-    commit: 14572f9a57822e00ca79ebd6f8f3443b4fcd01cf
+    commit: 45ace6e843078b8182b6097652390f1823100272
     subdir: app
     submodules: true
     sudo:
