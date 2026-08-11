@@ -12,6 +12,7 @@ AutoName: PassPony
 
 RepoType: git
 Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
+Binaries: https://github.com/norsehorse-dev/PassPonyAndroid/releases/download/v%v/PassPonyAndroid-%v-foss.apk
 
 Builds:
   - versionName: 1.0.1
@@ -25,8 +26,8 @@ Builds:
     gradle:
       - foss
     output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
-    prebuild:
-      - sed -i -e '/foojay/d' ../settings.gradle.kts
+    prebuild: sed -i -e '/foojay/d' ../settings.gradle.kts
+    build:
       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain
         none
       - export PATH="$HOME/.cargo/bin:$PATH"
@@ -35,6 +36,8 @@ Builds:
       - cargo install cargo-ndk
       - cd ../.. && bash scripts/build-core.sh
     ndk: 27.2.12479018
+
+AllowedAPKSigningKeys: f04955bb3cf6d8a7a9e5d109c741a52ee6df954a6bab29db5bf3d3ceb610f5f0
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags

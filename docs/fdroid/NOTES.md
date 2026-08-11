@@ -68,14 +68,30 @@ mid-build), regardless of whether it would ever trigger. Harmless to
 remove -- it was only ever a fallback for machines without a suitable
 JDK already installed, and the buildserver has its own.
 
-**The rest of `prebuild:`** mirrors `scripts/build-core.sh` (the
-authoritative, commented version this must stay in sync with): pin the
-toolchain PassPonyCore's own rust-toolchain.toml names, add both
-Android targets, install cargo-ndk, cross-compile with the
-remap-path-prefix / SOURCE_DATE_EPOCH / target-dir determinism pins
-(see `docs/REPRODUCIBLE.md`). prebuild commands run from `subdir:`
-(app/), not the repo root; only `$$SDK$$`/`$$NDK$$`/`$$VERSION$$`/
-`$$VERCODE$$`/`$$COMMIT$$` and declared srclib names get substituted.
+**The core build lives in `build:`, NOT `prebuild:`.** F-Droid's
+scanner runs between the two, and it hard-errors on any `.so` it finds
+in the source tree -- including ones prebuild just legitimately built
+from source ("Found shared library at core/src/main/jniLibs/...",
+fork pipeline run, 2026-08-11). The `build:` field exists exactly for
+this: it runs after the scan, before the gradle build. The commands
+mirror `scripts/build-core.sh` (the authoritative, commented version
+this must stay in sync with): install rustup, pin the toolchain
+PassPonyCore's own rust-toolchain.toml names, install cargo-ndk,
+cross-compile with the remap-path-prefix / SOURCE_DATE_EPOCH /
+target-dir determinism pins (see `docs/REPRODUCIBLE.md`). Commands run
+from `subdir:` (app/), not the repo root; only
+`$$SDK$$`/`$$NDK$$`/`$$VERSION$$`/`$$VERCODE$$`/`$$COMMIT$$` and
+declared srclib names get substituted.
+
+**`Binaries:` and `AllowedAPKSigningKeys:`** opt into F-Droid's
+Reproducible Builds flow, added at reviewer request on the MR. The
+Binaries URL pattern uses `%v` (versionName) against the GitHub
+release naming `scripts/release.sh` produces; the key is the release
+signing cert's lowercase SHA-256, extracted from the published
+v1.0.1 foss APK. F-Droid will rebuild from source and verify against
+the published, developer-signed APK instead of signing with their own
+key. rewritemeta places Binaries next to Repo and
+AllowedAPKSigningKeys after the Builds block on its own; let it.
 
 **No `srclibs:`.** PassPonyCore and PGPonyCore-Kotlin are git
 submodules of this repo; `submodules: true` runs
