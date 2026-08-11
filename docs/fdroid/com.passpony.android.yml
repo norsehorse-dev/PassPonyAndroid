@@ -12,7 +12,8 @@ AutoName: PassPony
 
 RepoType: git
 Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
-Binaries: https://github.com/norsehorse-dev/PassPonyAndroid/releases/download/v%v/PassPonyAndroid-%v-foss.apk
+Binaries:
+  https://github.com/norsehorse-dev/PassPonyAndroid/releases/download/v%v/PassPonyAndroid-%v-foss.apk
 
 Builds:
   - versionName: 1.0.1
@@ -25,7 +26,7 @@ Builds:
       - apt-get install -y perl make build-essential pkg-config libssl-dev
     gradle:
       - foss
-    output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
+    output: build/outputs/apk/foss/release/app-foss-release-unsigned.apk
     prebuild: sed -i -e '/foojay/d' ../settings.gradle.kts
     build:
       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain
