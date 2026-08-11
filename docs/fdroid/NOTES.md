@@ -116,6 +116,14 @@ the release APK's signing cert SHA-256 before submission if opting in.
 
 ## Submitting
 
+**Upload the file, never copy-paste it.** The canonical form can
+contain bytes a clipboard or web editor silently mangles -- ruamel
+0.18.10 (what the buildserver runs) emits `Binaries: ` with a trailing
+space before the wrapped URL, and the canonical check is a
+byte-for-byte `git diff`. A paste that strips that one space fails the
+pipeline with a diff where both sides look identical. Use GitLab's
+Replace file upload with the exact file from `docs/fdroid/`.
+
 The GitLab fork/MR steps only Kevin can do (his account) are in
 NorseHorse's F-Droid Submission Playbook, section 3. File name in the
 MR must be exactly `metadata/com.passpony.android.yml` -- the pipeline
