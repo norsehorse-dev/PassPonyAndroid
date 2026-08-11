@@ -1,67 +1,3 @@
-# DRAFT F-Droid metadata for PassPony (Android) -- per P16
-# (docs/plan/P16-release.md item 3). Not yet submitted to fdroiddata;
-# lives here so it's reviewable in this repo's own history before it
-# becomes an MR against https://gitlab.com/fdroid/fdroiddata. Canonicalize
-# with `fdroid rewritemeta`/`fdroid lint` (per NorseHorse's F-Droid
-# Submission Playbook) before it's ever pasted into the GitLab web editor
-# -- see docs/RELEASE_CHECKLIST.md for the manual steps only Kevin can do
-# (the GitLab fork/MR itself needs his account).
-#
-# PassPonyCore (the Rust crypto core) and PGPonyCore-Kotlin (the
-# pass/OpenPGP engine) are both git submodules of this repo
-# (third_party/passponycore, third_party/pgponycore-kotlin). No srclibs:
-# declaration is needed for either -- `submodules: true` below runs
-# `git submodule update --init --recursive` automatically right after the
-# clone, before prebuild runs (confirmed against F-Droid's own Build
-# Metadata Reference). See docs/REPRODUCIBLE.md for why PassPonyCore
-# specifically became a submodule in P16 rather than staying a separate,
-# SHA-pinned clone: a real F-Droid recipe has no way to inject an env var
-# into the build it clones, which that older architecture needed.
-#
-# prebuild: commands run from subdir: (app/), not the repo root -- also
-# confirmed against the Build Metadata Reference, since an earlier draft
-# of this file got that wrong (it referenced a $$PassPonyAndroid$$
-# variable that isn't real; only $$SDK$$/$$NDK$$/$$VERSION$$/$$VERCODE$$/
-# $$COMMIT$$ and declared srclib names are substituted). Paths below are
-# relative to app/ accordingly.
-#
-# No Summary:/Description: fields below on purpose. fdroidserver's
-# `fdroid update` reads fastlane/metadata/android/en-US/short_description.txt
-# and full_description.txt straight from this repo (P16 item 2) and uses
-# those for the store listing when the metadata file doesn't set its own
-# -- confirmed by running `fdroid lint` against this file with both
-# fields removed once the fastlane text existed: clean pass, since lint's
-# only hard requirement is that a summary/description exist somewhere,
-# not specifically inline here. One source of truth instead of two
-# copies that can drift.
-#
-# The `commit:` below is `git rev-list -n 1 v1.0.1` (never the tag name
-# itself -- the playbook's rule; reviewers ask for the hash even when a
-# tag would resolve). v1.0.1 exists specifically because v1.0.0's
-# tagged tree pins PGPonyCore-Kotlin at a commit whose build.gradle.kts
-# still had `kotlin { jvmToolchain(17) }`; the buildserver runs with
-# Gradle toolchain auto-provisioning disabled and ships only JDK 21
-# (Debian trixie), so that toolchain request fails hard there ("Cannot
-# find a Java installation... Toolchain auto-provisioning is not
-# enabled" -- QuorumPony hit the identical failure). The submodule fix
-# (explicit compilerOptions.jvmTarget instead) needed a new tag and
-# version bump, tags being immutable, per the playbook.
-#
-# No JDK install in sudo: on purpose. An earlier draft installed
-# openjdk-17-jdk-headless, believing the buildserver defaulted to JDK
-# 11; a real pipeline run (norsehorse/pgponyandroid fork, 2026-08-11)
-# showed the current buildserver-trixie image ships JDK 21 preinstalled
-# and set as default, and trixie's repos don't even carry openjdk-17
-# (the install step is what failed). AGP 8.13.2 needs 17 or newer, and
-# .github/workflows/reproducible.yml proves this build byte-identical
-# under JDK 21, so the buildserver default is used as-is.
-#
-# Not opting into Reproducible Builds (Binaries:/AllowedAPKSigningKeys:)
-# in this draft yet, though nothing blocks it -- the Linux-built release
-# is verified reproducible (docs/REPRODUCIBLE.md's cross-machine log,
-# both CI JDK legs IDENTICAL against the published asset). Add the two
-# fields with the release APK's signing cert SHA-256 before submission.
-
 Categories:
   - Password & 2FA
 License: Apache-2.0
@@ -78,49 +14,28 @@ RepoType: git
 Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
 
 Builds:
-  - versionName: "1.0.1"
+  - versionName: 1.0.1
     versionCode: 101
     commit: 5acd1d41cc0fe1d4ff2d48b5370cac7e0caa891b
     subdir: app
     submodules: true
     sudo:
-      # F-Droid's build container starts bare of these -- rustup, perl,
-      # and make (pass-core's vendored OpenSSL build for mobile targets,
-      # see scripts/build-core.sh) all need to exist before prebuild can
-      # cross-compile pass-ffi. The Android NDK itself comes from
-      # $$NDK$$, F-Droid's own build environment, not installed here.
-      # No JDK here -- see the header comment: the buildserver's
-      # preinstalled default JDK 21 is used as-is.
       - apt-get update
       - apt-get install -y perl make
-      - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
+      - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain
+        none
+    gradle:
+      - foss
+    output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
     prebuild:
-      # Strip the foojay-resolver-convention line from
-      # settings.gradle.kts (see that file's own comment on the plugin):
-      # F-Droid's scanner rejects a build outright just for referencing
-      # it, regardless of whether it would ever actually trigger a
-      # download. Harmless to remove -- it was only ever a fallback for
-      # machines without a suitable JDK already installed, and the
-      # buildserver has its own.
       - sed -i -e '/foojay/d' ../settings.gradle.kts
-      #
-      # Mirrors scripts/build-core.sh's own steps (see that script for
-      # the authoritative, commented version this must stay in sync
-      # with): pin the toolchain PassPonyCore's own rust-toolchain.toml
-      # names, add both Android targets, install cargo-ndk, then
-      # cross-compile with the same RUSTFLAGS remap-path-prefix and
-      # SOURCE_DATE_EPOCH/target-dir determinism pins P15/P16 set up
-      # (see docs/REPRODUCIBLE.md). Paths are relative to subdir: (app/).
       - export PATH="$HOME/.cargo/bin:$PATH"
       - export ANDROID_NDK_HOME="$$NDK$$"
       - cd ../third_party/passponycore && rustup show
       - cargo install cargo-ndk
       - cd .. && bash scripts/build-core.sh
-    gradle:
-      - foss
-    output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: "1.0.1"
+CurrentVersion: 1.0.1
 CurrentVersionCode: 101
