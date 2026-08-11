@@ -33,7 +33,7 @@ Builds:
       - export ANDROID_NDK_HOME="$$NDK$$"
       - cd ../third_party/passponycore && rustup show
       - cargo install cargo-ndk
-      - cd .. && bash scripts/build-core.sh
+      - cd ../.. && bash scripts/build-core.sh
     ndk: 27.2.12479018
 
 AutoUpdateMode: None
