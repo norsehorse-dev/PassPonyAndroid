@@ -35,24 +35,34 @@
 # not specifically inline here. One source of truth instead of two
 # copies that can drift.
 #
-# The `commit:` below is `git rev-list -n 1 v1.0.0` (never the tag name
-# itself -- the playbook's rule; reviewers ask for the hash even when a
-# tag would resolve), re-pinned once v1.0.0 was actually tagged and
-# published. It's no longer main HEAD -- later commits (the Docker
-# release container, this file's own JDK 17 fix) are build
-# infrastructure and docs, not app source, and don't bump versionName/
-# versionCode, so they have no bearing on what this Build: entry
-# describes. Re-pin again (and bump versionName/versionCode/
-# CurrentVersion/CurrentVersionCode together) only when a new tagged
-# release ships.
+# The `commit:` below is a PLACEHOLDER pending the v1.0.1 tag -- replace
+# it with `git rev-list -n 1 v1.0.1` (never the tag name itself -- the
+# playbook's rule; reviewers ask for the hash even when a tag would
+# resolve) once that tag exists. v1.0.1 exists specifically because
+# v1.0.0's tagged tree pins PGPonyCore-Kotlin at a commit whose
+# build.gradle.kts still had `kotlin { jvmToolchain(17) }`; the
+# buildserver runs with Gradle toolchain auto-provisioning disabled and
+# ships only JDK 21 (Debian trixie), so that toolchain request fails
+# hard there ("Cannot find a Java installation... Toolchain
+# auto-provisioning is not enabled" -- QuorumPony hit the identical
+# failure). The submodule fix (explicit compilerOptions.jvmTarget
+# instead) is on main; tags are immutable, so a new tag and version
+# bump it is, per the playbook.
+#
+# No JDK install in sudo: on purpose. An earlier draft installed
+# openjdk-17-jdk-headless, believing the buildserver defaulted to JDK
+# 11; a real pipeline run (norsehorse/pgponyandroid fork, 2026-08-11)
+# showed the current buildserver-trixie image ships JDK 21 preinstalled
+# and set as default, and trixie's repos don't even carry openjdk-17
+# (the install step is what failed). AGP 8.13.2 needs 17 or newer, and
+# .github/workflows/reproducible.yml proves this build byte-identical
+# under JDK 21, so the buildserver default is used as-is.
 #
 # Not opting into Reproducible Builds (Binaries:/AllowedAPKSigningKeys:)
-# in this draft yet, though nothing blocks it now -- v1.0.0's Linux-built
-# release is verified reproducible (docs/REPRODUCIBLE.md's cross-machine
-# log, both CI JDK legs IDENTICAL against the published asset). Add the
-# two fields with the release APK's signing cert SHA-256
-# (`keytool -printcert -jarfile PassPonyAndroid-1.0.0-foss.apk`) before
-# submission.
+# in this draft yet, though nothing blocks it -- the Linux-built release
+# is verified reproducible (docs/REPRODUCIBLE.md's cross-machine log,
+# both CI JDK legs IDENTICAL against the published asset). Add the two
+# fields with the release APK's signing cert SHA-256 before submission.
 
 Categories:
   - Password & 2FA
@@ -70,53 +80,30 @@ RepoType: git
 Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
 
 Builds:
-  - versionName: "1.0.0"
-    versionCode: 100
-    commit: 45ace6e843078b8182b6097652390f1823100272
+  - versionName: "1.0.1"
+    versionCode: 101
+    commit: REPLACE-WITH-git-rev-list-n-1-v1.0.1
     subdir: app
     submodules: true
     sudo:
-      # F-Droid's build container starts bare -- rustup, perl, and make
-      # (pass-core's vendored OpenSSL build for mobile targets, see
-      # scripts/build-core.sh) all need to exist before prebuild can
+      # F-Droid's build container starts bare of these -- rustup, perl,
+      # and make (pass-core's vendored OpenSSL build for mobile targets,
+      # see scripts/build-core.sh) all need to exist before prebuild can
       # cross-compile pass-ffi. The Android NDK itself comes from
       # $$NDK$$, F-Droid's own build environment, not installed here.
-      #
-      # openjdk-17-jdk-headless: the buildserver's own default JDK is 11
-      # (default-jdk-headless), but AGP 8.13.2 refuses to even run under
-      # anything older than 17, separately from whatever a module's own
-      # `jvmToolchain()` targets (PGPonyCore-Kotlin's
-      # third_party/pgponycore-kotlin/pgponycore/build.gradle.kts pins
-      # 17 too). Installed via apt here -- F-Droid's own sanctioned
-      # mechanism for this, per other recipes that hit the same wall
-      # (fdroiddata#3105) -- rather than leaning on Gradle's
-      # foojay-resolver toolchain auto-download, which F-Droid's own
-      # scanner rejects outright as a "usual suspect" (it can fetch an
-      # unpinned JDK from the network mid-build). prebuild below strips
-      # that plugin reference and points Gradle at the JDK installed
-      # here instead.
+      # No JDK here -- see the header comment: the buildserver's
+      # preinstalled default JDK 21 is used as-is.
       - apt-get update
-      - apt-get install -y perl make openjdk-17-jdk-headless
+      - apt-get install -y perl make
       - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain none
     prebuild:
-      # JDK 17 setup, ahead of everything else in this block: point
-      # Gradle's own launch environment at the JDK installed above
-      # instead of the buildserver's default JDK 11. `update-java-
-      # alternatives -a` is the fix people reach for first, but it
-      # flips a system-wide symlink that hasn't reliably taken effect
-      # in time for the same build's later gradle invocation for
-      # everyone who's hit this (see fdroiddata#3105); exporting
-      # JAVA_HOME directly in this same prebuild script is more direct
-      # and scoped to just this build. Also strips the
-      # foojay-resolver-convention line from settings.gradle.kts (see
-      # that file's own comment on the plugin) since F-Droid's scanner
-      # rejects a build outright just for referencing it, regardless of
-      # whether it would ever actually trigger a download -- harmless
-      # to remove, since it was only ever a fallback for machines
-      # without a JDK 17 already installed, and this recipe now
-      # guarantees one is.
-      - export JAVA_HOME=$(ls -d /usr/lib/jvm/java-17-openjdk-*)
-      - export PATH="$JAVA_HOME/bin:$PATH"
+      # Strip the foojay-resolver-convention line from
+      # settings.gradle.kts (see that file's own comment on the plugin):
+      # F-Droid's scanner rejects a build outright just for referencing
+      # it, regardless of whether it would ever actually trigger a
+      # download. Harmless to remove -- it was only ever a fallback for
+      # machines without a suitable JDK already installed, and the
+      # buildserver has its own.
       - sed -i -e '/foojay/d' ../settings.gradle.kts
       #
       # Mirrors scripts/build-core.sh's own steps (see that script for
@@ -137,5 +124,5 @@ Builds:
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags
-CurrentVersion: "1.0.0"
-CurrentVersionCode: 100
+CurrentVersion: "1.0.1"
+CurrentVersionCode: 101
