@@ -36,9 +36,12 @@ that install step was itself the build failure. AGP 8.13.2 needs 17 or
 newer, and `.github/workflows/reproducible.yml` proves the build
 byte-identical under JDK 21, so the buildserver default is used as-is.
 
-**`sudo:` installs only perl and make.** The build container starts
-without them, and pass-core's vendored OpenSSL build for mobile
-targets needs both (see `scripts/build-core.sh`).
+**`sudo:` installs perl, make, and build-essential.** The build
+container starts without them: pass-core's vendored OpenSSL build for
+mobile targets needs perl and make (see `scripts/build-core.sh`), and
+`cargo install cargo-ndk` needs a host C compiler/linker ("linker
+'cc' not found", fork pipeline run, 2026-08-11 -- the identical
+failure `docker/release.Dockerfile` hit, fixed the identical way).
 
 **rustup installs in `prebuild:`, NOT `sudo:`.** The sudo block runs
 as root, so a rustup install there lands in /root/.cargo -- but

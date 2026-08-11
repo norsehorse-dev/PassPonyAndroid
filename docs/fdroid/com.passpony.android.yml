@@ -21,7 +21,7 @@ Builds:
     submodules: true
     sudo:
       - apt-get update
-      - apt-get install -y perl make
+      - apt-get install -y perl make build-essential
     gradle:
       - foss
     output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
