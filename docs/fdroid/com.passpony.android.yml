@@ -22,18 +22,19 @@ Builds:
     sudo:
       - apt-get update
       - apt-get install -y perl make
-      - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain
-        none
     gradle:
       - foss
     output: app/build/outputs/apk/foss/release/app-foss-release-unsigned.apk
     prebuild:
       - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain
+        none
       - export PATH="$HOME/.cargo/bin:$PATH"
       - export ANDROID_NDK_HOME="$$NDK$$"
       - cd ../third_party/passponycore && rustup show
       - cargo install cargo-ndk
       - cd .. && bash scripts/build-core.sh
+    ndk: 27.2.12479018
 
 AutoUpdateMode: None
 UpdateCheckMode: Tags

@@ -36,11 +36,23 @@ that install step was itself the build failure. AGP 8.13.2 needs 17 or
 newer, and `.github/workflows/reproducible.yml` proves the build
 byte-identical under JDK 21, so the buildserver default is used as-is.
 
-**`sudo:` installs perl and make, and rustup.** The build container
-starts without them; pass-core's vendored OpenSSL build for mobile
-targets needs perl and make (see `scripts/build-core.sh`), and the
-Rust cross-compile needs rustup. The Android NDK itself comes from
-`$$NDK$$`, F-Droid's own build environment, never installed here.
+**`sudo:` installs only perl and make.** The build container starts
+without them, and pass-core's vendored OpenSSL build for mobile
+targets needs both (see `scripts/build-core.sh`).
+
+**rustup installs in `prebuild:`, NOT `sudo:`.** The sudo block runs
+as root, so a rustup install there lands in /root/.cargo -- but
+prebuild runs as the vagrant user, whose PATH points at
+/home/vagrant/.cargo/bin, and the build died with "rustup: command
+not found" (fork pipeline run, 2026-08-11) when the install lived in
+sudo. Installing from prebuild puts it in the home that actually runs
+the build.
+
+**`ndk: 27.2.12479018` must be declared.** F-Droid only provisions an
+NDK, and only substitutes `$$NDK$$`, when the build entry asks for one
+-- without the field, `export ANDROID_NDK_HOME="$$NDK$$"` expanded to
+an empty string (same fork run). Keep the version in sync with
+`gradle.properties`' ndkVersion by hand.
 
 **The foojay strip in `prebuild:`.** F-Droid's scanner rejects a build
 outright just for referencing org.gradle.toolchains.foojay-resolver (a
