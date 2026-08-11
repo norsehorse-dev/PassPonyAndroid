@@ -35,19 +35,17 @@
 # not specifically inline here. One source of truth instead of two
 # copies that can drift.
 #
-# The `commit:` below is a PLACEHOLDER pending the v1.0.1 tag -- replace
-# it with `git rev-list -n 1 v1.0.1` (never the tag name itself -- the
-# playbook's rule; reviewers ask for the hash even when a tag would
-# resolve) once that tag exists. v1.0.1 exists specifically because
-# v1.0.0's tagged tree pins PGPonyCore-Kotlin at a commit whose
-# build.gradle.kts still had `kotlin { jvmToolchain(17) }`; the
-# buildserver runs with Gradle toolchain auto-provisioning disabled and
-# ships only JDK 21 (Debian trixie), so that toolchain request fails
-# hard there ("Cannot find a Java installation... Toolchain
-# auto-provisioning is not enabled" -- QuorumPony hit the identical
-# failure). The submodule fix (explicit compilerOptions.jvmTarget
-# instead) is on main; tags are immutable, so a new tag and version
-# bump it is, per the playbook.
+# The `commit:` below is `git rev-list -n 1 v1.0.1` (never the tag name
+# itself -- the playbook's rule; reviewers ask for the hash even when a
+# tag would resolve). v1.0.1 exists specifically because v1.0.0's
+# tagged tree pins PGPonyCore-Kotlin at a commit whose build.gradle.kts
+# still had `kotlin { jvmToolchain(17) }`; the buildserver runs with
+# Gradle toolchain auto-provisioning disabled and ships only JDK 21
+# (Debian trixie), so that toolchain request fails hard there ("Cannot
+# find a Java installation... Toolchain auto-provisioning is not
+# enabled" -- QuorumPony hit the identical failure). The submodule fix
+# (explicit compilerOptions.jvmTarget instead) needed a new tag and
+# version bump, tags being immutable, per the playbook.
 #
 # No JDK install in sudo: on purpose. An earlier draft installed
 # openjdk-17-jdk-headless, believing the buildserver defaulted to JDK
@@ -82,7 +80,7 @@ Repo: https://github.com/norsehorse-dev/PassPonyAndroid.git
 Builds:
   - versionName: "1.0.1"
     versionCode: 101
-    commit: REPLACE-WITH-git-rev-list-n-1-v1.0.1
+    commit: 5acd1d41cc0fe1d4ff2d48b5370cac7e0caa891b
     subdir: app
     submodules: true
     sudo:
