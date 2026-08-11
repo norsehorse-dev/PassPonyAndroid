@@ -32,8 +32,8 @@ android {
         applicationId = "com.passpony.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 101
-        versionName = "1.0.1"
+        versionCode = 102
+        versionName = "1.0.2"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
