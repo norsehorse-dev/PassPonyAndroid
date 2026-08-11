@@ -63,11 +63,17 @@ The pass-format engine is [PGPonyCore-Kotlin](https://github.com/norsehorse-dev/
 over BouncyCastle, pulled in the same way as a git submodule at
 `third_party/pgponycore-kotlin`.
 
-Pinned to commit `080815d80021a2f86e1245f5044c6f6f6218be0e`, not a tagged
-release: PGPonyCore-Kotlin has none yet (a single "Initial 3.0.0 Commit"
-as of this pin). Re-pin to a real tag with `cd third_party/pgponycore-kotlin
-&& git fetch --tags && git checkout <tag>` once one exists, then commit the
-updated submodule reference.
+Pinned to commit `0c09788bda4c208297ae7d1668bdfec10b0f24fd`, not a tagged
+release: PGPonyCore-Kotlin has none yet. Re-pin to a real tag with
+`cd third_party/pgponycore-kotlin && git fetch --tags && git checkout <tag>`
+once one exists, then commit the updated submodule reference.
+
+(Bumped from the initial `080815d` pin to drop `kotlin { jvmToolchain(17) }`
+in favor of an explicit `compilerOptions.jvmTarget` -- F-Droid's buildserver
+disables Gradle's toolchain auto-provisioning, so a toolchain request with
+no matching JDK already installed fails outright. See `docs/fdroid/`'s
+recipe and NorseHorse's F-Droid Submission Playbook, which hit the same
+thing on QuorumPony's own pure-JVM core module.)
 
 ## Layout
 
