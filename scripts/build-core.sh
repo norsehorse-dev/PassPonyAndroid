@@ -51,6 +51,24 @@ if [[ -z "${ANDROID_NDK_HOME:-}" ]]; then
   export ANDROID_NDK_HOME
 fi
 
+# Normalize the NDK path through a fixed symlink before cargo-ndk sees
+# it. OpenSSL's build records the full CC invocation -- including the
+# NDK's absolute path -- into libcrypto's build-info (crypto/buildinf.h's
+# "compiler:" line), so two hosts with the NDK installed at different
+# locations produce byte-different .so files even with identical
+# toolchains: /usr/local/lib/android/sdk (this repo's Docker release
+# container and GitHub CI) vs /opt/android-sdk (F-Droid's buildserver)
+# was exactly the diff that failed F-Droid's reproducible-build
+# comparison (strings diff, MR pipeline, 2026-08-11). cargo-ndk uses
+# ANDROID_NDK_HOME verbatim without canonicalizing it (checked against
+# cargo-ndk 4.1.2's source), so pointing it at this symlink embeds the
+# same neutral path no matter where the real NDK lives.
+NDK_LINK="/tmp/passpony-ndk"
+[[ -L "$NDK_LINK" || ! -e "$NDK_LINK" ]] || {
+  echo "$NDK_LINK exists and is not a symlink; remove it and re-run"; exit 1; }
+ln -sfn "$ANDROID_NDK_HOME" "$NDK_LINK"
+export ANDROID_NDK_HOME="$NDK_LINK"
+
 pushd "$CORE" >/dev/null
 
 # Run inside the core dir so rustup targets the toolchain pinned by its
