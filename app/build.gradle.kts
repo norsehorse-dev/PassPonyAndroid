@@ -133,6 +133,17 @@ android {
     }
 }
 
+// Drop the ART baseline profile (assets/dexopt/baseline.prof + baseline.profm)
+// from the APK. AGP serializes it from unordered collections, so it is not
+// byte-reproducible and fails F-Droid's reproducible-build comparison on those
+// two files (a generic Compose/AGP issue, not specific to the Rust core). The
+// only cost is first-run startup speed, nothing functional.
+tasks.configureEach {
+    if (name.matches(Regex("compile.*ArtProfile"))) {
+        enabled = false
+    }
+}
+
 dependencies {
     implementation(project(":core"))
     // P06: pass (OpenPGP) engine, over PGPonyCore-Kotlin / BouncyCastle.
