@@ -47,25 +47,35 @@ val cargoBinDir: String =
 val buildCore = tasks.register<Exec>("buildCore") {
     workingDir = rootProject.projectDir
     commandLine("bash", "scripts/build-core.sh")
-    // F-Droid runs the Gradle step in a shell that does NOT inherit the PATH
-    // export from the recipe's prebuild:, so put cargo/cargo-ndk on PATH here.
-    environment("PATH", "$cargoBinDir${File.pathSeparator}${System.getenv("PATH") ?: ""}")
-    // No `build:` block on a gradle: recipe to export the NDK, so resolve the
-    // NDK the way AGP/F-Droid provide it and hand it to the script (the
-    // script's own fallback is a macOS-only path).
-    val ndkVersion = providers.gradleProperty("ndkVersion").get()
-    val sdkDir = System.getenv("ANDROID_HOME")
-        ?: System.getenv("ANDROID_SDK_ROOT")
-        ?: android.sdkDirectory.absolutePath
-    val ndkHome = System.getenv("ANDROID_NDK_HOME")
-        ?: System.getenv("ANDROID_NDK")
-        ?: "$sdkDir/ndk/$ndkVersion"
-    environment("ANDROID_NDK_HOME", ndkHome)
     val soFile = file("src/main/jniLibs/arm64-v8a/libpass_ffi.so")
     val bindings = file("src/main/kotlin/uniffi/pass_ffi/pass_ffi.kt")
     outputs.files(soFile, bindings)
-    // Idempotent: only build when the generated outputs are missing.
+    // Idempotent: only build when the generated outputs are missing (local
+    // dev, CI, verify_repro, and the docker release all run build-core.sh
+    // first, so this no-ops for them).
     onlyIf { !soFile.exists() || !bindings.exists() }
+    // Resolve PATH and the NDK lazily, at execution time and only when the
+    // task actually runs. Evaluating android.sdkDirectory at configuration
+    // time would break `gradle` itself whenever the SDK location isn't set
+    // yet (a fresh clone with no local.properties), even for tasks that never
+    // touch the core.
+    val ndkVersionProp = providers.gradleProperty("ndkVersion")
+    doFirst {
+        // F-Droid runs the gradle step in a shell that does NOT inherit the
+        // PATH export from the recipe's prebuild:, so put cargo/cargo-ndk on
+        // PATH here. Resolve the NDK the way AGP/F-Droid provide it, since
+        // build-core.sh's own fallback is a macOS-only path.
+        environment("PATH", "$cargoBinDir${File.pathSeparator}${System.getenv("PATH") ?: ""}")
+        val ndkHome = System.getenv("ANDROID_NDK_HOME")
+            ?: System.getenv("ANDROID_NDK")
+            ?: run {
+                val sdkDir = System.getenv("ANDROID_HOME")
+                    ?: System.getenv("ANDROID_SDK_ROOT")
+                    ?: android.sdkDirectory.absolutePath
+                "$sdkDir/ndk/${ndkVersionProp.get()}"
+            }
+        environment("ANDROID_NDK_HOME", ndkHome)
+    }
 }
 
 tasks.named("preBuild") { dependsOn(buildCore) }
