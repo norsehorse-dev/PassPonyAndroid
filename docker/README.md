@@ -1,6 +1,6 @@
 # Release build container
 
-Builds the signed release APK/AAB on Linux, matching CI's and F-Droid's
+Builds the signed release APK on Linux, matching CI's and F-Droid's
 build host, instead of on macOS. See `docs/RELEASE_CHECKLIST.md` step 3
 and `docs/REPRODUCIBLE.md` for why: a Mac-built release and a Linux-built
 release of the same commit are not byte-identical (the NDK's per-host

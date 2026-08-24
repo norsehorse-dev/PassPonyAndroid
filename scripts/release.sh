@@ -45,22 +45,23 @@ CURRENT_VERSION_NAME="$(sed -n 's/^ *versionName = "\(.*\)"/\1/p' "$REPO_ROOT/ap
 echo "--- Building foss release APK ---"
 ( cd "$REPO_ROOT" && bash scripts/build-core.sh && ./gradlew --no-daemon :app:assembleFossRelease )
 
-echo "--- Building play release AAB ---"
-( cd "$REPO_ROOT" && ./gradlew --no-daemon :app:bundlePlayRelease )
+# The Play AAB is deliberately not built here. Play is only a possible
+# future channel, and if it ever happens it will not go through this Docker
+# reproducible path: Play re-signs the bundle and generates the installed
+# split APKs on its own servers, so a locally built AAB is neither byte-
+# reproducible nor what any user actually runs. This script produces the
+# foss APK only -- the one artifact F-Droid/IzzyOnDroid and
+# tools/verify_repro.sh can rebuild from source and content-compare.
 
 FOSS_APK="$REPO_ROOT/app/build/outputs/apk/foss/release/app-foss-release.apk"
-PLAY_AAB="$REPO_ROOT/app/build/outputs/bundle/playRelease/app-play-release.aab"
 [[ -f "$FOSS_APK" ]] || { echo "Expected foss APK not found at $FOSS_APK" >&2; exit 1; }
-[[ -f "$PLAY_AAB" ]] || { echo "Expected play AAB not found at $PLAY_AAB" >&2; exit 1; }
 
 mkdir -p "$OUT"
 DEST_APK="$OUT/PassPonyAndroid-$VERSION-foss.apk"
-DEST_AAB="$OUT/PassPonyAndroid-$VERSION-play.aab"
 cp "$FOSS_APK" "$DEST_APK"
-cp "$PLAY_AAB" "$DEST_AAB"
 
 echo "--- Checksums ---"
-( cd "$OUT" && shasum -a 256 "$(basename "$DEST_APK")" "$(basename "$DEST_AAB")" | tee "PassPonyAndroid-$VERSION-SHA256SUMS.txt" )
+( cd "$OUT" && shasum -a 256 "$(basename "$DEST_APK")" | tee "PassPonyAndroid-$VERSION-SHA256SUMS.txt" )
 
 echo "--- Content hash (see docs/REPRODUCIBLE.md) ---"
 CONTENT_HASH="$(bash "$REPO_ROOT/tools/verify_repro.sh" content-hash "$DEST_APK")"
@@ -93,4 +94,4 @@ echo "Nothing has been tagged, pushed, or published. Once you've filled in $NOTE
 echo
 echo "  git tag -a $TAG -m \"PassPony (Android) $VERSION\""
 echo "  git push origin $TAG"
-echo "  gh release create $TAG \"$DEST_APK\" \"$DEST_AAB\" \"$OUT/PassPonyAndroid-$VERSION-SHA256SUMS.txt\" --title \"$VERSION\" --notes-file \"$NOTES\""
+echo "  gh release create $TAG \"$DEST_APK\" \"$OUT/PassPonyAndroid-$VERSION-SHA256SUMS.txt\" --title \"$VERSION\" --notes-file \"$NOTES\""

@@ -48,7 +48,7 @@ not just the first one.
     passpony-release <version> <commit-sha-just-pushed>
   ```
 
-- This builds both flavors, signs via the real Gradle release build (see
+- This builds the foss release APK, signs via the real Gradle release build (see
   `scripts/release.sh`'s own note on why not standalone `apksigner`),
   writes checksums and a content hash, and drafts release notes from
   `RELEASE_NOTES.template.md`. It stops before tagging, pushing, or
@@ -88,7 +88,7 @@ Only after the device matrix passes:
 ```
 git tag -a v<version> -m "PassPony (Android) <version>"
 git push origin v<version>
-gh release create v<version> release-<version>/*.apk release-<version>/*.aab release-<version>/*SHA256SUMS.txt --title "<version>" --notes-file release-<version>/RELEASE_NOTES-<version>.md
+gh release create v<version> release-<version>/*.apk release-<version>/*SHA256SUMS.txt --title "<version>" --notes-file release-<version>/RELEASE_NOTES-<version>.md
 ```
 
 Pushing the tag also triggers `.github/workflows/reproducible.yml` (the
@@ -104,9 +104,11 @@ is green too before considering the release final.
   result log: the CI legs row (JDK 17 / 21, from
   `.github/workflows/reproducible.yml`) and, once submitted, the F-Droid
   outcome row.
-- If this is a Play release: confirm the store listing shows the new
-  version and the AAB passed Play's own pre-launch report without new
-  crashes.
+- If this is a Play release: the Play AAB is built separately, outside
+  this Docker reproducible flow (Play re-signs and re-splits server-side,
+  so its bytes are neither reproducible nor what users install). Once it is
+  uploaded, confirm the store listing shows the new version and the AAB
+  passed Play's own pre-launch report without new crashes.
 - If this is an F-Droid submission: track the build against
   `docs/fdroid/com.passpony.android.yml`'s draft recipe once fdroiddata's
   own build completes, and update that file (or note the diff) if
