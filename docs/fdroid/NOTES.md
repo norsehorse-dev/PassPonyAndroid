@@ -9,9 +9,25 @@ Everything explaining *why* the recipe looks the way it does lives
 here instead, because rewritemeta silently deletes yml comments on
 every pass.
 
+## 1.0.4: migrated to a `gradle:` build
+
+Through 1.0.2 the recipe used a manual `build:` block to cross-compile
+the Rust core before the gradle step. 1.0.4 moves to the
+reviewer-preferred `gradle: [foss]` shape (the VaultPony precedent):
+no `build:`, no `output:`. The core `.so` is now produced by a Gradle
+`preBuild` task (`core/build.gradle.kts`) that wraps
+`scripts/build-core.sh`, so it is built during the gradle step, after
+the scanner. rustup comes from Debian (`apt-get install -y rustup`)
+rather than `curl sh.rustup.rs`, and the toolchain install moved into
+`prebuild:`. Separately, the app now disables the ART baseline profile
+(`app/build.gradle.kts`), whose two files (`assets/dexopt/baseline.*`)
+are not byte-reproducible and would fail F-Droid's RB comparison. The
+per-piece notes below still hold except where a "(1.0.4+)" note
+supersedes them.
+
 ## Why each piece is the way it is
 
-**`commit:`** is `git rev-list -n 1 v1.0.1`, never the tag name.
+**`commit:`** is `git rev-list -n 1 v1.0.4`, never the tag name.
 Reviewers ask for the full hash even when a tag would resolve (caught
 on QuorumPony). Re-pin it, and bump versionName/versionCode/
 CurrentVersion/CurrentVersionCode together, whenever a new tagged
@@ -68,20 +84,24 @@ mid-build), regardless of whether it would ever trigger. Harmless to
 remove -- it was only ever a fallback for machines without a suitable
 JDK already installed, and the buildserver has its own.
 
-**The core build lives in `build:`, NOT `prebuild:`.** F-Droid's
-scanner runs between the two, and it hard-errors on any `.so` it finds
-in the source tree -- including ones prebuild just legitimately built
-from source ("Found shared library at core/src/main/jniLibs/...",
-fork pipeline run, 2026-08-11). The `build:` field exists exactly for
-this: it runs after the scan, before the gradle build. The commands
-mirror `scripts/build-core.sh` (the authoritative, commented version
-this must stay in sync with): install rustup, pin the toolchain
-PassPonyCore's own rust-toolchain.toml names, install cargo-ndk,
-cross-compile with the remap-path-prefix / SOURCE_DATE_EPOCH /
-target-dir determinism pins (see `docs/REPRODUCIBLE.md`). Commands run
-from `subdir:` (app/), not the repo root; only
-`$$SDK$$`/`$$NDK$$`/`$$VERSION$$`/`$$VERCODE$$`/`$$COMMIT$$` and
-declared srclib names get substituted.
+**The core build runs during `gradle:`, via a Gradle preBuild task
+(1.0.4+).** Earlier versions ran `scripts/build-core.sh` from the
+recipe's `build:` block, after the scanner and before the gradle
+build, because the scanner hard-errors on any `.so` it finds in the
+source tree -- including one prebuild just built ("Found shared
+library at core/src/main/jniLibs/...", fork pipeline run,
+2026-08-11). From 1.0.4 the reviewer-preferred `gradle: [foss]` shape
+replaces that: `core/build.gradle.kts` wraps `scripts/build-core.sh`
+in a `buildCore` task wired into `preBuild`, so gradle itself produces
+the `.so` during its own build -- after the scan, no `.so` in the tree
+at scan time. That drops the `build:` block, the `output:`
+(auto-detected), and any scanignore. Two things the gradle step does
+NOT inherit from prebuild's shell, so the task sets them itself, not
+the recipe: cargo/cargo-ndk on PATH, and the NDK path. `build-core.sh`
+stays the authoritative, commented implementation (remap-path-prefix /
+SOURCE_DATE_EPOCH / target-dir determinism pins, see
+`docs/REPRODUCIBLE.md`). Older versions' `build:` entries keep their
+old shape -- their tagged trees have no `buildCore` task.
 
 **`Binaries:` and `AllowedAPKSigningKeys:`** opt into F-Droid's
 Reproducible Builds flow, added at reviewer request on the MR. The
