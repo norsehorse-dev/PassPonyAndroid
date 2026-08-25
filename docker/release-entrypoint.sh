@@ -34,7 +34,16 @@ git submodule update --init --recursive
 sed 's#^storeFile=.*#storeFile=/keystore/release.keystore#' \
   /keystore-props/keystore.properties > keystore.properties
 
-echo "--- Running scripts/release.sh $VERSION ---"
+# Harden the build for amd64 emulation: this container runs under QEMU on
+# Apple Silicon, where an unbounded Rust compile deadlocks and R8 OOM-hangs
+# (both reproduced building 1.0.4). These are reproducibility-neutral -- they
+# change only how many processes run in parallel and the JVM heap, never the
+# output bytes -- so they are safe to force here. An explicit -e override on
+# the docker run still wins. See docs/fdroid/NOTES.md.
+export CARGO_BUILD_JOBS="${CARGO_BUILD_JOBS:-2}"
+export GRADLE_OPTS="${GRADLE_OPTS:--Dorg.gradle.jvmargs=-Xmx6g -Dorg.gradle.workers.max=2 -Dorg.gradle.parallel=false}"
+
+echo "--- Running scripts/release.sh $VERSION (CARGO_BUILD_JOBS=$CARGO_BUILD_JOBS) ---"
 bash scripts/release.sh "$VERSION"
 
 echo "--- Copying results to /out ---"
