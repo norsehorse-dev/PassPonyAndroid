@@ -40,7 +40,7 @@ Builds:
 
   - versionName: 1.0.4
     versionCode: 104
-    commit: __REPLACE_WITH_V1.0.4_TAG_HASH__
+    commit: 37112af87ebaf7f4d72d8fcb95aaa9adcd4f6954
     subdir: app
     submodules: true
     sudo:
