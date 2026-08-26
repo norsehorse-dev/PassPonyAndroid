@@ -16,28 +16,6 @@ Binaries:
   https://github.com/norsehorse-dev/PassPonyAndroid/releases/download/v%v/PassPonyAndroid-%v-foss.apk
 
 Builds:
-  - versionName: 1.0.2
-    versionCode: 102
-    commit: 9f6e1be4bad6a55a702d49b3ce875297bdaa48e5
-    subdir: app
-    submodules: true
-    sudo:
-      - apt-get update
-      - apt-get install -y perl make build-essential pkg-config libssl-dev
-    gradle:
-      - foss
-    output: build/outputs/apk/foss/release/app-foss-release*.apk
-    prebuild: sed -i -e '/foojay/d' ../settings.gradle.kts
-    build:
-      - curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- -y --default-toolchain
-        none
-      - export PATH="$HOME/.cargo/bin:$PATH"
-      - export ANDROID_NDK_HOME="$$NDK$$"
-      - cd ../third_party/passponycore && rustup show
-      - cargo install cargo-ndk
-      - cd ../.. && bash scripts/build-core.sh
-    ndk: 27.2.12479018
-
   - versionName: 1.0.4
     versionCode: 104
     commit: 37112af87ebaf7f4d72d8fcb95aaa9adcd4f6954
@@ -58,7 +36,7 @@ Builds:
 
 AllowedAPKSigningKeys: f04955bb3cf6d8a7a9e5d109c741a52ee6df954a6bab29db5bf3d3ceb610f5f0
 
-AutoUpdateMode: None
+AutoUpdateMode: Version
 UpdateCheckMode: Tags
 CurrentVersion: 1.0.4
 CurrentVersionCode: 104
