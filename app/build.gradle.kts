@@ -35,6 +35,18 @@ android {
         versionCode = 104
         versionName = "1.0.4"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+        ndk {
+            // The Rust core (libpass_ffi.so) is cross-compiled for arm64-v8a
+            // and x86_64 only (see scripts/build-core.sh). Restrict the whole
+            // APK to those two ABIs: without this, JNA's libjnidispatch and a
+            // couple of AndroidX deps package .so for armeabi-v7a, x86, and
+            // dead archs (mips/mips64) that ship no core, giving an APK with a
+            // different native-lib set per ABI (F-Droid's "different libs in
+            // different ABI" finding) and broken installs on any ABI that
+            // cannot load the core.
+            abiFilters.addAll(listOf("arm64-v8a", "x86_64"))
+        }
     }
 
     signingConfigs {
