@@ -16,9 +16,9 @@ Binaries:
   https://github.com/norsehorse-dev/PassPonyAndroid/releases/download/v%v/PassPonyAndroid-%v-foss.apk
 
 Builds:
-  - versionName: 1.0.4
-    versionCode: 104
-    commit: 37112af87ebaf7f4d72d8fcb95aaa9adcd4f6954
+  - versionName: 1.0.5
+    versionCode: 105
+    commit: a48d2aa8df9c772f10da285fcf02299be7a4351f
     subdir: app
     submodules: true
     sudo:
@@ -38,5 +38,5 @@ AllowedAPKSigningKeys: f04955bb3cf6d8a7a9e5d109c741a52ee6df954a6bab29db5bf3d3ceb
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.4
-CurrentVersionCode: 104
+CurrentVersion: 1.0.5
+CurrentVersionCode: 105
