@@ -33,10 +33,27 @@ Builds:
       - rustup target add aarch64-linux-android x86_64-linux-android
       - cargo install cargo-ndk@4.1.2 --locked
     ndk: 27.2.12479018
+  - versionName: 1.1.0
+    versionCode: 110
+    commit: 247b2875aebbdb29536dc8de37008090f1acd021
+    subdir: app
+    submodules: true
+    sudo:
+      - apt-get update
+      - apt-get install -y rustup build-essential perl make pkg-config libssl-dev
+    gradle:
+      - foss
+    prebuild:
+      - sed -i -e '/foojay/d' ../settings.gradle.kts
+      - export PATH="$HOME/.cargo/bin:$PATH"
+      - rustup default 1.95.0
+      - rustup target add aarch64-linux-android x86_64-linux-android
+      - cargo install cargo-ndk@4.1.2 --locked
+    ndk: 27.2.12479018
 
 AllowedAPKSigningKeys: f04955bb3cf6d8a7a9e5d109c741a52ee6df954a6bab29db5bf3d3ceb610f5f0
 
 AutoUpdateMode: Version
 UpdateCheckMode: Tags
-CurrentVersion: 1.0.5
-CurrentVersionCode: 105
+CurrentVersion: 1.1.0
+CurrentVersionCode: 110
