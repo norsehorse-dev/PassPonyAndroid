@@ -32,8 +32,8 @@ android {
         applicationId = "com.passpony.android"
         minSdk = 26
         targetSdk = 36
-        versionCode = 105
-        versionName = "1.0.5"
+        versionCode = 110
+        versionName = "1.1.0"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
         ndk {
@@ -198,6 +198,17 @@ dependencies {
     // in the service, so a problem here never affects the RemoteViews
     // dropdown or the picker fallback, which don't depend on it.
     implementation("androidx.autofill:autofill:1.3.0")
+
+    // -- QR scanning for one-time code setup (P18) --
+    // CameraX for the preview and the frame feed, zxing core (pure Java,
+    // Apache-2.0) for decoding. No Play services and no ML Kit, so this
+    // stays in common code for both flavors and the F-Droid build is
+    // unaffected. Frames are decoded in memory and never written.
+    implementation("androidx.camera:camera-core:1.4.1")
+    implementation("androidx.camera:camera-camera2:1.4.1")
+    implementation("androidx.camera:camera-lifecycle:1.4.1")
+    implementation("androidx.camera:camera-view:1.4.1")
+    implementation("com.google.zxing:core:3.5.3")
 
     // -- Testing --
     testImplementation("junit:junit:4.13.2")

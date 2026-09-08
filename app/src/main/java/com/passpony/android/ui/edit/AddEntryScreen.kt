@@ -2,14 +2,19 @@ package com.passpony.android.ui.edit
 
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
-import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -23,27 +28,54 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
 import com.passpony.android.ui.AppViewModel
+import uniffi.pass_ffi.totpDescribe
 
 /**
  * Port of PassPony iOS's AddEntryView: name, password with a Generate
- * button, optional username/url fields. "username"/"url" are the
- * literal on-disk field keys the entry codec writes (see
- * NewEntryContent) -- like iOS, deliberately not localized, since a
- * translated label would still need to write the English key for pass
- * CLI / other clients to read it back correctly.
+ * button, optional username/url fields, and (1.1) an optional one-time
+ * code from the setup sheet. "username"/"url" are the literal on-disk
+ * field keys the entry codec writes (see NewEntryContent) -- like iOS,
+ * deliberately not localized, since a translated label would still
+ * need to write the English key for pass CLI / other clients to read it
+ * back correctly. A code with no password saves as an OTP-only entry,
+ * the shape `pass otp insert` creates.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
+    val context = LocalContext.current
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var username by remember { mutableStateOf("") }
     var url by remember { mutableStateOf("") }
+    var otpauth by remember { mutableStateOf<String?>(null) }
+    var showOtpSheet by remember { mutableStateOf(false) }
+    var showGeneratorSheet by remember { mutableStateOf(false) }
+
+    if (showGeneratorSheet) {
+        GeneratorSheet(
+            onDismiss = { showGeneratorSheet = false },
+            onUse = { generated ->
+                password = generated
+                showGeneratorSheet = false
+            }
+        )
+    }
+    if (showOtpSheet) {
+        TotpSetupSheet(
+            onDismiss = { showOtpSheet = false },
+            onUse = { uri ->
+                otpauth = uri
+                showOtpSheet = false
+            }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -55,11 +87,11 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                 actions = {
                     TextButton(
                         onClick = {
-                            val content = NewEntryContent.assemble(password, username, url)
+                            val content = NewEntryContent.assemble(password, username, url, otpauth)
                             viewModel.saveEntry(name, content, isNew = true)
                             onDone()
                         },
-                        enabled = name.isNotEmpty() && password.isNotEmpty()
+                        enabled = name.isNotEmpty() && (password.isNotEmpty() || otpauth != null)
                     ) { Text(stringResource(R.string.action_save)) }
                 }
             )
@@ -89,8 +121,11 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                     visualTransformation = PasswordVisualTransformation(),
                     modifier = Modifier.weight(1f)
                 )
-                TextButton(onClick = { password = PasswordGenerator.generate() }) {
+                TextButton(onClick = { password = PasswordGenerator.generate(context) }) {
                     Text(stringResource(R.string.add_entry_generate))
+                }
+                IconButton(onClick = { showGeneratorSheet = true }) {
+                    Icon(Icons.Filled.Tune, contentDescription = stringResource(R.string.generator_tune))
                 }
             }
             Spacer(Modifier.height(16.dp))
@@ -113,6 +148,25 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             )
+
+            Spacer(Modifier.height(16.dp))
+            Text(
+                stringResource(R.string.add_entry_otp_optional),
+                style = MaterialTheme.typography.labelMedium,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            val pendingUri = otpauth
+            if (pendingUri == null) {
+                TextButton(onClick = { showOtpSheet = true }) { Text(stringResource(R.string.otp_add)) }
+            } else {
+                val summary = remember(pendingUri) { runCatching { totpDescribe(pendingUri) }.getOrNull() }
+                if (summary != null) Text(totpSummaryLine(summary))
+                Row {
+                    TextButton(onClick = { showOtpSheet = true }) { Text(stringResource(R.string.otp_change)) }
+                    Spacer(Modifier.width(8.dp))
+                    TextButton(onClick = { otpauth = null }) { Text(stringResource(R.string.otp_remove)) }
+                }
+            }
         }
     }
 }

@@ -7,12 +7,17 @@ stays interoperable with desktop clients.
 Features:
 
 * Browse and search entries across a pass or passage store
-* Live TOTP codes with a countdown ring
+* One-time codes: scan a QR code, paste an otpauth link, or type
+  the key; live codes with a countdown ring, in the same format
+  pass-otp uses
+* Password generator with length and character-class options
 * An ephemeral clipboard that clears itself after 45 seconds
 * Git sync: clone, push, and per-entry conflict resolution
 * System Autofill. Only entry names are indexed; nothing decrypts
   until you fill
 * Biometric unlock with a shared grace window
+* A Diagnostics screen with a copyable report for support
+  requests, with nothing secret in it
 * Localized in English, Spanish, French, German, Simplified
   Chinese, Brazilian Portuguese, and Russian, with live in-app
   language switching

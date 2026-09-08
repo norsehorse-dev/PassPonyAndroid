@@ -16,14 +16,21 @@ listings, the signed release flow) is the packet in progress now -- see
 - Browse, search, and edit entries in pass (OpenPGP) and passage (age)
   stores. Each format keeps its own store; switching never touches the
   other store's data.
-- Live TOTP with a countdown ring; ephemeral, local-only clipboard that
-  clears after 45 seconds.
+- One-time codes: scan a QR code, paste an otpauth link, or type the
+  key; live codes with a countdown ring. Reads and writes the same
+  `otpauth://` line as pass-otp, including entries made with
+  `pass otp insert`.
+- Password generator with length and character-class options; the
+  untouched default is pass's own 25 from the full set.
+- Ephemeral, local-only clipboard that clears after 45 seconds.
 - Git sync: clone, publish, push, and per-entry conflict resolution.
   Commit messages match the pass CLI format, so a store stays
   interoperable with desktop pass and passage users.
 - System Autofill service. Only entry names are indexed; nothing decrypts
   until you fill.
 - Biometric unlock with a 5-minute grace window shared with autofill.
+- A Diagnostics screen under Settings with a copyable report that holds
+  no entry names, secrets, fingerprints, or remote credentials.
 - Localized in English, Spanish, French, German, Simplified Chinese,
   Brazilian Portuguese, and Russian, with live in-app language switching.
 - First-run tour: pick a language, choose a format, clone an existing
@@ -123,7 +130,9 @@ UnlockGate parity.
 - Smartcard decrypt (NFC and USB-C YubiKey).
 - SSH remotes for git sync; use HTTPS with a token for now.
 - Passphrase-protected identities files for passage.
-- Credential Manager / passkey-era autofill APIs.
+- Credential Manager / passkey-era autofill APIs (format spike done in
+  PassPonyCore's `docs/passkeys-format.md`; the release after 1.2).
+- HOTP (counter-based) codes and Google Authenticator migration QR codes.
 - armeabi-v7a (32-bit) builds.
 
 ## License

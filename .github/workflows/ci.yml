@@ -137,7 +137,7 @@ jobs:
           arch: x86_64
           profile: pixel_6
           disable-animations: true
-          script: ./gradlew connectedFossDebugAndroidTest
+          script: ./gradlew connectedFossDebugAndroidTest :core:connectedDebugAndroidTest
 
   verify-reproducible:
     name: Weekly reproducible-build verification

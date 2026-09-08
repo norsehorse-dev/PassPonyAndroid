@@ -3,7 +3,6 @@ package com.passpony.android.ui.settings
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.os.Build
 import android.provider.Settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
@@ -37,7 +36,6 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
-import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -65,8 +63,6 @@ import com.passpony.android.ui.util.safDisplayName
 import java.io.File
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.StoreFormat
-import uniffi.pass_ffi.SyncStatus
-import uniffi.pass_ffi.coreVersion
 
 /**
  * Port of PassPony iOS's SettingsView: store format switch, OpenPGP key
@@ -84,6 +80,7 @@ fun SettingsScreen(
     onDone: () -> Unit,
     onInitializeStore: () -> Unit,
     onReencrypt: () -> Unit,
+    onDiagnostics: () -> Unit,
     onLock: () -> Unit,
     onRestartOnboarding: () -> Unit,
 ) {
@@ -101,8 +98,6 @@ fun SettingsScreen(
     var keyPassphrase by remember { mutableStateOf("") }
     var gpgIdLines by remember { mutableStateOf(emptyList<String>()) }
     var message by remember { mutableStateOf<String?>(null) }
-    val entries by appViewModel.entries.collectAsState()
-    val syncStatus by appViewModel.syncStatus.collectAsState()
 
     fun refreshKeys() {
         keyFiles = PgpKeyStore.availableKeys(context)
@@ -250,16 +245,16 @@ fun SettingsScreen(
             Spacer(Modifier.height(16.dp))
             AboutSection(context)
 
+            // 1.1 (P20): Diagnostics is its own screen, reached from here,
+            // which makes the support page's "Settings, then Diagnostics"
+            // literally true; the inline section this replaced sat below
+            // the app list where nobody found it (issue #2).
+            Spacer(Modifier.height(16.dp))
+            DiagnosticsRow(onOpen = onDiagnostics)
+
             Spacer(Modifier.height(16.dp))
             OtherAppsSection(context)
 
-            Spacer(Modifier.height(16.dp))
-            DiagnosticsSection(
-                storePath = StorePaths.storeRoot(context, format).absolutePath,
-                format = format,
-                entryCount = entries.size,
-                syncStatus = syncStatus
-            )
 
             message?.let {
                 Spacer(Modifier.height(16.dp))
@@ -586,20 +581,19 @@ private const val CORE_REPO_URL = "https://github.com/norsehorse-dev/PassPonyCor
 private const val NORSEHORSE_SITE_URL = "https://pony.norsehor.se"
 
 @Composable
-private fun DiagnosticsSection(storePath: String, format: StoreFormat, entryCount: Int, syncStatus: SyncStatus?) {
+private fun DiagnosticsRow(onOpen: () -> Unit) {
     SectionHeader(stringResource(R.string.settings_diagnostics_header))
-    LabeledRow(stringResource(R.string.settings_diagnostics_core), coreVersion())
-    LabeledRow(stringResource(R.string.settings_diagnostics_entries), entryCount.toString())
-    LabeledRow(
-        stringResource(R.string.settings_diagnostics_format),
-        stringResource(if (format == StoreFormat.PASSAGE) R.string.settings_format_passage else R.string.settings_format_pass)
-    )
-    LabeledRow(stringResource(R.string.settings_diagnostics_store_path), storePath)
-    LabeledRow(stringResource(R.string.settings_diagnostics_abi), Build.SUPPORTED_ABIS.firstOrNull() ?: "?")
-    val gitValue = if (syncStatus != null) {
-        "↑${syncStatus.ahead} ↓${syncStatus.behind}" + if (syncStatus.dirty) " (dirty)" else ""
-    } else {
-        stringResource(R.string.settings_diagnostics_git_not_configured)
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpen)
+            .padding(vertical = 6.dp)
+    ) {
+        Text(stringResource(R.string.settings_diagnostics_row_title))
+        Text(
+            stringResource(R.string.settings_diagnostics_row_subtitle),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary
+        )
     }
-    LabeledRow(stringResource(R.string.settings_diagnostics_git), gitValue)
 }

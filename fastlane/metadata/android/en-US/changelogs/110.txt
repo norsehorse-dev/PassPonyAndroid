@@ -1,0 +1,3 @@
+Remote sync now works. Earlier versions couldn't reach the git remote to clone, pull, or push, so sync failed on first setup. This release fixes it.
+
+One-time codes can now be set up in the app: scan a QR code, paste an otpauth link, or type the key. Entries made with pass otp insert show their code. The password generator has length and character-class options. Diagnostics is its own screen under Settings, with a copyable report.

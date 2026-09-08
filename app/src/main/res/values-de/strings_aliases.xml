@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  1.1 alias strings. These 9 keys share their English text with a
+  sibling key (shown per line), so the xcstrings pipeline routes the
+  translation to the sibling and leaves these untranslated. This file
+  mirrors the sibling value so the diagnostics/OTP/generator screens
+  render translated. The pipeline only owns strings.xml, so it never
+  touches this file. TODO(post-1.1): dedupe these keys and delete this.
+-->
+<resources>
+    <string name="diagnostics_autofill">AutoFill</string>  <!-- = settings_autofill_header -->
+    <string name="diagnostics_language">Sprache</string>  <!-- = settings_language -->
+    <string name="diagnostics_title">Diagnose</string>  <!-- = settings_diagnostics_header -->
+    <string name="generator_no_classes">Aktiviere mindestens eine Zeichenart.</string>  <!-- = error_generate_no_classes -->
+    <string name="generator_preview">Vorschau</string>  <!-- = reencrypt_preview -->
+    <string name="otp_key_digits">Ziffern</string>  <!-- = generator_digits -->
+    <string name="otp_preview">Vorschau</string>  <!-- = reencrypt_preview -->
+    <string name="otp_scan_title">QR-Code scannen</string>  <!-- = otp_scan_open -->
+    <string name="otp_sheet_title">Einmalcode einrichten</string>  <!-- = entry_detail_set_up_otp -->
+</resources>

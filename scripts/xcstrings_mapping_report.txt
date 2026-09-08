@@ -1,34 +1,49 @@
 P13 xcstrings -> Android mapping report
-source: /sessions/rcw-01271fsffakfc5vwpxtkshkm/mnt/PassPony/Sources/Shared/Localizable.xcstrings
-total xcstrings keys considered: 172
-  under an existing hand-authored resource name: 103
-  under a generated xc_-prefixed name: 69
+source: /sessions/rcw-017x3blyhsbmr5m1zs1ja7a7/mnt/PassPony/Sources/Shared/Localizable.xcstrings
+total xcstrings keys considered: 252
+  under an existing hand-authored resource name: 182
+  under a generated xc_-prefixed name: 70
 
 per-language coverage (translated / total selected keys):
-  es         160 / 172
-  fr         160 / 172
-  de         160 / 172
-  ru         160 / 172
-  zh-Hans    160 / 172
-  pt-BR      160 / 172
+  es         238 / 252
+  fr         238 / 252
+  de         238 / 252
+  ru         238 / 252
+  zh-Hans    238 / 252
+  pt-BR      238 / 252
 
 key -> android resource name:
+  '%@ · %lld digits · %lld s' -> otp_summary_format
   '%@%@ · %@' -> xc_str
+  '%lld OpenPGP key files' -> diagnostics_keys_pass
+  '%lld to %lld characters. The slider stops at 64; type a larger number for more.' -> generator_length_hint
   '%lld unpushed changes' -> xc_lld_unpushed_changes
+  'A code-only entry keeps its code. To get rid of it, delete the entry.' -> otp_only_delete_hint
   'A pass is one encrypted file: the password on the first line, anything else after it.\n\nTry it now. This saves a real entry to your store.' -> xc_a_pass_is_one_encrypted_file_the_password_on_the
   'A pass store encrypts to the keys listed in its .gpg-id. Initialize once with your imported keys.' -> settings_gpgid_footer_empty
   'About' -> settings_about_header
+  'Account' -> otp_key_account
   'Actions' -> sync_actions_header
   'Add a pass…' -> xc_add_a_pass
   'Add an entry, or clone your store in Sync.' -> store_list_no_entries_hint
   'Add field' -> edit_entry_add_field
+  'Add one-time code…' -> otp_add
   'Add your first pass' -> xc_add_your_first_pass
+  'Added when you save.' -> otp_added_on_save
+  'Advanced' -> otp_key_advanced
+  'Algorithm' -> otp_key_algorithm
+  'All 32 punctuation characters, the pass default.' -> generator_symbols_full_hint
   'Already up to date.' -> xc_already_up_to_date
   'Already using pass or passage? Clone your existing store from its git remote, or import your OpenPGP key files.\n\nStarting fresh? Just continue.' -> xc_already_using_pass_or_passage_clone_your_existin
+  'App' -> diagnostics_app
+  'Autofill' -> settings_autofill_header
   'Autofill is on.' -> xc_autofill_is_on
+  'Basic' -> generator_symbols_basic
   'Behind remote' -> sync_behind_remote
   'Bring your store' -> xc_bring_your_store
+  'Camera access was denied. Paste the link or enter the key instead.' -> otp_scan_denied
   'Cancel' -> delete_entry_cancel
+  'Change…' -> otp_change
   'Choose entry' -> xc_choose_entry
   "Choose the language you'd like to use.\n\nYou can change this anytime in Settings." -> xc_choose_the_language_you_d_like_to_use_you_can_ch
   'Choose your format' -> xc_choose_your_format
@@ -36,14 +51,21 @@ key -> android resource name:
   'Clone (replaces current store)' -> sync_clone_button
   'Clone existing store' -> sync_clone_header
   'Clone existing store…' -> xc_clone_existing_store
+  'Close' -> otp_scan_close
   'Commits the current store and pushes it to an empty remote. SSH remotes land with the SSH-auth work; use HTTPS with a token for now.' -> sync_publish_footer
   'Contact' -> settings_contact
+  'Copy report' -> diagnostics_copy
   'Core' -> settings_diagnostics_core
   "Couldn't decrypt this entry. The matching key may be missing or locked." -> error_decryption_failed
   "Couldn't encrypt the entry." -> error_encryption_failed
   'Crypto core on GitHub' -> settings_core_repo_title
   'Current' -> sync_remote_current
+  'Delete' -> delete_entry_confirm
+  'Delete entry' -> store_list_delete_entry
+  'Delete entry?' -> delete_entry_title
+  'Device' -> diagnostics_device
   'Diagnostics' -> settings_diagnostics_header
+  'Digits' -> generator_digits
   'Done' -> reencrypt_done
   "Each format keeps its own store. Switching never touches the other store's data." -> settings_format_footer
   'Edit %@' -> xc_edit
@@ -51,6 +73,7 @@ key -> android resource name:
   'Encrypt new entries to' -> init_store_header
   'Encrypted file transfer' -> xc_encrypted_file_transfer
   'Encryption error: %@' -> xc_encryption_error
+  'Enter key' -> otp_tab_key
   'Entire store' -> reencrypt_scope_entire_store
   'Entries' -> settings_diagnostics_entries
   'Entry' -> xc_entry
@@ -59,7 +82,10 @@ key -> android resource name:
   'Fields (optional)' -> add_entry_fields_optional
   'File error: %@' -> xc_file_error
   'Fill passwords anywhere' -> xc_fill_passwords_anywhere
+  'Format' -> settings_diagnostics_format
+  'Full' -> generator_symbols_full
   'Generate' -> add_entry_generate
+  'Generator settings' -> generator_tune
   'Get Started' -> xc_get_started
   'Git' -> settings_diagnostics_git
   'Git error: %@' -> xc_git_error
@@ -71,16 +97,24 @@ key -> android resource name:
   'Initialize store' -> init_store_title
   'Initialize store with key…' -> settings_gpgid_init
   'Invalid entry path.' -> error_invalid_path
+  'Invalid value: %@' -> error_totp_bad_number
+  'Issuer (site)' -> otp_key_issuer
   'Keep both' -> sync_conflict_keep_both
+  'Keep current code' -> otp_keep_current
   'Keep the other version' -> sync_conflict_keep_remote
   "Keep this device's version" -> sync_conflict_keep_local
   'Kept both for: %@.' -> xc_kept_both_for
   'Key for %@ has no usable encryption subkey (RSA keys need the smartcard path)' -> xc_key_for_has_no_usable_encryption_subkey_rsa_keys
   'Key passphrase' -> settings_key_passphrase_hint
   'Key unlocked.' -> settings_key_unlocked
+  'Keys' -> diagnostics_keys
   'Language' -> settings_language
+  'Length' -> generator_length
+  'Length must be between %lld and %lld.' -> error_generate_bad_length
+  'Letters and digits only, like pass generate --no-symbols.' -> generator_symbols_none_hint
   'Locked by default' -> xc_locked_by_default
   'Locked keys' -> settings_locked_keys_header
+  'Lowercase letters' -> generator_lowercase
   'Maintenance' -> settings_maintenance_header
   'Merged cleanly (%lld local changes replayed).' -> xc_merged_cleanly_lld_local_changes_replayed
   'More from NorseHorse' -> settings_other_apps_header
@@ -90,17 +124,23 @@ key -> android resource name:
   'New URL (https://user:token@…)' -> sync_remote_new_url_hint
   'New entry' -> add_entry_title
   'New name' -> xc_new_name
+  'New password' -> generator_regenerate
   'Next' -> xc_next
   'No entries' -> store_list_no_entries
   'No git repository for this store.' -> error_no_git_repository
   'No git repository — clone a store or use local-only mode.' -> sync_no_repository
   'No imported key matches %@ (fingerprint or 16-hex key ID)' -> xc_no_imported_key_matches_fingerprint_or_16_hex_ke
   'No keys imported. A pass store needs at least a public key matching its .gpg-id (and the secret key to decrypt).' -> settings_pgp_keys_empty
+  'No one-time code' -> otp_none
+  'No random number source is available: %@' -> error_generate_entropy
   'No remote is configured.' -> error_no_remote
   'No store is open.' -> error_no_store
   'No usable key. Import the key for this store in Settings.' -> error_no_usable_key
+  'None' -> generator_symbols_none
   'One-time code' -> entry_detail_totp
+  'One-time code (optional)' -> add_entry_otp_optional
   'Open Settings' -> xc_open_settings
+  'Open app settings' -> otp_scan_open_settings
   'Open source (Apache-2.0). Inspect the cryptography.' -> settings_core_repo_subtitle
   'OpenPGP keys' -> settings_pgp_keys_header
   'OpenPGP messages, files, and keys' -> xc_openpgp_messages_files_and_keys
@@ -112,6 +152,11 @@ key -> android resource name:
   'PassPony locks behind Face ID, Touch ID, or your passcode.\n\nAfter you unlock, it stays open for %lld minutes (shared with autofill), then locks again.' -> xc_passpony_locks_behind_face_id_touch_id_or_your_p
   'PassPony on GitHub' -> settings_app_repo_title
   'Password' -> entry_detail_password
+  'Password generator' -> generator_sheet_title
+  'Paste' -> otp_tab_paste
+  'Paste the otpauth:// link the site offers during two-factor setup, or the output of pass otp uri on your desktop.' -> otp_paste_help
+  'Period (seconds)' -> otp_key_period
+  'Point the camera at the QR code the site shows during two-factor setup.' -> otp_scan_help
   'Preview' -> reencrypt_preview
   'Publish' -> sync_publish
   'Publish this store' -> sync_publish_header
@@ -125,15 +170,25 @@ key -> android resource name:
   'Re-keying a live store is the re-encrypt flow — coming with the subtree preview.' -> xc_re_keying_a_live_store_is_the_re_encrypt_flow_co
   'Remote' -> sync_remote_header
   'Remote updated.' -> sync_remote_updated
+  'Remove' -> otp_remove
+  'Removed when you save.' -> otp_removed_on_save
+  'Replaces the current code when you save.' -> otp_replaces_on_save
+  'Replace…' -> otp_replace
+  'Report copied.' -> diagnostics_copied
   'Resolved %lld conflicts.' -> xc_resolved_lld_conflicts
   'Results' -> xc_results
   'Run checks' -> xc_run_checks
   'Save' -> action_save
   "Saved. That's your first pass." -> xc_saved_that_s_your_first_pass
+  'Scan' -> otp_tab_scan
+  'Scan QR code' -> otp_scan_open
   'Scope' -> reencrypt_scope_header
   'Search all entries' -> store_list_search_hint
+  'Secret key' -> otp_key_secret
   'Self-destructing encrypted messages' -> xc_self_destructing_encrypted_messages
+  'Set up one-time code' -> entry_detail_set_up_otp
   'Settings' -> settings_title
+  'Share' -> diagnostics_share
   'Show welcome tour again' -> settings_tour_replay
   'Simple, modern file encryption (age)' -> xc_simple_modern_file_encryption_age
   'Skip' -> xc_skip
@@ -143,29 +198,47 @@ key -> android resource name:
   'Store already has a .gpg-id — re-keying comes with the re-encrypt flow.' -> xc_store_already_has_a_gpg_id_re_keying_comes_with
   'Store cloned.' -> xc_store_cloned
   'Store format' -> xc_store_format
+  'Store path' -> settings_diagnostics_store_path
   'Store recipients (.gpg-id)' -> settings_gpgid_header
   'Store unavailable' -> xc_store_unavailable
+  'Symbols' -> generator_symbols
   'Sync' -> sync_title
   'Sync conflict: %@' -> xc_sync_conflict
   'Sync now' -> sync_now
   'System' -> xc_system
+  "That QR code isn't a one-time code. %@" -> otp_scan_rejected
   'The clone lands in a scratch area first — a failed clone leaves the current store untouched. On success it replaces the current store for this format. Decrypting cloned entries still needs the matching key: identities file for passage, imported OpenPGP key for pass.' -> sync_clone_footer
+  'The code has no secret.' -> error_totp_missing_secret
   'The full app source (Apache-2.0).' -> settings_app_repo_subtitle
   'The passphrase is cached for %lld minutes (shared with autofill), then cleared.' -> xc_the_passphrase_is_cached_for_lld_minutes_shared
+  'The punctuation most sites accept: %@' -> generator_symbols_basic_hint
   'The remote has new changes — sync before pushing.' -> xc_the_remote_has_new_changes_sync_before_pushing
   'The remote history was rewritten. Re-clone the store to continue.' -> error_upstream_rewritten
+  "The secret isn't valid base32." -> error_totp_bad_secret
   "The store has local changes that aren't committed yet." -> error_dirty_workdir
+  'This deletes "%@" from the store. This can\'t be undone.' -> delete_entry_message
   'This entry changed on this device and on another device.' -> sync_conflict_body
+  'This entry is a one-time code only.' -> otp_only_caption
   "This entry isn't in the store." -> error_not_in_store
+  "This isn't an otpauth:// one-time code link. Counter-based (HOTP) codes and Google Authenticator export codes aren't supported." -> error_totp_not_totp_uri
+  'This report has no entry names, secrets, key fingerprints, or remote credentials. Paste it into a support message or a GitHub issue.' -> diagnostics_footer
+  'Torch' -> otp_scan_torch
+  'Turn on at least one kind of character.' -> error_generate_no_classes
   'Turn on autofill' -> xc_turn_on_autofill
   'Turn on autofill and your passes appear right in the QuickType bar when you sign in.\n\nYou can manage this anytime in iOS Settings under AutoFill & Passwords.' -> xc_turn_on_autofill_and_your_passes_appear_right_in
+  'Undo' -> otp_undo_remove
   'Unlock' -> lock_screen_unlock_button
   'Unlock to fill your password' -> xc_unlock_to_fill_your_password
   'Unlock your password store' -> lock_reason
   'Unlocked some keys; %lld still locked.' -> xc_unlocked_some_keys_lld_still_locked
   'Unpushed' -> sync_unpushed
+  'Unsupported algorithm: %@' -> error_totp_bad_algorithm
   'Update remote' -> sync_update_remote
+  'Uppercase letters' -> generator_uppercase
+  'Use password' -> generator_use
+  'Use this code' -> otp_use
   'Version' -> settings_version
+  'Version, store, and sync details for a support message. No secrets.' -> settings_diagnostics_row_subtitle
   'Week-one spike' -> xc_week_one_spike
   'Welcome to PassPony' -> xc_welcome_to_passpony
   'Will rewrite %lld entries' -> xc_will_rewrite_lld_entries
@@ -176,12 +249,19 @@ key -> android resource name:
   'configured' -> sync_remote_configured
   'folder/name' -> move_entry_name_hint
   'https://user:token@host/you/store.git' -> sync_publish_url_hint
+  'iOS' -> xc_ios
+  'identities file present' -> diagnostics_keys_passage_present
   'key' -> edit_entry_new_key
+  'no identities file' -> diagnostics_keys_passage_missing
   'none' -> sync_remote_none
   'not configured' -> settings_diagnostics_git_not_configured
+  'off' -> diagnostics_off
+  'on' -> diagnostics_on
+  'otpauth://totp/…' -> otp_paste_hint
   'pass (OpenPGP)' -> settings_format_pass
   'passage (age)' -> settings_format_passage
   'passage encrypts with modern age identities. pass encrypts with OpenPGP keys and works with existing pass stores.\n\nEach format keeps its own store, and you can switch anytime in Settings.' -> xc_passage_encrypts_with_modern_age_identities_pass
+  'system' -> diagnostics_system
   'url' -> xc_url
   'username' -> xc_username
   'value' -> edit_entry_new_value

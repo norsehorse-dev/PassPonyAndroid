@@ -14,6 +14,7 @@ import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material.icons.filled.DriveFileMove
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
+import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
@@ -49,18 +50,23 @@ import com.passpony.android.ui.components.TotpRing
 import com.passpony.android.ui.util.Clipboard
 import com.passpony.android.ui.util.SecureScreenEffect
 import uniffi.pass_ffi.entryFields
+import uniffi.pass_ffi.entryIsOtpOnly
 import uniffi.pass_ffi.entryPassword
 import uniffi.pass_ffi.entryTotp
 
 /**
  * Port of PassPony iOS's EntryDetailView: masked password with reveal
  * and copy, key/value fields, live TOTP ring. Decrypts once when the
- * screen is reached and holds plaintext only in local Compose state —
- * never in [AppViewModel], which outlives this screen — clearing the
+ * screen is reached and holds plaintext only in local Compose state,
+ * never in [AppViewModel], which outlives this screen, clearing the
  * reference when the screen leaves composition (structural parity with
  * iOS's `.onDisappear { content = nil }`; a config change also leaves
  * and re-enters composition, so it simply re-decrypts rather than
  * risking plaintext surviving in a Bundle).
+ *
+ * An OTP-only entry (the URI is line 1, what `pass otp insert` writes)
+ * shows its code first and no password row: `pass show` would print the
+ * URI as the "password", and that is nothing a person wants to copy.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -82,6 +88,8 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
 
     val lastError by viewModel.lastError.collectAsState()
     val current = content
+    val hasTotp = remember(current) { current != null && entryTotp(current, 0uL) != null }
+    val otpOnly = remember(current) { current != null && entryIsOtpOnly(current) }
 
     Scaffold(
         topBar = {
@@ -112,6 +120,16 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
                                     navController.navigate(Routes.editEntry(name))
                                 }
                             )
+                            if (!hasTotp) {
+                                DropdownMenuItem(
+                                    text = { Text(stringResource(R.string.entry_detail_set_up_otp)) },
+                                    leadingIcon = { Icon(Icons.Filled.Timer, contentDescription = null) },
+                                    onClick = {
+                                        showOverflowMenu = false
+                                        navController.navigate(Routes.editEntry(name, openOtp = true))
+                                    }
+                                )
+                            }
                             DropdownMenuItem(
                                 text = { Text(stringResource(R.string.entry_detail_move_rename)) },
                                 leadingIcon = { Icon(Icons.Filled.DriveFileMove, contentDescription = null) },
@@ -134,9 +152,14 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
         ) {
             when {
                 current != null -> {
-                    PasswordSection(current, revealed, onRevealToggle = { revealed = !revealed })
-                    FieldsSection(current)
-                    TotpSection(current)
+                    if (otpOnly) {
+                        TotpSection(current, caption = stringResource(R.string.otp_only_caption))
+                        FieldsSection(current)
+                    } else {
+                        PasswordSection(current, revealed, onRevealToggle = { revealed = !revealed })
+                        FieldsSection(current)
+                        if (hasTotp) TotpSection(current, caption = null)
+                    }
                 }
                 loadAttempted -> {
                     Text(
@@ -223,15 +246,21 @@ private fun FieldsSection(content: ByteArray) {
 }
 
 @Composable
-private fun TotpSection(content: ByteArray) {
-    // entryTotp is cheap (no re-decryption) and only needs a presence
-    // check here; TotpRing owns its own 1 s clock for the live value.
-    val hasTotp = remember(content) { entryTotp(content, 0uL) != null }
-    if (!hasTotp) return
-
+private fun TotpSection(content: ByteArray, caption: String?) {
+    // entryTotp is cheap (no re-decryption); TotpRing owns its own 1 s
+    // clock for the live value.
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         SectionHeader(stringResource(R.string.entry_detail_totp))
         TotpRing(content)
+        if (caption != null) {
+            Text(
+                caption,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+        HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
     }
 }
 

@@ -78,6 +78,21 @@ covered. Do this for every release, not just the first.
 - **One passage (age) store, end to end, on-device.** Same shape as
   above, with an age identity instead of an OpenPGP key.
 
+- **One-time code setup on-device (1.1).** Scan a real QR code from a
+  site's two-factor setup page with the camera, confirm the preview
+  code matches the site's authenticator prompt, save, and confirm the
+  ring on the detail screen. Deny the camera permission once and finish
+  the same setup by pasting. On a desktop, `pass otp insert` an entry
+  into the synced store and confirm the phone shows the ring and no
+  password row for it.
+- **Generator settings (1.1).** In the generator sheet set 19
+  characters with Basic symbols, Use, then confirm plain Generate on
+  another screen honors the same settings after the app is killed and
+  reopened.
+- **Diagnostics (1.1).** Settings, then the Diagnostics row under
+  About; Copy report; paste it into a mail draft and read it: no entry
+  names, no token in the Git line.
+
 Any failure here blocks the release. Fix it, rerun this whole checklist
 from step 2, not just the failing item.
 

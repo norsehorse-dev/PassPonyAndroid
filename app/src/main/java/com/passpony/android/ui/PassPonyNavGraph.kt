@@ -6,10 +6,12 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.compose.rememberNavController
+import androidx.navigation.navArgument
 import com.passpony.android.ui.detail.EntryDetailScreen
 import com.passpony.android.ui.edit.AddEntryScreen
 import com.passpony.android.ui.edit.EditEntryScreen
 import com.passpony.android.ui.edit.MoveEntryScreen
+import com.passpony.android.ui.settings.DiagnosticsScreen
 import com.passpony.android.ui.settings.InitializeStoreScreen
 import com.passpony.android.ui.settings.ReencryptScreen
 import com.passpony.android.ui.settings.SettingsScreen
@@ -20,17 +22,22 @@ object Routes {
     const val FOLDER_PATTERN = "folder/{path}"
     const val ENTRY_PATTERN = "entry/{name}"
     const val ADD_ENTRY = "add_entry"
-    const val EDIT_ENTRY_PATTERN = "entry/{name}/edit"
+    // `otp=1` opens the one-time code setup sheet on arrival (the detail
+    // screen's shortcut). A flag, never a secret: nothing sensitive rides
+    // in a route argument.
+    const val EDIT_ENTRY_PATTERN = "entry/{name}/edit?otp={otp}"
     const val MOVE_ENTRY_PATTERN = "entry/{name}/move"
     const val SYNC = "sync"
     const val SETTINGS = "settings"
     const val INITIALIZE_STORE = "settings/initialize_store"
     const val REENCRYPT = "settings/reencrypt"
+    const val DIAGNOSTICS = "settings/diagnostics"
 
     /** Path segments can contain slashes; encode so the route stays one segment. */
     fun folder(path: String): String = "folder/" + Uri.encode(path)
     fun entry(name: String): String = "entry/" + Uri.encode(name)
-    fun editEntry(name: String): String = "entry/" + Uri.encode(name) + "/edit"
+    fun editEntry(name: String, openOtp: Boolean = false): String =
+        "entry/" + Uri.encode(name) + "/edit" + if (openOtp) "?otp=1" else ""
     fun moveEntry(name: String): String = "entry/" + Uri.encode(name) + "/move"
 }
 
@@ -59,9 +66,25 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
         composable(Routes.ADD_ENTRY) {
             AddEntryScreen(appViewModel, onDone = { navController.popBackStack() })
         }
-        composable(Routes.EDIT_ENTRY_PATTERN) { backStackEntry ->
+        composable(
+            Routes.EDIT_ENTRY_PATTERN,
+            arguments = listOf(navArgument("otp") { defaultValue = "0" })
+        ) { backStackEntry ->
             val name = Uri.decode(backStackEntry.arguments?.getString("name").orEmpty())
-            EditEntryScreen(name, appViewModel, onDone = { navController.popBackStack() })
+            val openOtp = backStackEntry.arguments?.getString("otp") == "1"
+            EditEntryScreen(
+                name = name,
+                viewModel = appViewModel,
+                onDone = { navController.popBackStack() },
+                openOtpSetup = openOtp,
+                onDeleted = {
+                    // Pop the edit screen and the now-deleted entry's detail
+                    // screen underneath it, the same double pop
+                    // MoveEntryScreen does after a rename.
+                    navController.popBackStack()
+                    navController.popBackStack()
+                },
+            )
         }
         composable(Routes.MOVE_ENTRY_PATTERN) { backStackEntry ->
             val name = Uri.decode(backStackEntry.arguments?.getString("name").orEmpty())
@@ -88,6 +111,7 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
                 onDone = { navController.popBackStack() },
                 onInitializeStore = { navController.navigate(Routes.INITIALIZE_STORE) },
                 onReencrypt = { navController.navigate(Routes.REENCRYPT) },
+                onDiagnostics = { navController.navigate(Routes.DIAGNOSTICS) },
                 onLock = onLock,
                 onRestartOnboarding = onRestartOnboarding,
             )
@@ -101,6 +125,9 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
         }
         composable(Routes.REENCRYPT) {
             ReencryptScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.DIAGNOSTICS) {
+            DiagnosticsScreen(appViewModel, onDone = { navController.popBackStack() })
         }
     }
 }

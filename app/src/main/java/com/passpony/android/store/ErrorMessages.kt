@@ -3,8 +3,10 @@ package com.passpony.android.store
 import android.content.Context
 import com.passpony.android.R
 import uniffi.pass_ffi.CryptoException
+import uniffi.pass_ffi.GenerateException
 import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.StoreException
+import uniffi.pass_ffi.TotpException
 
 /**
  * User-facing messages for errors surfaced from the core. FFI error text
@@ -18,6 +20,8 @@ fun Throwable.ponyMessage(context: Context): String = when (this) {
     is CryptoException -> ponyMessage(context)
     is GitException -> ponyMessage(context)
     is StoreException -> ponyMessage(context)
+    is TotpException -> ponyMessage(context)
+    is GenerateException -> ponyMessage(context)
     // Unlike iOS's fallback, which shows the raw Swift description, this
     // never surfaces raw exception text: the house rule is no raw
     // exception text with entry names or paths in UI toasts, and an
@@ -48,4 +52,24 @@ fun StoreException.ponyMessage(context: Context): String = when (this) {
     is StoreException.SneakyPath -> context.getString(R.string.error_invalid_path)
     is StoreException.Crypto -> context.getString(R.string.error_store_crypto, reason)
     is StoreException.Io -> context.getString(R.string.error_store_io, reason)
+}
+
+/**
+ * Why a pasted, scanned, or typed one-time code was rejected. The
+ * variants never carry the secret; BadAlgorithm's name and BadNumber's
+ * detail are the offending parameter, which is safe to show.
+ */
+fun TotpException.ponyMessage(context: Context): String = when (this) {
+    is TotpException.NotTotpUri -> context.getString(R.string.error_totp_not_totp_uri)
+    is TotpException.MissingSecret -> context.getString(R.string.error_totp_missing_secret)
+    is TotpException.BadSecret -> context.getString(R.string.error_totp_bad_secret)
+    is TotpException.BadAlgorithm -> context.getString(R.string.error_totp_bad_algorithm, name)
+    is TotpException.BadNumber -> context.getString(R.string.error_totp_bad_number, detail)
+}
+
+/** The generator sheet keeps these unreachable; they exist for completeness. */
+fun GenerateException.ponyMessage(context: Context): String = when (this) {
+    is GenerateException.BadLength -> context.getString(R.string.error_generate_bad_length, min.toInt(), max.toInt())
+    is GenerateException.NoClasses -> context.getString(R.string.error_generate_no_classes)
+    is GenerateException.Entropy -> context.getString(R.string.error_generate_entropy, reason)
 }

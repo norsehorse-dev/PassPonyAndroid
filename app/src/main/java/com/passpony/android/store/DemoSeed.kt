@@ -23,6 +23,8 @@ object DemoSeed {
         "work/vpn" to "juniper-cobalt-relay-9\nusername: kstewart\n",
         "work/slack.com" to "pommel-drift-signal-64\nusername: kevin@example.com\nurl: norsehorse.slack.com\n",
         "work/jira.example.com" to "griffin-mortar-plume-28\nusername: kstewart\n",
+        // OTP-only: the URI is the whole entry, the shape `pass otp insert` writes.
+        "work/vpn-2fa" to "otpauth://totp/Work%20VPN:kstewart?secret=JBSWY3DPEHPK3PXQ&issuer=Work%20VPN\n",
         "wifi/home" to "pony-passphrase-9000\n",
         "wifi/office" to "stable-gateway-4242\n",
         "dev/registry.example.com" to "tarpit-nimbus-octave-55\nusername: norsehorse-dev\n",

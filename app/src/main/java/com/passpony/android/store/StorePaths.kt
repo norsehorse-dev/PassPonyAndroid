@@ -11,7 +11,9 @@ import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
 import uniffi.pass_ffi.StoreFormat
 
-private val Context.passPonyDataStore by preferencesDataStore(name = "passpony_prefs")
+// Shared with GeneratorPrefs: DataStore allows exactly one instance per
+// file, so every preference in passpony_prefs goes through this delegate.
+internal val Context.passPonyDataStore by preferencesDataStore(name = "passpony_prefs")
 
 /**
  * One place for every path decision, mirroring PassPony iOS's

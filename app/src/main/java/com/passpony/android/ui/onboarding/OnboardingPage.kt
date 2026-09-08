@@ -327,6 +327,7 @@ private fun OnboardingCloneDialog(appViewModel: AppViewModel, onCloned: () -> Un
  * saveEntry's own (silent-on-failure) return. */
 @Composable
 private fun TryPassAction(appViewModel: AppViewModel, onAdvance: () -> Unit) {
+    val context = LocalContext.current
     val entries by appViewModel.entries.collectAsState()
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
@@ -363,7 +364,7 @@ private fun TryPassAction(appViewModel: AppViewModel, onAdvance: () -> Unit) {
                 visualTransformation = PasswordVisualTransformation(),
                 modifier = Modifier.weight(1f)
             )
-            TextButton(onClick = { password = PasswordGenerator.generate() }) {
+            TextButton(onClick = { password = PasswordGenerator.generate(context) }) {
                 Text(stringResource(R.string.add_entry_generate))
             }
         }

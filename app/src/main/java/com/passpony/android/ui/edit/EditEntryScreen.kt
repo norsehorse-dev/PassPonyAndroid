@@ -7,9 +7,14 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Tune
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -25,42 +30,71 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.detail.Utf8Text
+import uniffi.pass_ffi.TotpSummary
 import uniffi.pass_ffi.entryFields
+import uniffi.pass_ffi.entryIsOtpOnly
 import uniffi.pass_ffi.entryPassword
+import uniffi.pass_ffi.entryRemoveOtpauth
 import uniffi.pass_ffi.entrySetField
+import uniffi.pass_ffi.entrySetOtpauth
 import uniffi.pass_ffi.entrySetPassword
+import uniffi.pass_ffi.entryTotpSummary
+import uniffi.pass_ffi.totpDescribe
 
 /**
  * Port of PassPony iOS's EditEntryView: field-level editing over the
- * byte-faithful codec helpers only (entrySetField/entrySetPassword) --
- * unknown lines, ordering, spacing, and trailing-newline style survive
- * untouched (verified against a real fixture by
- * PgpEditByteFidelityTest). Removing a field is deliberately absent:
- * the codec has no delete-with-fidelity primitive yet.
+ * byte-faithful codec helpers only (entrySetField/entrySetPassword, and
+ * since 1.1 entrySetOtpauth/entryRemoveOtpauth) -- unknown lines,
+ * ordering, spacing, and trailing-newline style survive untouched
+ * (verified against a real fixture by PgpEditByteFidelityTest).
+ * Removing a field is deliberately absent: the codec has no
+ * delete-with-fidelity primitive for fields, only for the one
+ * `otpauth://` line.
  *
  * Re-decrypts via [AppViewModel.readEntry] the same way
  * EntryDetailScreen does, rather than receiving plaintext through
  * navigation arguments -- plaintext never travels through the back
- * stack's saved state.
+ * stack's saved state. The one-time code the setup sheet produces is
+ * held the same way: in this screen's Compose state, until Save.
+ *
+ * [openOtpSetup] opens the setup sheet on arrival (the detail screen's
+ * "Set up one-time code" shortcut); it is a flag in the route, not a
+ * secret. [onDeleted] is for the OTP-only case: the codec refuses to
+ * remove a URI that is the entry's first line, so the screen offers to
+ * delete the entry instead and then pops past the stale detail screen.
  */
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
+fun EditEntryScreen(
+    name: String,
+    viewModel: AppViewModel,
+    onDone: () -> Unit,
+    openOtpSetup: Boolean = false,
+    onDeleted: () -> Unit = onDone,
+) {
+    val context = LocalContext.current
     var original by remember(name) { mutableStateOf<ByteArray?>(null) }
     var originalPassword by remember(name) { mutableStateOf("") }
     var originalValues by remember(name) { mutableStateOf<Map<String, String>>(emptyMap()) }
     var fieldKeys by remember(name) { mutableStateOf<List<String>>(emptyList()) }
+    var originalTotp by remember(name) { mutableStateOf<TotpSummary?>(null) }
+    var otpOnly by remember(name) { mutableStateOf(false) }
 
     var password by remember(name) { mutableStateOf("") }
     var values by remember(name) { mutableStateOf<Map<String, String>>(emptyMap()) }
     var newKey by remember(name) { mutableStateOf("") }
     var newValue by remember(name) { mutableStateOf("") }
+    var otpauthEdit by remember(name) { mutableStateOf<OtpauthEdit>(OtpauthEdit.Unchanged) }
+    var showOtpSheet by remember(name) { mutableStateOf(openOtpSetup) }
+    var showGeneratorSheet by remember(name) { mutableStateOf(false) }
+    var confirmDelete by remember(name) { mutableStateOf(false) }
 
     LaunchedEffect(name) {
         val content = viewModel.readEntry(name) ?: return@LaunchedEffect
@@ -87,6 +121,8 @@ fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
         fieldKeys = keys
         password = decodedPassword
         values = pairs
+        originalTotp = entryTotpSummary(content)
+        otpOnly = entryIsOtpOnly(content)
     }
     DisposableEffect(name) {
         onDispose { original = null }
@@ -100,7 +136,39 @@ fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
         values = values,
         newKey = newKey,
         newValue = newValue,
+        hasOriginalOtpauth = originalTotp != null,
+        otpauthEdit = otpauthEdit,
     )
+
+    if (showGeneratorSheet) {
+        GeneratorSheet(
+            onDismiss = { showGeneratorSheet = false },
+            onUse = { generated ->
+                password = generated
+                showGeneratorSheet = false
+            }
+        )
+    }
+    if (showOtpSheet) {
+        TotpSetupSheet(
+            onDismiss = { showOtpSheet = false },
+            onUse = { uri ->
+                otpauthEdit = OtpauthEdit.Set(uri)
+                showOtpSheet = false
+            }
+        )
+    }
+    if (confirmDelete) {
+        DeleteEntryDialog(
+            name = name,
+            onConfirm = {
+                confirmDelete = false
+                viewModel.deleteEntry(name)
+                onDeleted()
+            },
+            onDismiss = { confirmDelete = false }
+        )
+    }
 
     Scaffold(
         topBar = {
@@ -120,6 +188,10 @@ fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
                                         entrySetPassword(bytes, step.password.toByteArray(Charsets.UTF_8))
                                     is EditStep.SetField ->
                                         entrySetField(bytes, step.key, step.value)
+                                    is EditStep.SetOtpauth ->
+                                        entrySetOtpauth(bytes, step.uri)
+                                    EditStep.RemoveOtpauth ->
+                                        entryRemoveOtpauth(bytes)
                                 }
                             }
                             viewModel.saveEntry(name, bytes, isNew = false)
@@ -138,17 +210,30 @@ fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
-                OutlinedTextField(
-                    value = password,
-                    onValueChange = { password = it },
-                    label = { Text(stringResource(R.string.entry_detail_password)) },
-                    singleLine = true,
-                    visualTransformation = PasswordVisualTransformation(),
-                    modifier = Modifier.weight(1f)
+            if (otpOnly) {
+                // Line 1 is the URI, so there is no password to edit; the
+                // code section below owns that line.
+                Text(
+                    stringResource(R.string.otp_only_caption),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
                 )
-                TextButton(onClick = { password = PasswordGenerator.generate() }) {
-                    Text(stringResource(R.string.add_entry_generate))
+            } else {
+                Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+                    OutlinedTextField(
+                        value = password,
+                        onValueChange = { password = it },
+                        label = { Text(stringResource(R.string.entry_detail_password)) },
+                        singleLine = true,
+                        visualTransformation = PasswordVisualTransformation(),
+                        modifier = Modifier.weight(1f)
+                    )
+                    TextButton(onClick = { password = PasswordGenerator.generate(context) }) {
+                        Text(stringResource(R.string.add_entry_generate))
+                    }
+                    IconButton(onClick = { showGeneratorSheet = true }) {
+                        Icon(Icons.Filled.Tune, contentDescription = stringResource(R.string.generator_tune))
+                    }
                 }
             }
             if (fieldKeys.isNotEmpty()) {
@@ -172,6 +257,18 @@ fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
                     )
                 }
             }
+
+            Spacer(Modifier.height(16.dp))
+            OtpauthSection(
+                original = originalTotp,
+                otpOnly = otpOnly,
+                edit = otpauthEdit,
+                onAddOrReplace = { showOtpSheet = true },
+                onRemove = { otpauthEdit = OtpauthEdit.Remove },
+                onKeepCurrent = { otpauthEdit = OtpauthEdit.Unchanged },
+                onDeleteEntry = { confirmDelete = true },
+            )
+
             Spacer(Modifier.height(16.dp))
             Text(
                 stringResource(R.string.edit_entry_add_field),
@@ -192,6 +289,84 @@ fun EditEntryScreen(name: String, viewModel: AppViewModel, onDone: () -> Unit) {
                 singleLine = true,
                 modifier = Modifier.fillMaxWidth().padding(top = 8.dp)
             )
+        }
+    }
+}
+
+/**
+ * The one-time code section's five states: no code, a pending new code,
+ * an existing code, a pending replacement, and a pending removal. Each
+ * shows the summary that applies and the actions that make sense from
+ * there; nothing is written until Save.
+ */
+@Composable
+private fun OtpauthSection(
+    original: TotpSummary?,
+    otpOnly: Boolean,
+    edit: OtpauthEdit,
+    onAddOrReplace: () -> Unit,
+    onRemove: () -> Unit,
+    onKeepCurrent: () -> Unit,
+    onDeleteEntry: () -> Unit,
+) {
+    Text(
+        stringResource(R.string.entry_detail_totp),
+        style = MaterialTheme.typography.labelMedium,
+        color = MaterialTheme.colorScheme.secondary
+    )
+    Spacer(Modifier.height(4.dp))
+    when (edit) {
+        is OtpauthEdit.Set -> {
+            val pending = remember(edit.uri) { runCatching { totpDescribe(edit.uri) }.getOrNull() }
+            if (pending != null) Text(totpSummaryLine(pending))
+            Text(
+                stringResource(if (original == null) R.string.otp_added_on_save else R.string.otp_replaces_on_save),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            Row {
+                TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_change)) }
+                Spacer(Modifier.width(8.dp))
+                TextButton(onClick = onKeepCurrent) {
+                    Text(stringResource(if (original == null) R.string.otp_remove else R.string.otp_keep_current))
+                }
+            }
+        }
+        OtpauthEdit.Remove -> {
+            Text(
+                stringResource(R.string.otp_removed_on_save),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary
+            )
+            TextButton(onClick = onKeepCurrent) { Text(stringResource(R.string.otp_undo_remove)) }
+        }
+        OtpauthEdit.Unchanged -> {
+            if (original == null) {
+                Text(
+                    stringResource(R.string.otp_none),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+                TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_add)) }
+            } else {
+                Text(totpSummaryLine(original))
+                Row {
+                    TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_replace)) }
+                    Spacer(Modifier.width(8.dp))
+                    if (otpOnly) {
+                        TextButton(onClick = onDeleteEntry) { Text(stringResource(R.string.store_list_delete_entry)) }
+                    } else {
+                        TextButton(onClick = onRemove) { Text(stringResource(R.string.otp_remove)) }
+                    }
+                }
+                if (otpOnly) {
+                    Text(
+                        stringResource(R.string.otp_only_delete_hint),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
+            }
         }
     }
 }

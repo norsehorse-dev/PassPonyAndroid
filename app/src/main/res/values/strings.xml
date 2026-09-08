@@ -129,6 +129,96 @@
     <string name="settings_import_failed">Import failed for %1$s: %2$s</string>
     <string name="settings_import_success">Imported %1$d key files.</string>
 
+    <!-- 1.1 (P18): one-time code setup. On-disk tokens (otpauth, secret,
+         issuer) are never localized; these are the UI labels only. -->
+    <string name="otp_none">No one-time code</string>
+    <string name="otp_add">Add one-time code…</string>
+    <string name="otp_replace">Replace…</string>
+    <string name="otp_change">Change…</string>
+    <string name="otp_remove">Remove</string>
+    <string name="otp_keep_current">Keep current code</string>
+    <string name="otp_undo_remove">Undo</string>
+    <string name="otp_removed_on_save">Removed when you save.</string>
+    <string name="otp_added_on_save">Added when you save.</string>
+    <string name="otp_replaces_on_save">Replaces the current code when you save.</string>
+    <string name="otp_only_caption">This entry is a one-time code only.</string>
+    <string name="otp_only_delete_hint">A code-only entry keeps its code. To get rid of it, delete the entry.</string>
+    <string name="otp_summary_format">%1$s · %2$d digits · %3$d s</string>
+    <string name="otp_sheet_title">Set up one-time code</string>
+    <string name="otp_tab_paste">Paste</string>
+    <string name="otp_tab_key">Enter key</string>
+    <string name="otp_tab_scan">Scan</string>
+    <string name="otp_paste_hint">otpauth://totp/…</string>
+    <string name="otp_paste_help">Paste the otpauth:// link the site offers during two-factor setup, or the output of pass otp uri on your desktop.</string>
+    <string name="otp_key_secret">Secret key</string>
+    <string name="otp_key_account">Account</string>
+    <string name="otp_key_issuer">Issuer (site)</string>
+    <string name="otp_key_advanced">Advanced</string>
+    <string name="otp_key_algorithm">Algorithm</string>
+    <string name="otp_key_digits">Digits</string>
+    <string name="otp_key_period">Period (seconds)</string>
+    <string name="otp_scan_title">Scan QR code</string>
+    <string name="otp_scan_open">Scan QR code</string>
+    <string name="otp_scan_help">Point the camera at the QR code the site shows during two-factor setup.</string>
+    <string name="otp_scan_denied">Camera access was denied. Paste the link or enter the key instead.</string>
+    <string name="otp_scan_open_settings">Open app settings</string>
+    <string name="otp_scan_close">Close</string>
+    <string name="otp_scan_torch">Torch</string>
+    <string name="otp_scan_rejected">That QR code isn\'t a one-time code. %1$s</string>
+    <string name="otp_preview">Preview</string>
+    <string name="otp_use">Use this code</string>
+    <string name="entry_detail_set_up_otp">Set up one-time code</string>
+    <string name="add_entry_otp_optional">One-time code (optional)</string>
+    <string name="error_totp_not_totp_uri">This isn\'t an otpauth:// one-time code link. Counter-based (HOTP) codes and Google Authenticator export codes aren\'t supported.</string>
+    <string name="error_totp_missing_secret">The code has no secret.</string>
+    <string name="error_totp_bad_secret">The secret isn\'t valid base32.</string>
+    <string name="error_totp_bad_algorithm">Unsupported algorithm: %1$s</string>
+    <string name="error_totp_bad_number">Invalid value: %1$s</string>
+
+    <!-- 1.1 (P19): password generator options. -->
+    <string name="generator_sheet_title">Password generator</string>
+    <string name="generator_tune">Generator settings</string>
+    <string name="generator_preview">Preview</string>
+    <string name="generator_regenerate">New password</string>
+    <string name="generator_use">Use password</string>
+    <string name="generator_length">Length</string>
+    <string name="generator_length_hint">%1$d to %2$d characters. The slider stops at 64; type a larger number for more.</string>
+    <string name="generator_lowercase">Lowercase letters</string>
+    <string name="generator_uppercase">Uppercase letters</string>
+    <string name="generator_digits">Digits</string>
+    <string name="generator_symbols">Symbols</string>
+    <string name="generator_symbols_none">None</string>
+    <string name="generator_symbols_basic">Basic</string>
+    <string name="generator_symbols_full">Full</string>
+    <string name="generator_symbols_none_hint">Letters and digits only, like pass generate --no-symbols.</string>
+    <string name="generator_symbols_basic_hint">The punctuation most sites accept: %1$s</string>
+    <string name="generator_symbols_full_hint">All 32 punctuation characters, the pass default.</string>
+    <string name="generator_no_classes">Turn on at least one kind of character.</string>
+    <string name="error_generate_bad_length">Length must be between %1$d and %2$d.</string>
+    <string name="error_generate_no_classes">Turn on at least one kind of character.</string>
+    <string name="error_generate_entropy">No random number source is available: %1$s</string>
+
+    <!-- 1.1 (P20): Diagnostics as its own screen. -->
+    <string name="settings_diagnostics_row_title">Diagnostics</string>
+    <string name="settings_diagnostics_row_subtitle">Version, store, and sync details for a support message. No secrets.</string>
+    <string name="diagnostics_title">Diagnostics</string>
+    <string name="diagnostics_app">App</string>
+    <string name="diagnostics_android">Android</string>
+    <string name="diagnostics_device">Device</string>
+    <string name="diagnostics_autofill">Autofill</string>
+    <string name="diagnostics_language">Language</string>
+    <string name="diagnostics_keys">Keys</string>
+    <string name="diagnostics_on">on</string>
+    <string name="diagnostics_off">off</string>
+    <string name="diagnostics_system">system</string>
+    <string name="diagnostics_keys_pass">%1$d OpenPGP key files</string>
+    <string name="diagnostics_keys_passage_present">identities file present</string>
+    <string name="diagnostics_keys_passage_missing">no identities file</string>
+    <string name="diagnostics_footer">This report has no entry names, secrets, key fingerprints, or remote credentials. Paste it into a support message or a GitHub issue.</string>
+    <string name="diagnostics_copy">Copy report</string>
+    <string name="diagnostics_share">Share</string>
+    <string name="diagnostics_copied">Report copied.</string>
+
     <string name="init_store_title">Initialize store</string>
     <string name="init_store_confirm">Initialize</string>
     <string name="init_store_header">Encrypt new entries to</string>
@@ -217,6 +307,7 @@ You can change this anytime in Settings.</string>
         <item quantity="one">Imported %1$d key file.</item>
         <item quantity="other">Imported %1$d key files.</item>
     </plurals>
+    <string name="xc_ios">iOS</string>
     <string name="xc_kept_both_for">Kept both for: %1$s.</string>
     <string name="xc_key_for_has_no_usable_encryption_subkey_rsa_keys">Key for %1$s has no usable encryption subkey (RSA keys need the smartcard path)</string>
     <plurals name="xc_lld_unpushed_changes">
