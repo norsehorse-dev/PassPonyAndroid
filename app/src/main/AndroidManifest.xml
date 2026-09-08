@@ -1,6 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
+    <!--
+      Sync (clone / fetch / push to a git remote over HTTPS) needs network
+      access. Without INTERNET, Android denies the app all sockets and DNS,
+      so libgit2's getaddrinfo fails before it ever connects and every
+      remote op reports "failed to resolve address for <host>: No address
+      associated with hostname; class=Net (12)". Normal install-time
+      permission, no runtime request.
+    -->
+    <uses-permission android:name="android.permission.INTERNET" />
+
+    <!--
+      1.1 (P18): the one-time code setup sheet can scan a QR code. The
+      permission is requested at the moment of use, never at install or
+      onboarding, and camera-less devices still install (required=false);
+      they get the paste and typed-key paths only.
+    -->
+    <uses-permission android:name="android.permission.CAMERA" />
+    <uses-feature
+        android:name="android.hardware.camera.any"
+        android:required="false" />
+
     <application
         android:name=".PassPonyApp"
         android:allowBackup="false"
