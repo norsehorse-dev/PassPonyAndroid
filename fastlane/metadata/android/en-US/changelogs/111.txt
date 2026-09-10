@@ -1,0 +1,1 @@
+Remote sync could not verify the git server's certificate, so clone, pull, and push failed to connect. This adds the trusted certificate list the app was missing. Sync now works with no changes on your end.
