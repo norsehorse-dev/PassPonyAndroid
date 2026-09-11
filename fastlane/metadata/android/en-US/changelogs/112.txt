@@ -1,0 +1,1 @@
+Remote sync could not verify the git server's certificate on Android, so clone, pull, and push still failed after 1.1.1. This loads the trusted certificate list a different way that works on Android. Sync now works with no changes on your end.
