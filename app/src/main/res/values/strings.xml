@@ -128,6 +128,13 @@
     <string name="settings_diagnostics_git_not_configured">not configured</string>
     <string name="settings_import_failed">Import failed for %1$s: %2$s</string>
     <string name="settings_import_success">Imported %1$d key files.</string>
+    <!-- Age (passage) identity management, PassPony Android issue: age import -->
+    <string name="settings_age_keys_header">Age identities</string>
+    <string name="settings_age_present">Identities file present.</string>
+    <string name="settings_age_missing">No identities imported. A passage store needs the age identity it was encrypted to.</string>
+    <string name="settings_age_import">Import identities file…</string>
+    <string name="settings_age_import_success">Imported your age identity.</string>
+    <string name="settings_age_import_failed">That file has no usable age identity.</string>
 
     <!-- 1.1 (P18): one-time code setup. On-disk tokens (otpauth, secret,
          issuer) are never localized; these are the UI labels only. -->

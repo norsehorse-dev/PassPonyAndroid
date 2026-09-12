@@ -1,0 +1,1 @@
+Passage (age) users can now import an existing age identity, so a store you cloned decrypts with the key it was encrypted to. The option to add your key also stays available after cloning, and Settings has an age identities section. OpenPGP (pass) stores are unaffected.

@@ -37,6 +37,51 @@ object AgeIdentityStore {
         return AgeCryptoBackend(AgeEngine.fromIdentitiesText(file.readText(Charsets.UTF_8)))
     }
 
+    /** True when an identities file exists in this app's storage. */
+    fun hasIdentities(context: Context): Boolean = identitiesFile(context).exists()
+
+    /**
+     * Public-key hint lines pulled from `# public key:` comments in the
+     * identities file, for display only. Empty when the file is absent or
+     * carries no such comment (an imported file may omit it). Never
+     * returns secret key material.
+     */
+    fun publicKeyHints(context: Context): List<String> {
+        val file = identitiesFile(context)
+        if (!file.exists()) return emptyList()
+        return file.readLines(Charsets.UTF_8)
+            .map { it.trim() }
+            .mapNotNull { line -> line.removePrefix("# public key:").takeIf { it != line }?.trim() }
+            .filter { it.isNotEmpty() }
+    }
+
+    /**
+     * Replace the identities file with imported text after confirming it
+     * carries at least one usable age identity. `AgeEngine.fromIdentitiesText`
+     * silently drops malformed lines and never throws (see its FFI doc),
+     * so a bad paste would otherwise install a store that decrypts
+     * nothing; the self-encrypt round-trip below rejects that up front and
+     * nothing is written unless it passes. Throws [IllegalArgumentException]
+     * when the text has no usable identity.
+     */
+    fun importIdentities(context: Context, text: String) {
+        val engine = AgeEngine.fromIdentitiesText(text)
+        val usable = try {
+            runCatching { engine.decrypt(engine.encrypt(IMPORT_PROBE, emptyList())) }.isSuccess
+        } finally {
+            engine.close()
+        }
+        require(usable) { "no usable age identity" }
+        val file = identitiesFile(context)
+        file.writeText(if (text.endsWith("\n")) text else "$text\n", Charsets.UTF_8)
+        restrictToOwner(file)
+    }
+
+    // A short self-encrypt probe validates an imported identities file:
+    // encrypt to the loaded identities' own public keys, then decrypt.
+    // Round-trips only when at least one usable identity is present.
+    private val IMPORT_PROBE = "PassPony import probe".toByteArray(Charsets.UTF_8)
+
     private fun restrictToOwner(file: File) {
         file.setReadable(false, false)
         file.setWritable(false, false)

@@ -124,7 +124,7 @@ fun OnboardingPage(slide: OnboardingSlide, appViewModel: AppViewModel, onAdvance
         when (slide.action) {
             OnboardingAction.LANGUAGE -> LanguageAction()
             OnboardingAction.FORMAT -> FormatAction(appViewModel)
-            OnboardingAction.IMPORT_STORE -> ImportStoreAction(appViewModel, onAdvance)
+            OnboardingAction.IMPORT_STORE -> ImportStoreAction(appViewModel)
             OnboardingAction.TRY_PASS -> TryPassAction(appViewModel, onAdvance)
             OnboardingAction.AUTOFILL -> AutofillAction()
             // Biometric is detection/explanation only on iOS too (its
@@ -199,17 +199,13 @@ private fun FormatAction(appViewModel: AppViewModel) {
  * instead -- covers both "just imported/cloned" and "replaying the tour
  * on an already-populated store", same check iOS uses. */
 @Composable
-private fun ImportStoreAction(appViewModel: AppViewModel, onAdvance: () -> Unit) {
+private fun ImportStoreAction(appViewModel: AppViewModel) {
     val entries by appViewModel.entries.collectAsState()
     val context = LocalContext.current
     val scope = rememberCoroutineScope()
+    val format = appViewModel.format
     var showCloneDialog by remember { mutableStateOf(false) }
     var importMessage by remember { mutableStateOf<String?>(null) }
-
-    if (entries.isNotEmpty()) {
-        ExistingIndicator(count = entries.size)
-        return
-    }
 
     val keyImportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
@@ -233,12 +229,47 @@ private fun ImportStoreAction(appViewModel: AppViewModel, onAdvance: () -> Unit)
         }
     }
 
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        TextButton(onClick = { showCloneDialog = true }) {
-            Text(stringResource(R.string.xc_clone_existing_store))
+    val ageImportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val text = try {
+            context.contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+        } catch (e: Exception) {
+            null
         }
-        TextButton(onClick = { keyImportLauncher.launch(arrayOf("*/*")) }) {
-            Text(stringResource(R.string.settings_pgp_import))
+        if (text == null) {
+            importMessage = context.getString(R.string.settings_age_import_failed)
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            importMessage = try {
+                appViewModel.importAgeIdentities(text)
+                context.getString(R.string.settings_age_import_success)
+            } catch (e: Exception) {
+                context.getString(R.string.settings_age_import_failed)
+            }
+        }
+    }
+
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        // A clone populates entries; keep the key step reachable here
+        // afterward -- cloning a store is exactly when you still need the
+        // key it was encrypted to -- rather than hiding the whole action.
+        if (entries.isNotEmpty()) {
+            ExistingIndicator(count = entries.size)
+        } else {
+            TextButton(onClick = { showCloneDialog = true }) {
+                Text(stringResource(R.string.xc_clone_existing_store))
+            }
+        }
+        when (format) {
+            StoreFormat.PASS -> TextButton(onClick = { keyImportLauncher.launch(arrayOf("*/*")) }) {
+                Text(stringResource(R.string.settings_pgp_import))
+            }
+            StoreFormat.PASSAGE -> TextButton(onClick = { ageImportLauncher.launch(arrayOf("*/*")) }) {
+                Text(stringResource(R.string.settings_age_import))
+            }
         }
         importMessage?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
@@ -248,10 +279,7 @@ private fun ImportStoreAction(appViewModel: AppViewModel, onAdvance: () -> Unit)
     if (showCloneDialog) {
         OnboardingCloneDialog(
             appViewModel = appViewModel,
-            onCloned = {
-                showCloneDialog = false
-                onAdvance()
-            },
+            onCloned = { showCloneDialog = false },
             onDismiss = { showCloneDialog = false }
         )
     }

@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.passpony.android.BuildConfig
+import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
@@ -279,6 +280,21 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 throw GitException.Other("couldn't move the cloned store into place")
             }
         }
+        openStore()
+    }
+
+    /**
+     * Import an age identities file's text for the passage store, then
+     * rebuild the engine and reopen so entries that were waiting on the
+     * right key decrypt. Surfaces a bad import (no usable identity) to the
+     * caller rather than swallowing it, like the Sync actions -- the user
+     * asked to add a key and wants to know if it didn't take.
+     */
+    suspend fun importAgeIdentities(text: String) {
+        withContext(Dispatchers.IO) {
+            AgeIdentityStore.importIdentities(context, text)
+        }
+        engine = EngineProvider.engine(context, format)
         openStore()
     }
 

@@ -52,6 +52,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import com.passpony.android.BuildConfig
 import com.passpony.android.R
+import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.PassphraseCache
 import com.passpony.android.crypto.PgpEngine
 import com.passpony.android.crypto.PgpKeyStore
@@ -98,6 +99,9 @@ fun SettingsScreen(
     var keyPassphrase by remember { mutableStateOf("") }
     var gpgIdLines by remember { mutableStateOf(emptyList<String>()) }
     var message by remember { mutableStateOf<String?>(null) }
+    var agePresent by remember { mutableStateOf(false) }
+    var ageHints by remember { mutableStateOf(emptyList<String>()) }
+    var ageMessage by remember { mutableStateOf<String?>(null) }
 
     fun refreshKeys() {
         keyFiles = PgpKeyStore.availableKeys(context)
@@ -109,9 +113,13 @@ fun SettingsScreen(
             // actually load one. Return value unused on purpose.
             PgpEngine.load(context)
             lockedKeys = PgpKeyStore.lockedKeyFiles
+            agePresent = false
+            ageHints = emptyList()
         } else {
             gpgIdLines = emptyList()
             lockedKeys = emptyList()
+            agePresent = AgeIdentityStore.hasIdentities(context)
+            ageHints = AgeIdentityStore.publicKeyHints(context)
         }
     }
 
@@ -139,6 +147,30 @@ fun SettingsScreen(
         }
         refreshKeys()
         appViewModel.openStore()
+    }
+
+    val ageImportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        if (uri == null) return@rememberLauncherForActivityResult
+        val text = try {
+            context.contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
+        } catch (e: Exception) {
+            null
+        }
+        if (text == null) {
+            ageMessage = context.getString(R.string.settings_age_import_failed)
+            return@rememberLauncherForActivityResult
+        }
+        scope.launch {
+            ageMessage = try {
+                appViewModel.importAgeIdentities(text)
+                context.getString(R.string.settings_age_import_success)
+            } catch (e: Exception) {
+                context.getString(R.string.settings_age_import_failed)
+            }
+            refreshKeys()
+        }
     }
 
     Scaffold(
@@ -218,6 +250,16 @@ fun SettingsScreen(
                     gpgIdLines = gpgIdLines,
                     hasKeys = keyFiles.isNotEmpty(),
                     onInitialize = onInitializeStore
+                )
+            }
+
+            if (format == StoreFormat.PASSAGE) {
+                Spacer(Modifier.height(16.dp))
+                AgeKeysSection(
+                    present = agePresent,
+                    hints = ageHints,
+                    message = ageMessage,
+                    onImport = { ageImportLauncher.launch(arrayOf("*/*")) }
                 )
             }
 
@@ -390,6 +432,39 @@ private fun OpenPgpKeysSection(
     }
     TextButton(onClick = onImport) {
         Text(stringResource(R.string.settings_pgp_import))
+    }
+}
+
+@Composable
+private fun AgeKeysSection(
+    present: Boolean,
+    hints: List<String>,
+    message: String?,
+    onImport: () -> Unit,
+) {
+    SectionHeader(stringResource(R.string.settings_age_keys_header))
+    Text(
+        stringResource(if (present) R.string.settings_age_present else R.string.settings_age_missing),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.secondary
+    )
+    for (hint in hints) {
+        Text(
+            hint,
+            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+            color = MaterialTheme.colorScheme.secondary,
+            modifier = Modifier.padding(top = 2.dp)
+        )
+    }
+    TextButton(onClick = onImport) {
+        Text(stringResource(R.string.settings_age_import))
+    }
+    message?.let {
+        Text(
+            it,
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary
+        )
     }
 }
 
