@@ -61,6 +61,7 @@ import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.edit.NewEntryContent
 import com.passpony.android.ui.edit.PasswordGenerator
 import com.passpony.android.ui.settings.LanguageManager
+import com.passpony.android.ui.settings.rememberAgeIdentitiesImporter
 import com.passpony.android.ui.util.safDisplayName
 import java.io.File
 import kotlinx.coroutines.launch
@@ -229,27 +230,8 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
         }
     }
 
-    val ageImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val text = try {
-            context.contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
-        } catch (e: Exception) {
-            null
-        }
-        if (text == null) {
-            importMessage = context.getString(R.string.settings_age_import_failed)
-            return@rememberLauncherForActivityResult
-        }
-        scope.launch {
-            importMessage = try {
-                appViewModel.importAgeIdentities(text)
-                context.getString(R.string.settings_age_import_success)
-            } catch (e: Exception) {
-                context.getString(R.string.settings_age_import_failed)
-            }
-        }
+    val launchAgeImport = rememberAgeIdentitiesImporter(appViewModel) { result ->
+        importMessage = result
     }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
@@ -267,7 +249,7 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
             StoreFormat.PASS -> TextButton(onClick = { keyImportLauncher.launch(arrayOf("*/*")) }) {
                 Text(stringResource(R.string.settings_pgp_import))
             }
-            StoreFormat.PASSAGE -> TextButton(onClick = { ageImportLauncher.launch(arrayOf("*/*")) }) {
+            StoreFormat.PASSAGE -> TextButton(onClick = { launchAgeImport() }) {
                 Text(stringResource(R.string.settings_age_import))
             }
         }

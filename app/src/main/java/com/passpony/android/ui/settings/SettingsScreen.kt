@@ -149,28 +149,9 @@ fun SettingsScreen(
         appViewModel.openStore()
     }
 
-    val ageImportLauncher = rememberLauncherForActivityResult(
-        ActivityResultContracts.OpenDocument()
-    ) { uri ->
-        if (uri == null) return@rememberLauncherForActivityResult
-        val text = try {
-            context.contentResolver.openInputStream(uri)?.use { it.readBytes().toString(Charsets.UTF_8) }
-        } catch (e: Exception) {
-            null
-        }
-        if (text == null) {
-            ageMessage = context.getString(R.string.settings_age_import_failed)
-            return@rememberLauncherForActivityResult
-        }
-        scope.launch {
-            ageMessage = try {
-                appViewModel.importAgeIdentities(text)
-                context.getString(R.string.settings_age_import_success)
-            } catch (e: Exception) {
-                context.getString(R.string.settings_age_import_failed)
-            }
-            refreshKeys()
-        }
+    val launchAgeImport = rememberAgeIdentitiesImporter(appViewModel) { result ->
+        ageMessage = result
+        refreshKeys()
     }
 
     Scaffold(
@@ -259,7 +240,7 @@ fun SettingsScreen(
                     present = agePresent,
                     hints = ageHints,
                     message = ageMessage,
-                    onImport = { ageImportLauncher.launch(arrayOf("*/*")) }
+                    onImport = launchAgeImport
                 )
             }
 

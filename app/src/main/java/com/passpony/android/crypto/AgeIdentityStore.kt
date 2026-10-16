@@ -4,7 +4,9 @@ import android.content.Context
 import java.io.File
 import uniffi.pass_ffi.AgeEngine
 import uniffi.pass_ffi.CryptoBackend
+import uniffi.pass_ffi.ageDecryptIdentitiesFile
 import uniffi.pass_ffi.ageGenerateIdentity
+import uniffi.pass_ffi.ageIsEncryptedIdentitiesFile
 
 /**
  * Identities live in an age identities file in this app's private files
@@ -75,6 +77,41 @@ object AgeIdentityStore {
         val file = identitiesFile(context)
         file.writeText(if (text.endsWith("\n")) text else "$text\n", Charsets.UTF_8)
         restrictToOwner(file)
+    }
+
+    /**
+     * True when [bytes] is an age-encrypted file (binary header or ASCII
+     * armor), i.e. a passphrase-protected identities file such as gopass's
+     * age backend writes, rather than a plaintext identities file.
+     */
+    fun isPassphraseProtected(bytes: ByteArray): Boolean = ageIsEncryptedIdentitiesFile(bytes)
+
+    /**
+     * Import an identities file read from disk. A plaintext file goes
+     * straight to [importIdentities]. A passphrase-protected one (see
+     * [isPassphraseProtected]) is decrypted in memory with [passphrase]
+     * first and the plaintext handed to the same validation; only that
+     * plaintext is ever stored, same as a plaintext import. A wrong
+     * passphrase throws `CryptoException.DecryptionFailed`, a file that
+     * asks for more scrypt work than the core allows throws
+     * `CryptoException.Unavailable`, and in both cases nothing is
+     * written. Neither the passphrase nor the decrypted text is logged;
+     * the decrypted bytes are zeroed as soon as the text is built (the
+     * JVM String copy and the FFI passphrase String cannot be wiped and
+     * live until GC).
+     */
+    fun importIdentitiesFile(context: Context, bytes: ByteArray, passphrase: String?) {
+        if (!isPassphraseProtected(bytes)) {
+            importIdentities(context, bytes.toString(Charsets.UTF_8))
+            return
+        }
+        requireNotNull(passphrase) { "passphrase required" }
+        val decrypted = ageDecryptIdentitiesFile(bytes, passphrase)
+        try {
+            importIdentities(context, decrypted.toString(Charsets.UTF_8))
+        } finally {
+            decrypted.fill(0)
+        }
     }
 
     // A short self-encrypt probe validates an imported identities file:
