@@ -284,15 +284,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
-     * Import an age identities file's text for the passage store, then
+     * Import an age identities file's bytes for the passage store, then
      * rebuild the engine and reopen so entries that were waiting on the
-     * right key decrypt. Surfaces a bad import (no usable identity) to the
+     * right key decrypt. [passphrase] is only needed for a
+     * passphrase-protected file (see [AgeIdentityStore.isPassphraseProtected]).
+     * Surfaces a bad import (no usable identity, wrong passphrase) to the
      * caller rather than swallowing it, like the Sync actions -- the user
      * asked to add a key and wants to know if it didn't take.
      */
-    suspend fun importAgeIdentities(text: String) {
+    suspend fun importAgeIdentitiesFile(bytes: ByteArray, passphrase: String?) {
         withContext(Dispatchers.IO) {
-            AgeIdentityStore.importIdentities(context, text)
+            AgeIdentityStore.importIdentitiesFile(context, bytes, passphrase)
         }
         engine = EngineProvider.engine(context, format)
         openStore()
