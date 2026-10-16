@@ -22,6 +22,8 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.window.DialogProperties
+import androidx.compose.ui.window.SecureFlagPolicy
 import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.ui.AppViewModel
@@ -127,6 +129,9 @@ private fun AgeIdentitiesPassphraseDialog(
     var passphrase by remember { mutableStateOf("") }
     AlertDialog(
         onDismissRequest = { if (!busy) onDismiss() },
+        // The dialog has its own window; secure it directly rather than
+        // relying on the host activity's flag (onboarding does not set one).
+        properties = DialogProperties(securePolicy = SecureFlagPolicy.SecureOn),
         title = { Text(stringResource(R.string.settings_age_passphrase_title)) },
         text = {
             Column {
@@ -159,7 +164,7 @@ private fun AgeIdentitiesPassphraseDialog(
         },
         dismissButton = {
             TextButton(onClick = onDismiss, enabled = !busy) {
-                Text(stringResource(R.string.settings_age_passphrase_cancel))
+                Text(stringResource(R.string.action_cancel))
             }
         }
     )

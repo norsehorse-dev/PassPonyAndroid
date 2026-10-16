@@ -138,7 +138,6 @@
     <string name="settings_age_passphrase_title">Identities file is encrypted</string>
     <string name="settings_age_passphrase_message">Enter the passphrase this identities file was encrypted with, for example the one gopass asked for. It is only used to decrypt the file on this device.</string>
     <string name="settings_age_passphrase_hint">Passphrase</string>
-    <string name="settings_age_passphrase_cancel">Cancel</string>
     <string name="settings_age_passphrase_wrong">Wrong passphrase, or that is not a passphrase-protected file.</string>
     <string name="settings_age_passphrase_too_costly">That file needs more memory to unlock than this device allows.</string>
 
