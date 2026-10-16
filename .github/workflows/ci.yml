@@ -60,7 +60,7 @@ jobs:
         run: cargo install cargo-ndk --locked
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Read pinned NDK version
         id: ndk
@@ -169,7 +169,7 @@ jobs:
         run: cargo install cargo-ndk --locked
 
       - name: Set up Android SDK
-        uses: android-actions/setup-android@v3
+        uses: android-actions/setup-android@v4
 
       - name: Read pinned NDK version
         id: ndk
