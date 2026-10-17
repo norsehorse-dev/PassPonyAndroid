@@ -410,10 +410,7 @@ PassPony speaks the same format as the pass and passage command-line tools: plai
         <item quantity="one">Added %1$d age identity.</item>
         <item quantity="other">Added %1$d age identities.</item>
     </plurals>
-    <plurals name="settings_age_import_added_some_present">
-        <item quantity="one">Added %1$d age identity; %2$d already here.</item>
-        <item quantity="other">Added %1$d age identities; %2$d already here.</item>
-    </plurals>
+    <string name="settings_age_import_added_some_present">%1$d added, %2$d already here.</string>
     <string name="settings_age_import_already_present">PassPony already has every identity in that file.</string>
     <string name="error_hotp_missing_counter">This counter-based (HOTP) link has no counter.</string>
     <string name="error_backup_not_a_backup">That file isn\'t a PassPony backup.</string>
@@ -430,7 +427,6 @@ PassPony speaks the same format as the pass and passage command-line tools: plai
     <string name="otp_scan_is_authenticator_export">That\'s a Google Authenticator export. Use Import from Authenticator in the store list menu.</string>
     <string name="otp_hotp_next_code">Show next code</string>
     <string name="otp_hotp_next_code_footer">Each code uses up one counter value and is saved to the entry, the same as pass otp code.</string>
-    <string name="otp_import_title">Import from Authenticator</string>
     <string name="otp_import_intro">In Google Authenticator, choose Transfer accounts, then Export accounts. Scan every QR code it shows. Each account you pick becomes its own one-time code entry.</string>
     <string name="otp_import_scan">Scan export codes</string>
     <string name="otp_import_paste_hint">or paste an otpauth-migration:// link</string>

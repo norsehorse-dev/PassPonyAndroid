@@ -1,43 +1,62 @@
 P13 xcstrings -> Android mapping report
-source: /sessions/rcw-017x3blyhsbmr5m1zs1ja7a7/mnt/PassPony/Sources/Shared/Localizable.xcstrings
-total xcstrings keys considered: 252
-  under an existing hand-authored resource name: 182
+source: /home/claude/l10n/Localizable.xcstrings
+total xcstrings keys considered: 344
+  under an existing hand-authored resource name: 274
   under a generated xc_-prefixed name: 70
 
 per-language coverage (translated / total selected keys):
-  es         238 / 252
-  fr         238 / 252
-  de         238 / 252
-  ru         238 / 252
-  zh-Hans    238 / 252
-  pt-BR      238 / 252
+  es         330 / 344
+  fr         330 / 344
+  de         330 / 344
+  ru         330 / 344
+  zh-Hans    330 / 344
+  pt-BR      330 / 344
 
 key -> android resource name:
   '%@ · %lld digits · %lld s' -> otp_summary_format
+  '%@ · %lld digits · counter %lld' -> otp_hotp_summary_format
   '%@%@ · %@' -> xc_str
   '%lld OpenPGP key files' -> diagnostics_keys_pass
+  '%lld PGP keys' -> backup_restore_pgp_keys
+  '%lld added, %lld already here.' -> settings_age_import_added_some_present
+  '%lld age identities' -> backup_restore_identities
+  '%lld items from a newer version were skipped.' -> backup_restore_unknown
+  '%lld of %lld codes scanned' -> otp_import_progress
   '%lld to %lld characters. The slider stops at 64; type a larger number for more.' -> generator_length_hint
   '%lld unpushed changes' -> xc_lld_unpushed_changes
   'A code-only entry keeps its code. To get rid of it, delete the entry.' -> otp_only_delete_hint
   'A pass is one encrypted file: the password on the first line, anything else after it.\n\nTry it now. This saves a real entry to your store.' -> xc_a_pass_is_one_encrypted_file_the_password_on_the
   'A pass store encrypts to the keys listed in its .gpg-id. Initialize once with your imported keys.' -> settings_gpgid_footer_empty
+  'A recovery code has 30 characters.' -> error_backup_code_length
   'About' -> settings_about_header
   'Account' -> otp_key_account
+  'Accounts' -> otp_import_accounts_header
   'Actions' -> sync_actions_header
   'Add a pass…' -> xc_add_a_pass
   'Add an entry, or clone your store in Sync.' -> store_list_no_entries_hint
   'Add field' -> edit_entry_add_field
+  'Add link' -> otp_import_paste_add
   'Add one-time code…' -> otp_add
   'Add your first pass' -> xc_add_your_first_pass
+  'Added %lld age identities.' -> settings_age_import_added
   'Added when you save.' -> otp_added_on_save
   'Advanced' -> otp_key_advanced
+  'Age identities' -> settings_age_keys_header
   'Algorithm' -> otp_key_algorithm
   'All 32 punctuation characters, the pass default.' -> generator_symbols_full_hint
+  'Already scanned. %lld of %lld codes so far.' -> otp_import_already_scanned
   'Already up to date.' -> xc_already_up_to_date
   'Already using pass or passage? Clone your existing store from its git remote, or import your OpenPGP key files.\n\nStarting fresh? Just continue.' -> xc_already_using_pass_or_passage_clone_your_existin
+  'An entry with this name already exists.' -> otp_import_name_exists
+  'Another account here has the same name.' -> otp_import_name_duplicate
+  'Anyone who gets this file can read your passage entries. Keep it somewhere only you can reach, or use the encrypted backup instead.' -> backup_plain_warning_body
   'App' -> diagnostics_app
   'Autofill' -> settings_autofill_header
   'Autofill is on.' -> xc_autofill_is_on
+  'Back up and restore keys' -> settings_backup_row_title
+  'Back up keys' -> store_list_back_up_keys
+  'Backup' -> settings_backup_header
+  'Backup saved.' -> backup_saved
   'Basic' -> generator_symbols_basic
   'Behind remote' -> sync_behind_remote
   'Bring your store' -> xc_bring_your_store
@@ -46,6 +65,7 @@ key -> android resource name:
   'Change…' -> otp_change
   'Choose entry' -> xc_choose_entry
   "Choose the language you'd like to use.\n\nYou can change this anytime in Settings." -> xc_choose_the_language_you_d_like_to_use_you_can_ch
+  'Choose where to save the backup.' -> backup_choose_location
   'Choose your format' -> xc_choose_your_format
   'Clone' -> xc_clone
   'Clone (replaces current store)' -> sync_clone_button
@@ -58,6 +78,9 @@ key -> android resource name:
   'Core' -> settings_diagnostics_core
   "Couldn't decrypt this entry. The matching key may be missing or locked." -> error_decryption_failed
   "Couldn't encrypt the entry." -> error_encryption_failed
+  "Couldn't save: %@" -> backup_save_failed
+  'Counter-based code. Codes are shown on the entry, one at a time, when you ask for the next one.' -> otp_hotp_preview_note
+  'Create backup…' -> backup_create
   'Crypto core on GitHub' -> settings_core_repo_title
   'Current' -> sync_remote_current
   'Delete' -> delete_entry_confirm
@@ -67,17 +90,26 @@ key -> android resource name:
   'Diagnostics' -> settings_diagnostics_header
   'Digits' -> generator_digits
   'Done' -> reencrypt_done
+  'Each code uses up one counter value and is saved to the entry, the same as pass otp code.' -> otp_hotp_next_code_footer
   "Each format keeps its own store. Switching never touches the other store's data." -> settings_format_footer
   'Edit %@' -> xc_edit
   'Edit fields' -> entry_detail_edit_fields
   'Encrypt new entries to' -> init_store_header
+  'Encrypted backup' -> backup_encrypted_header
+  'Encrypted backup, plain export, restore' -> settings_backup_row_subtitle
   'Encrypted file transfer' -> xc_encrypted_file_transfer
   'Encryption error: %@' -> xc_encryption_error
   'Enter key' -> otp_tab_key
+  'Enter the passphrase this identities file was encrypted with, for example the one gopass asked for. It is only used to decrypt the file on this device.' -> settings_age_passphrase_message
+  'Enter the recovery code you wrote down when you made this backup.' -> backup_restore_message
   'Entire store' -> reencrypt_scope_entire_store
   'Entries' -> settings_diagnostics_entries
   'Entry' -> xc_entry
+  'Entry name' -> otp_import_entry_name
   'Every entry in scope is decrypted and re-encrypted to the recipients its directory currently resolves to.' -> reencrypt_footer
+  'Export' -> backup_plain_export_confirm
+  'Export identities file…' -> backup_plain_export
+  'Export your key unencrypted?' -> backup_plain_warning_title
   'Fields' -> entry_detail_fields
   'Fields (optional)' -> add_entry_fields_optional
   'File error: %@' -> xc_file_error
@@ -89,10 +121,21 @@ key -> android resource name:
   'Get Started' -> xc_get_started
   'Git' -> settings_diagnostics_git
   'Git error: %@' -> xc_git_error
+  'Give this entry a name.' -> otp_import_name_blank
+  "I've written it down" -> backup_code_written
+  'Identities file is encrypted' -> settings_age_passphrase_title
+  'Identities file present.' -> settings_age_present
+  'Identities file saved.' -> backup_plain_saved
+  "If you lose this phone, your passage entries can't be read without it. Tap to back it up." -> store_list_backup_banner_body
+  'Import %lld entries' -> otp_import_button
   'Import a key file in Settings first.' -> init_store_empty
   'Import failed for %@: %@' -> xc_import_failed_for
+  'Import from Authenticator' -> store_list_import_authenticator
+  'Import identities file…' -> settings_age_import
   'Import key file…' -> settings_pgp_import
+  'Imported %lld entries.' -> otp_import_done
   'Imported %lld key files.' -> xc_imported_lld_key_files
+  'In Google Authenticator, choose Transfer accounts, then Export accounts. Scan every QR code it shows. Each account you pick becomes its own one-time code entry.' -> otp_import_intro
   'Initialize' -> init_store_confirm
   'Initialize store' -> init_store_title
   'Initialize store with key…' -> settings_gpgid_init
@@ -108,6 +151,7 @@ key -> android resource name:
   'Key passphrase' -> settings_key_passphrase_hint
   'Key unlocked.' -> settings_key_unlocked
   'Keys' -> diagnostics_keys
+  'Keys backup' -> backup_title
   'Language' -> settings_language
   'Length' -> generator_length
   'Length must be between %lld and %lld.' -> error_generate_bad_length
@@ -129,6 +173,7 @@ key -> android resource name:
   'No entries' -> store_list_no_entries
   'No git repository for this store.' -> error_no_git_repository
   'No git repository — clone a store or use local-only mode.' -> sync_no_repository
+  'No identities imported. A passage store needs the age identity it was encrypted to.' -> settings_age_missing
   'No imported key matches %@ (fingerprint or 16-hex key ID)' -> xc_no_imported_key_matches_fingerprint_or_16_hex_ke
   'No keys imported. A pass store needs at least a public key matching its .gpg-id (and the secret key to decrypt).' -> settings_pgp_keys_empty
   'No one-time code' -> otp_none
@@ -137,6 +182,7 @@ key -> android resource name:
   'No store is open.' -> error_no_store
   'No usable key. Import the key for this store in Settings.' -> error_no_usable_key
   'None' -> generator_symbols_none
+  'Not imported' -> otp_import_skipped_header
   'One-time code' -> entry_detail_totp
   'One-time code (optional)' -> add_entry_otp_optional
   'Open Settings' -> xc_open_settings
@@ -148,14 +194,17 @@ key -> android resource name:
   'Other apps from the same developer.' -> settings_other_apps_footer
   'PGP chat and encrypted files' -> xc_pgp_chat_and_encrypted_files
   'PassPony' -> store_list_title
+  'PassPony already has every identity in that file.' -> settings_age_import_already_present
   'PassPony is locked' -> xc_passpony_is_locked
   'PassPony locks behind Face ID, Touch ID, or your passcode.\n\nAfter you unlock, it stays open for %lld minutes (shared with autofill), then locks again.' -> xc_passpony_locks_behind_face_id_touch_id_or_your_p
   'PassPony on GitHub' -> settings_app_repo_title
+  'Passphrase' -> settings_age_passphrase_hint
   'Password' -> entry_detail_password
   'Password generator' -> generator_sheet_title
   'Paste' -> otp_tab_paste
   'Paste the otpauth:// link the site offers during two-factor setup, or the output of pass otp uri on your desktop.' -> otp_paste_help
   'Period (seconds)' -> otp_key_period
+  'Plain export' -> backup_plain_header
   'Point the camera at the QR code the site shows during two-factor setup.' -> otp_scan_help
   'Preview' -> reencrypt_preview
   'Publish' -> sync_publish
@@ -168,6 +217,7 @@ key -> android resource name:
   'Re-encrypt store…' -> settings_reencrypt
   'Re-encrypted %lld entries.' -> xc_re_encrypted_lld_entries
   'Re-keying a live store is the re-encrypt flow — coming with the subtree preview.' -> xc_re_keying_a_live_store_is_the_re_encrypt_flow_co
+  'Recovery code' -> backup_code_hint
   'Remote' -> sync_remote_header
   'Remote updated.' -> sync_remote_updated
   'Remove' -> otp_remove
@@ -176,12 +226,20 @@ key -> android resource name:
   'Replace…' -> otp_replace
   'Report copied.' -> diagnostics_copied
   'Resolved %lld conflicts.' -> xc_resolved_lld_conflicts
+  'Restore' -> backup_restore_header
+  'Restore backup' -> backup_restore_title
+  'Restore from backup…' -> backup_restore_button
+  'Restore keys from a .passpony backup. They are added to the keys already here; nothing is replaced.' -> backup_restore_body
+  'Restored %@.' -> backup_restore_done
+  'Restored. Every key in the backup was already here.' -> backup_restore_nothing_new
   'Results' -> xc_results
   'Run checks' -> xc_run_checks
   'Save' -> action_save
+  'Save backup…' -> backup_save
   "Saved. That's your first pass." -> xc_saved_that_s_your_first_pass
   'Scan' -> otp_tab_scan
   'Scan QR code' -> otp_scan_open
+  'Scan export codes' -> otp_import_scan
   'Scope' -> reencrypt_scope_header
   'Search all entries' -> store_list_search_hint
   'Secret key' -> otp_key_secret
@@ -189,11 +247,14 @@ key -> android resource name:
   'Set up one-time code' -> entry_detail_set_up_otp
   'Settings' -> settings_title
   'Share' -> diagnostics_share
+  'Show next code' -> otp_hotp_next_code
+  'Show the code again' -> backup_show_code_again
   'Show welcome tour again' -> settings_tour_replay
   'Simple, modern file encryption (age)' -> xc_simple_modern_file_encryption_age
   'Skip' -> xc_skip
   'Spike' -> xc_spike
   'Spike: in-extension capabilities' -> xc_spike_in_extension_capabilities
+  'Start over' -> otp_import_start_over
   'Status' -> sync_status_header
   'Store already has a .gpg-id — re-keying comes with the re-encrypt flow.' -> xc_store_already_has_a_gpg_id_re_keying_comes_with
   'Store cloned.' -> xc_store_cloned
@@ -204,9 +265,25 @@ key -> android resource name:
   'Symbols' -> generator_symbols
   'Sync' -> sync_title
   'Sync conflict: %@' -> xc_sync_conflict
+  "Sync copies your encrypted entries, not your keys. A new phone can clone your store but can't read it without a key backup." -> backup_sync_is_not_backup
   'Sync now' -> sync_now
   'System' -> xc_system
   "That QR code isn't a one-time code. %@" -> otp_scan_rejected
+  'That backup is damaged or incomplete. Nothing was restored.' -> error_backup_damaged
+  'That backup was made by a newer version of PassPony. Update the app to restore it.' -> error_backup_newer_version
+  'That code is from a different export. Finish this one or start over.' -> otp_import_other_export
+  "That export code couldn't be read. Scan it again." -> error_migration_damaged
+  "That file couldn't be read." -> backup_restore_unreadable
+  'That file has no usable age identity.' -> settings_age_import_failed
+  "That file isn't a PassPony backup." -> error_backup_not_a_backup
+  'That file needs more memory to unlock than this device allows.' -> settings_age_passphrase_too_costly
+  "That isn't a Google Authenticator export code." -> error_migration_not_export
+  "That recovery code doesn't open this backup." -> backup_restore_wrong_code
+  'That recovery code has a character codes never use.' -> error_backup_code_character
+  'That recovery code has a typo. Check each group against what you wrote down.' -> error_backup_code_checksum
+  "That's a Google Authenticator export. Use Import from Authenticator in the store list menu." -> otp_scan_is_authenticator_export
+  "That's a valid code, but not this one. Check what you wrote down." -> backup_confirm_mismatch
+  "The backup can't be opened without this code, and PassPony can't show it again after this." -> backup_code_warning
   'The clone lands in a scratch area first — a failed clone leaves the current store untouched. On success it replaces the current store for this format. Decrypting cloned entries still needs the matching key: identities file for passage, imported OpenPGP key for pass.' -> sync_clone_footer
   'The code has no secret.' -> error_totp_missing_secret
   'The full app source (Apache-2.0).' -> settings_app_repo_subtitle
@@ -216,16 +293,20 @@ key -> android resource name:
   'The remote history was rewritten. Re-clone the store to continue.' -> error_upstream_rewritten
   "The secret isn't valid base32." -> error_totp_bad_secret
   "The store has local changes that aren't committed yet." -> error_dirty_workdir
+  'This counter-based (HOTP) link has no counter.' -> error_hotp_missing_counter
   'This deletes "%@" from the store. This can\'t be undone.' -> delete_entry_message
+  "This device couldn't generate a recovery code. Try again." -> error_backup_random
   'This entry changed on this device and on another device.' -> sync_conflict_body
   'This entry is a one-time code only.' -> otp_only_caption
   "This entry isn't in the store." -> error_not_in_store
-  "This isn't an otpauth:// one-time code link. Counter-based (HOTP) codes and Google Authenticator export codes aren't supported." -> error_totp_not_totp_uri
+  'This is your recovery code. Write it down and keep it somewhere safe.' -> backup_code_intro
+  "This isn't an otpauth:// one-time code link." -> error_totp_not_totp_uri
   'This report has no entry names, secrets, key fingerprints, or remote credentials. Paste it into a support message or a GitHub issue.' -> diagnostics_footer
   'Torch' -> otp_scan_torch
   'Turn on at least one kind of character.' -> error_generate_no_classes
   'Turn on autofill' -> xc_turn_on_autofill
   'Turn on autofill and your passes appear right in the QuickType bar when you sign in.\n\nYou can manage this anytime in iOS Settings under AutoFill & Passwords.' -> xc_turn_on_autofill_and_your_passes_appear_right_in
+  'Type the recovery code from what you wrote down.' -> backup_confirm_intro
   'Undo' -> otp_undo_remove
   'Unlock' -> lock_screen_unlock_button
   'Unlock to fill your password' -> xc_unlock_to_fill_your_password
@@ -243,11 +324,19 @@ key -> android resource name:
   'Welcome to PassPony' -> xc_welcome_to_passpony
   'Will rewrite %lld entries' -> xc_will_rewrite_lld_entries
   "Writes the selected keys' fingerprints to the store's .gpg-id — the same file pass init creates. Every entry saved afterward is encrypted to all of them." -> init_store_footer
+  'Wrong passphrase, or that is not a passphrase-protected file.' -> settings_age_passphrase_wrong
   'Wrong passphrase.' -> settings_wrong_passphrase
   'You already have %lld passes' -> xc_you_already_have_lld_passes
+  "Your age identities and any imported PGP keys, in one .passpony file locked with a recovery code. Keep the file wherever you like. Without the code it can't be opened." -> backup_encrypted_body
+  'Your age identities file as plain text, the same file the passage and age tools read.' -> backup_plain_body
+  "Your key isn't backed up" -> store_list_backup_banner_title
+  'Your keys are backed up.' -> backup_status_done
+  "Your keys aren't backed up yet." -> backup_status_needed
   'Your passwords, in a store you own.\n\nPassPony speaks the same format as the pass and passage command-line tools: plain files, encrypted with your keys, synced with git.' -> xc_your_passwords_in_a_store_you_own_passpony_speak
   'configured' -> sync_remote_configured
+  'counter-based' -> otp_import_kind_hotp
   'folder/name' -> move_entry_name_hint
+  'has no secret' -> otp_import_skip_empty
   'https://user:token@host/you/store.git' -> sync_publish_url_hint
   'iOS' -> xc_ios
   'identities file present' -> diagnostics_keys_passage_present
@@ -257,11 +346,14 @@ key -> android resource name:
   'not configured' -> settings_diagnostics_git_not_configured
   'off' -> diagnostics_off
   'on' -> diagnostics_on
-  'otpauth://totp/…' -> otp_paste_hint
+  'or paste an otpauth-migration:// link' -> otp_import_paste_hint
+  'otpauth://…' -> otp_paste_hint
   'pass (OpenPGP)' -> settings_format_pass
   'passage (age)' -> settings_format_passage
   'passage encrypts with modern age identities. pass encrypts with OpenPGP keys and works with existing pass stores.\n\nEach format keeps its own store, and you can switch anytime in Settings.' -> xc_passage_encrypts_with_modern_age_identities_pass
   'system' -> diagnostics_system
   'url' -> xc_url
   'username' -> xc_username
+  "uses MD5, which PassPony and pass-otp don't support" -> otp_import_skip_md5
+  "uses settings PassPony doesn't support" -> otp_import_skip_unsupported
   'value' -> edit_entry_new_value

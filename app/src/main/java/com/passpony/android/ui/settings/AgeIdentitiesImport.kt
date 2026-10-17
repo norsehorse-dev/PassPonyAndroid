@@ -112,15 +112,13 @@ fun rememberAgeIdentitiesImporter(
     return { launcher.launch(arrayOf("*/*")) }
 }
 
-/** "Added 1 identity." / "Added 2 identities; 1 was already here." / "Already have it." */
+/** "Added 1 age identity." / "2 added, 1 already here." / "already has every identity". */
 internal fun ageImportSuccessMessage(context: Context, result: AgeIdentityStore.ImportResult): String =
     when {
         result.added == 0 -> context.getString(R.string.settings_age_import_already_present)
         result.alreadyPresent == 0 ->
             context.resources.getQuantityString(R.plurals.settings_age_import_added, result.added, result.added)
-        else -> context.resources.getQuantityString(
-            R.plurals.settings_age_import_added_some_present, result.added, result.added, result.alreadyPresent
-        )
+        else -> context.getString(R.string.settings_age_import_added_some_present, result.added, result.alreadyPresent)
     }
 
 private fun ageImportFailureMessage(context: Context, e: Exception): String =

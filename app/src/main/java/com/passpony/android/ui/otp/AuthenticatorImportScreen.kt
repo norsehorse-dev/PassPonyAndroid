@@ -156,7 +156,7 @@ fun AuthenticatorImportScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text(stringResource(R.string.otp_import_title)) },
+                title = { Text(stringResource(R.string.store_list_import_authenticator)) },
                 navigationIcon = {
                     IconButton(onClick = onDone) {
                         Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
