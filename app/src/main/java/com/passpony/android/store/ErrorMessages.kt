@@ -2,9 +2,11 @@ package com.passpony.android.store
 
 import android.content.Context
 import com.passpony.android.R
+import uniffi.pass_ffi.BackupException
 import uniffi.pass_ffi.CryptoException
 import uniffi.pass_ffi.GenerateException
 import uniffi.pass_ffi.GitException
+import uniffi.pass_ffi.MigrationException
 import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.TotpException
 
@@ -22,6 +24,8 @@ fun Throwable.ponyMessage(context: Context): String = when (this) {
     is StoreException -> ponyMessage(context)
     is TotpException -> ponyMessage(context)
     is GenerateException -> ponyMessage(context)
+    is BackupException -> ponyMessage(context)
+    is MigrationException -> ponyMessage(context)
     // Unlike iOS's fallback, which shows the raw Swift description, this
     // never surfaces raw exception text: the house rule is no raw
     // exception text with entry names or paths in UI toasts, and an
@@ -65,6 +69,27 @@ fun TotpException.ponyMessage(context: Context): String = when (this) {
     is TotpException.BadSecret -> context.getString(R.string.error_totp_bad_secret)
     is TotpException.BadAlgorithm -> context.getString(R.string.error_totp_bad_algorithm, name)
     is TotpException.BadNumber -> context.getString(R.string.error_totp_bad_number, detail)
+    is TotpException.NotHotpUri -> context.getString(R.string.error_totp_not_totp_uri)
+    is TotpException.MissingCounter -> context.getString(R.string.error_hotp_missing_counter)
+}
+
+/** Restoring a `.passpony` backup, or checking a typed recovery code. */
+fun BackupException.ponyMessage(context: Context): String = when (this) {
+    is BackupException.NotABackup -> context.getString(R.string.error_backup_not_a_backup)
+    is BackupException.NewerVersion -> context.getString(R.string.error_backup_newer_version)
+    is BackupException.Damaged -> context.getString(R.string.error_backup_damaged)
+    is BackupException.CodeLength -> context.getString(R.string.error_backup_code_length)
+    is BackupException.CodeCharacter -> context.getString(R.string.error_backup_code_character)
+    is BackupException.CodeChecksum -> context.getString(R.string.error_backup_code_checksum)
+    is BackupException.RandomUnavailable -> context.getString(R.string.error_backup_random)
+}
+
+/** A scanned or pasted Google Authenticator export that could not be read. */
+fun MigrationException.ponyMessage(context: Context): String = when (this) {
+    is MigrationException.NotMigrationUri -> context.getString(R.string.error_migration_not_export)
+    is MigrationException.MissingData,
+    is MigrationException.BadBase64,
+    is MigrationException.BadPayload -> context.getString(R.string.error_migration_damaged)
 }
 
 /** The generator sheet keeps these unreachable; they exist for completeness. */

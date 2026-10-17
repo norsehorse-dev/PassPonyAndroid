@@ -62,6 +62,7 @@ import com.passpony.android.ui.edit.NewEntryContent
 import com.passpony.android.ui.edit.PasswordGenerator
 import com.passpony.android.ui.settings.LanguageManager
 import com.passpony.android.ui.settings.rememberAgeIdentitiesImporter
+import com.passpony.android.ui.settings.rememberBackupRestorer
 import com.passpony.android.ui.util.safDisplayName
 import java.io.File
 import kotlinx.coroutines.launch
@@ -233,6 +234,9 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
     val launchAgeImport = rememberAgeIdentitiesImporter(appViewModel) { result ->
         importMessage = result
     }
+    val launchRestore = rememberBackupRestorer(appViewModel) { result ->
+        importMessage = result
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // A clone populates entries; keep the key step reachable here
@@ -252,6 +256,10 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
             StoreFormat.PASSAGE -> TextButton(onClick = { launchAgeImport() }) {
                 Text(stringResource(R.string.settings_age_import))
             }
+        }
+        // A PassPony backup carries keys for both formats.
+        TextButton(onClick = { launchRestore() }) {
+            Text(stringResource(R.string.backup_restore_button))
         }
         importMessage?.let {
             Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)

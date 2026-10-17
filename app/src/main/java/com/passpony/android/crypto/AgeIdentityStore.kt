@@ -1,12 +1,15 @@
 package com.passpony.android.crypto
 
 import android.content.Context
+import com.passpony.android.store.KeyBackupState
 import java.io.File
 import uniffi.pass_ffi.AgeEngine
 import uniffi.pass_ffi.CryptoBackend
 import uniffi.pass_ffi.ageDecryptIdentitiesFile
 import uniffi.pass_ffi.ageGenerateIdentity
 import uniffi.pass_ffi.ageIsEncryptedIdentitiesFile
+import uniffi.pass_ffi.identitiesDescribe
+import uniffi.pass_ffi.identitiesMerge
 
 /**
  * Identities live in an age identities file in this app's private files
@@ -33,8 +36,8 @@ object AgeIdentityStore {
             val text = "# created by PassPony\n" +
                 "# public key: ${generated.recipientString}\n" +
                 "${generated.identityString}\n"
-            file.writeText(text, Charsets.UTF_8)
-            restrictToOwner(file)
+            writeAtomically(file, text)
+            KeyBackupState.markChanged(context)
         }
         return AgeCryptoBackend(AgeEngine.fromIdentitiesText(file.readText(Charsets.UTF_8)))
     }
@@ -51,22 +54,31 @@ object AgeIdentityStore {
     fun publicKeyHints(context: Context): List<String> {
         val file = identitiesFile(context)
         if (!file.exists()) return emptyList()
-        return file.readLines(Charsets.UTF_8)
-            .map { it.trim() }
-            .mapNotNull { line -> line.removePrefix("# public key:").takeIf { it != line }?.trim() }
-            .filter { it.isNotEmpty() }
+        return identitiesDescribe(file.readText(Charsets.UTF_8)).mapNotNull { it.publicKeyHint }
     }
 
+    /** How many identities the file holds, hint or not. */
+    fun identityCount(context: Context): Int {
+        val file = identitiesFile(context)
+        if (!file.exists()) return 0
+        return identitiesDescribe(file.readText(Charsets.UTF_8)).size
+    }
+
+    /** Outcome of an import: identities appended, and ones the file already had. */
+    data class ImportResult(val added: Int, val alreadyPresent: Int)
+
     /**
-     * Replace the identities file with imported text after confirming it
-     * carries at least one usable age identity. `AgeEngine.fromIdentitiesText`
-     * silently drops malformed lines and never throws (see its FFI doc),
-     * so a bad paste would otherwise install a store that decrypts
-     * nothing; the self-encrypt round-trip below rejects that up front and
-     * nothing is written unless it passes. Throws [IllegalArgumentException]
-     * when the text has no usable identity.
+     * Add the identities in [text] to the identities file after confirming
+     * the text carries at least one usable age identity. Since 2.0 this
+     * appends instead of replacing (core `identities_merge`): identities
+     * already in the file stay, in place, so nothing encrypted to them
+     * becomes unreadable; identities the file already has are skipped.
+     * `AgeEngine.fromIdentitiesText` silently drops malformed lines and
+     * never throws (see its FFI doc), so the self-encrypt round trip below
+     * rejects a file with no usable identity before anything is written.
+     * Throws [IllegalArgumentException] in that case.
      */
-    fun importIdentities(context: Context, text: String) {
+    fun importIdentities(context: Context, text: String): ImportResult {
         val engine = AgeEngine.fromIdentitiesText(text)
         val usable = try {
             runCatching { engine.decrypt(engine.encrypt(IMPORT_PROBE, emptyList())) }.isSuccess
@@ -75,8 +87,13 @@ object AgeIdentityStore {
         }
         require(usable) { "no usable age identity" }
         val file = identitiesFile(context)
-        file.writeText(if (text.endsWith("\n")) text else "$text\n", Charsets.UTF_8)
-        restrictToOwner(file)
+        val existing = if (file.exists()) file.readText(Charsets.UTF_8) else ""
+        val merged = identitiesMerge(existing, text)
+        if (merged.added > 0u) {
+            writeAtomically(file, merged.text)
+            KeyBackupState.markChanged(context)
+        }
+        return ImportResult(merged.added.toInt(), merged.alreadyPresent.toInt())
     }
 
     /**
@@ -100,24 +117,45 @@ object AgeIdentityStore {
      * JVM String copy and the FFI passphrase String cannot be wiped and
      * live until GC).
      */
-    fun importIdentitiesFile(context: Context, bytes: ByteArray, passphrase: String?) {
+    fun importIdentitiesFile(context: Context, bytes: ByteArray, passphrase: String?): ImportResult {
         if (!isPassphraseProtected(bytes)) {
-            importIdentities(context, bytes.toString(Charsets.UTF_8))
-            return
+            return importIdentities(context, bytes.toString(Charsets.UTF_8))
         }
         requireNotNull(passphrase) { "passphrase required" }
         val decrypted = ageDecryptIdentitiesFile(bytes, passphrase)
         try {
-            importIdentities(context, decrypted.toString(Charsets.UTF_8))
+            return importIdentities(context, decrypted.toString(Charsets.UTF_8))
         } finally {
             decrypted.fill(0)
         }
+    }
+
+    /** The identities file's text for a backup or export, or null when there is none. */
+    fun exportText(context: Context): String? {
+        val file = identitiesFile(context)
+        return if (file.exists()) file.readText(Charsets.UTF_8) else null
     }
 
     // A short self-encrypt probe validates an imported identities file:
     // encrypt to the loaded identities' own public keys, then decrypt.
     // Round-trips only when at least one usable identity is present.
     private val IMPORT_PROBE = "PassPony import probe".toByteArray(Charsets.UTF_8)
+
+    /**
+     * Write through a temp file and rename, so a crash mid-write leaves
+     * either the old identities file or the new one, never half of one.
+     */
+    private fun writeAtomically(file: File, text: String) {
+        val body = if (text.endsWith("\n")) text else "$text\n"
+        val tmp = File(file.parentFile, file.name + ".tmp")
+        tmp.writeText(body, Charsets.UTF_8)
+        restrictToOwner(tmp)
+        if (!tmp.renameTo(file)) {
+            tmp.delete()
+            throw java.io.IOException("couldn't replace the identities file")
+        }
+        restrictToOwner(file)
+    }
 
     private fun restrictToOwner(file: File) {
         file.setReadable(false, false)

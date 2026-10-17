@@ -50,6 +50,22 @@ object UnlockGate {
     }
 
     /**
+     * The app is leaving the foreground while unlocked: restart the grace
+     * window from now (see UnlockGateLogic.shouldStampOnLeave). Only ever
+     * refreshes an existing stamp; after a panic lock there is none, and
+     * leaving does not create one.
+     */
+    fun markLeftForeground(context: Context) {
+        runBlocking {
+            context.unlockGateDataStore.edit { prefs ->
+                if (prefs[LAST_UNLOCK_KEY] != null) {
+                    prefs[LAST_UNLOCK_KEY] = System.currentTimeMillis()
+                }
+            }
+        }
+    }
+
+    /**
      * The panic-lock action and background-expiry both land here --
      * also clears the cached pass (OpenPGP) key passphrase, matching
      * iOS: a relock means every cached secret is gone, not just the

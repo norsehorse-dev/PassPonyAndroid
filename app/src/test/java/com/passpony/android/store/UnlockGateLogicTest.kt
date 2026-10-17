@@ -70,4 +70,25 @@ class UnlockGateLogicTest {
         assertFalse(UnlockGateLogic.shouldRelock(Lifecycle.Event.ON_PAUSE, isFreshNow = false))
         assertFalse(UnlockGateLogic.shouldRelock(Lifecycle.Event.ON_DESTROY, isFreshNow = false))
     }
+
+    @Test
+    fun shouldStampOnLeave_onlyOnStopWhileUnlocked() {
+        assertTrue(UnlockGateLogic.shouldStampOnLeave(Lifecycle.Event.ON_STOP, lockedNow = false))
+        // Backgrounding the lock screen must never refresh a stale stamp.
+        assertFalse(UnlockGateLogic.shouldStampOnLeave(Lifecycle.Event.ON_STOP, lockedNow = true))
+        assertFalse(UnlockGateLogic.shouldStampOnLeave(Lifecycle.Event.ON_PAUSE, lockedNow = false))
+        assertFalse(UnlockGateLogic.shouldStampOnLeave(Lifecycle.Event.ON_START, lockedNow = false))
+    }
+
+    @Test
+    fun graceCountsFromLeaving_notFromUnlock() {
+        // Unlocked at 0, used the app for 10 minutes, left at 600 s, came
+        // back 30 s later: the stamp written on leaving keeps it fresh.
+        val grace = 300_000L
+        val leftAt = 600_000L
+        assertFalse(UnlockGateLogic.isFresh(lastUnlockMillis = 0L, nowMillis = 630_000L, graceMillis = grace))
+        assertTrue(UnlockGateLogic.isFresh(lastUnlockMillis = leftAt, nowMillis = 630_000L, graceMillis = grace))
+        // Six minutes away relocks.
+        assertFalse(UnlockGateLogic.isFresh(lastUnlockMillis = leftAt, nowMillis = 960_000L, graceMillis = grace))
+    }
 }

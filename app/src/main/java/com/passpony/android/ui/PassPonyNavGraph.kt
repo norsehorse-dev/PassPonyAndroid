@@ -11,6 +11,8 @@ import com.passpony.android.ui.detail.EntryDetailScreen
 import com.passpony.android.ui.edit.AddEntryScreen
 import com.passpony.android.ui.edit.EditEntryScreen
 import com.passpony.android.ui.edit.MoveEntryScreen
+import com.passpony.android.ui.otp.AuthenticatorImportScreen
+import com.passpony.android.ui.settings.BackupScreen
 import com.passpony.android.ui.settings.DiagnosticsScreen
 import com.passpony.android.ui.settings.InitializeStoreScreen
 import com.passpony.android.ui.settings.ReencryptScreen
@@ -32,6 +34,8 @@ object Routes {
     const val INITIALIZE_STORE = "settings/initialize_store"
     const val REENCRYPT = "settings/reencrypt"
     const val DIAGNOSTICS = "settings/diagnostics"
+    const val BACKUP = "settings/backup"
+    const val IMPORT_AUTHENTICATOR = "import/authenticator"
 
     /** Path segments can contain slashes; encode so the route stays one segment. */
     fun folder(path: String): String = "folder/" + Uri.encode(path)
@@ -112,6 +116,7 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
                 onInitializeStore = { navController.navigate(Routes.INITIALIZE_STORE) },
                 onReencrypt = { navController.navigate(Routes.REENCRYPT) },
                 onDiagnostics = { navController.navigate(Routes.DIAGNOSTICS) },
+                onBackup = { navController.navigate(Routes.BACKUP) },
                 onLock = onLock,
                 onRestartOnboarding = onRestartOnboarding,
             )
@@ -128,6 +133,12 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
         }
         composable(Routes.DIAGNOSTICS) {
             DiagnosticsScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.BACKUP) {
+            BackupScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.IMPORT_AUTHENTICATOR) {
+            AuthenticatorImportScreen(appViewModel, onDone = { navController.popBackStack() })
         }
     }
 }

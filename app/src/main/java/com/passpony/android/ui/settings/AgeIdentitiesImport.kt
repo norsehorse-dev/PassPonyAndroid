@@ -52,8 +52,8 @@ fun rememberAgeIdentitiesImporter(
 
     suspend fun import(bytes: ByteArray, passphrase: String?): Boolean =
         try {
-            appViewModel.importAgeIdentitiesFile(bytes, passphrase)
-            onResult(context.getString(R.string.settings_age_import_success))
+            val result = appViewModel.importAgeIdentitiesFile(bytes, passphrase)
+            onResult(ageImportSuccessMessage(context, result))
             true
         } catch (e: CryptoException.DecryptionFailed) {
             // Wrong passphrase (or not a passphrase file): keep the
@@ -111,6 +111,17 @@ fun rememberAgeIdentitiesImporter(
 
     return { launcher.launch(arrayOf("*/*")) }
 }
+
+/** "Added 1 identity." / "Added 2 identities; 1 was already here." / "Already have it." */
+internal fun ageImportSuccessMessage(context: Context, result: AgeIdentityStore.ImportResult): String =
+    when {
+        result.added == 0 -> context.getString(R.string.settings_age_import_already_present)
+        result.alreadyPresent == 0 ->
+            context.resources.getQuantityString(R.plurals.settings_age_import_added, result.added, result.added)
+        else -> context.resources.getQuantityString(
+            R.plurals.settings_age_import_added_some_present, result.added, result.added, result.alreadyPresent
+        )
+    }
 
 private fun ageImportFailureMessage(context: Context, e: Exception): String =
     when (e) {

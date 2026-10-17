@@ -22,6 +22,7 @@ import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.VpnKey
+import androidx.compose.material.icons.filled.Warning
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
@@ -44,14 +45,18 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
 import com.passpony.android.R
+import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.store.BrowseModel
+import com.passpony.android.store.KeyBackupState
 import com.passpony.android.ui.edit.DeleteEntryDialog
 import uniffi.pass_ffi.EntryRef
+import uniffi.pass_ffi.StoreFormat
 
 /** Root store browser: unpushed banner, search, folder-level browsing. */
 @OptIn(ExperimentalMaterial3Api::class)
@@ -84,6 +89,20 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
                         DropdownMenuItem(
+                            text = { Text(stringResource(R.string.store_list_import_authenticator)) },
+                            onClick = {
+                                menuExpanded = false
+                                navController.navigate(Routes.IMPORT_AUTHENTICATOR)
+                            }
+                        )
+                        DropdownMenuItem(
+                            text = { Text(stringResource(R.string.store_list_back_up_keys)) },
+                            onClick = {
+                                menuExpanded = false
+                                navController.navigate(Routes.BACKUP)
+                            }
+                        )
+                        DropdownMenuItem(
                             text = { Text(stringResource(R.string.store_list_lock_now)) },
                             onClick = {
                                 menuExpanded = false
@@ -102,6 +121,14 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                 label = { Text(stringResource(R.string.store_list_search_hint)) },
                 modifier = Modifier.fillMaxWidth().padding(16.dp)
             )
+
+            // 2.0: PassPony generates an age identity on first run, and git
+            // sync never carries it, so say so until the user backs it up.
+            val context = LocalContext.current
+            val backedUp by remember { KeyBackupState.backedUp(context) }.collectAsState(initial = true)
+            if (!backedUp && viewModel.format == StoreFormat.PASSAGE && AgeIdentityStore.hasIdentities(context)) {
+                BackupBanner(onClick = { navController.navigate(Routes.BACKUP) })
+            }
 
             if ((syncStatus?.ahead ?: 0u) > 0u) {
                 UnpushedBanner((syncStatus?.ahead ?: 0u).toInt())
@@ -217,6 +244,34 @@ private fun LazyListScope.browseLevel(
                 onClick = { navController.navigate(Routes.entry(prefix + leaf)) },
                 onDeleteRequest = { onDeleteRequest(prefix + leaf) }
             )
+        }
+    }
+}
+
+@Composable
+private fun BackupBanner(onClick: () -> Unit) {
+    ElevatedCard(
+        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
+        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+    ) {
+        Row(
+            modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.spacedBy(8.dp)
+        ) {
+            Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
+            Column {
+                Text(
+                    stringResource(R.string.store_list_backup_banner_title),
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    stringResource(R.string.store_list_backup_banner_body),
+                    color = MaterialTheme.colorScheme.onErrorContainer,
+                    style = MaterialTheme.typography.bodySmall
+                )
+            }
         }
     }
 }

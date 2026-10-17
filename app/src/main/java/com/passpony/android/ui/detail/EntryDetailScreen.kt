@@ -18,6 +18,7 @@ import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -35,6 +36,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -46,13 +48,17 @@ import androidx.navigation.NavHostController
 import com.passpony.android.R
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.Routes
+import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.components.TotpRing
+import com.passpony.android.ui.components.entryOtpSummaryLine
 import com.passpony.android.ui.util.Clipboard
 import com.passpony.android.ui.util.SecureScreenEffect
+import kotlinx.coroutines.launch
+import uniffi.pass_ffi.OtpKind
 import uniffi.pass_ffi.entryFields
+import uniffi.pass_ffi.entryOtpKind
 import uniffi.pass_ffi.entryIsOtpOnly
 import uniffi.pass_ffi.entryPassword
-import uniffi.pass_ffi.entryTotp
 
 /**
  * Port of PassPony iOS's EntryDetailView: masked password with reveal
@@ -88,7 +94,10 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
 
     val lastError by viewModel.lastError.collectAsState()
     val current = content
-    val hasTotp = remember(current) { current != null && entryTotp(current, 0uL) != null }
+    // TOTP shows a live ring; HOTP (2.0) shows a code only when asked,
+    // since every code uses up a counter value.
+    val otpKind = remember(current) { current?.let { entryOtpKind(it) } }
+    val hasTotp = otpKind != null
     val otpOnly = remember(current) { current != null && entryIsOtpOnly(current) }
 
     Scaffold(
@@ -152,13 +161,27 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
         ) {
             when {
                 current != null -> {
+                    val caption = if (otpOnly) stringResource(R.string.otp_only_caption) else null
+                    val otpSection: @Composable () -> Unit = {
+                        when (otpKind) {
+                            OtpKind.TOTP -> TotpSection(current, caption = caption)
+                            OtpKind.HOTP -> HotpSection(
+                                name = name,
+                                content = current,
+                                caption = caption,
+                                viewModel = viewModel,
+                                onAdvanced = { content = it }
+                            )
+                            null -> {}
+                        }
+                    }
                     if (otpOnly) {
-                        TotpSection(current, caption = stringResource(R.string.otp_only_caption))
+                        otpSection()
                         FieldsSection(current)
                     } else {
                         PasswordSection(current, revealed, onRevealToggle = { revealed = !revealed })
                         FieldsSection(current)
-                        if (hasTotp) TotpSection(current, caption = null)
+                        otpSection()
                     }
                 }
                 loadAttempted -> {
@@ -252,6 +275,82 @@ private fun TotpSection(content: ByteArray, caption: String?) {
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         SectionHeader(stringResource(R.string.entry_detail_totp))
         TotpRing(content)
+        if (caption != null) {
+            Text(
+                caption,
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(top = 4.dp)
+            )
+        }
+        HorizontalDivider(modifier = Modifier.padding(top = 8.dp))
+    }
+}
+
+/**
+ * Counter-based code (pass-otp's `otpauth://hotp`). Nothing is shown until
+ * the user asks: "Show next code" advances the counter, saves and commits
+ * the entry, and only then shows the code, matching `pass otp code`.
+ */
+@Composable
+private fun HotpSection(
+    name: String,
+    content: ByteArray,
+    caption: String?,
+    viewModel: AppViewModel,
+    onAdvanced: (ByteArray) -> Unit,
+) {
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var code by remember(name) { mutableStateOf<String?>(null) }
+    var busy by remember(name) { mutableStateOf(false) }
+    var error by remember(name) { mutableStateOf<String?>(null) }
+
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        SectionHeader(stringResource(R.string.entry_detail_totp))
+        entryOtpSummaryLine(content)?.let {
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+        }
+        code?.let { shown ->
+            Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    TotpFormat.group(shown),
+                    style = MaterialTheme.typography.headlineSmall,
+                    fontFamily = FontFamily.Monospace,
+                    modifier = Modifier.weight(1f)
+                )
+                IconButton(onClick = { Clipboard.copyEphemeral(context, shown) }) {
+                    Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.entry_detail_copy))
+                }
+            }
+        }
+        FilledTonalButton(
+            onClick = {
+                busy = true
+                error = null
+                scope.launch {
+                    try {
+                        val advance = viewModel.advanceHotp(name, content)
+                        onAdvanced(advance.content)
+                        code = advance.code
+                    } catch (e: Exception) {
+                        error = e.ponyMessage(context)
+                    } finally {
+                        busy = false
+                    }
+                }
+            },
+            enabled = !busy,
+            modifier = Modifier.padding(top = 4.dp)
+        ) {
+            Text(stringResource(R.string.otp_hotp_next_code))
+        }
+        Text(
+            stringResource(R.string.otp_hotp_next_code_footer),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary
+        )
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
         if (caption != null) {
             Text(
                 caption,

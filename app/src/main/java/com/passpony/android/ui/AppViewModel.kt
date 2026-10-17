@@ -6,6 +6,9 @@ import androidx.lifecycle.viewModelScope
 import com.passpony.android.BuildConfig
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
+import com.passpony.android.crypto.PgpKeyStore
+import com.passpony.android.store.KeyBackupState
+import java.io.File
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
 import com.passpony.android.store.StorePaths
@@ -34,6 +37,17 @@ import uniffi.pass_ffi.commitMessageEdit
 import uniffi.pass_ffi.commitMessageReencrypt
 import uniffi.pass_ffi.commitMessageRemove
 import uniffi.pass_ffi.commitMessageRename
+import uniffi.pass_ffi.BackupSection
+import uniffi.pass_ffi.HotpAdvance
+import uniffi.pass_ffi.ageDecryptWithPassphrase
+import uniffi.pass_ffi.ageEncryptWithPassphrase
+import uniffi.pass_ffi.backupDecode
+import uniffi.pass_ffi.backupEncode
+import uniffi.pass_ffi.backupKindAgeIdentities
+import uniffi.pass_ffi.backupKindPgpSecretKey
+import uniffi.pass_ffi.commitMessageHotpIncrement
+import uniffi.pass_ffi.commitMessageOtpAdd
+import uniffi.pass_ffi.entryHotpNext
 
 /**
  * Same structure as PassPony iOS's AppModel: open/refresh/read/save/move/
@@ -292,12 +306,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      * caller rather than swallowing it, like the Sync actions -- the user
      * asked to add a key and wants to know if it didn't take.
      */
-    suspend fun importAgeIdentitiesFile(bytes: ByteArray, passphrase: String?) {
-        withContext(Dispatchers.IO) {
+    suspend fun importAgeIdentitiesFile(bytes: ByteArray, passphrase: String?): AgeIdentityStore.ImportResult {
+        val result = withContext(Dispatchers.IO) {
             AgeIdentityStore.importIdentitiesFile(context, bytes, passphrase)
         }
         engine = EngineProvider.engine(context, format)
         openStore()
+        return result
     }
 
     /**
@@ -325,6 +340,164 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         }
         refresh()
         return result.entries
+    }
+
+    /** True when an entry with exactly this name exists in the open store. */
+    fun hasEntry(name: String): Boolean = store?.hasEntry(name) ?: false
+
+    /**
+     * Next HOTP code for an entry, pass-otp style: the counter is advanced
+     * and the entry written and committed ("Increment HOTP counter for
+     * <name>.") before the code is returned, so a code is never shown
+     * whose counter was not saved. Throws on any failure; the caller shows
+     * it and shows no code.
+     */
+    suspend fun advanceHotp(name: String, content: ByteArray): HotpAdvance {
+        val current = store ?: throw StoreException.NoStore()
+        val advance = withContext(Dispatchers.IO) {
+            val next = entryHotpNext(content)
+            current.writeEntry(name, next.content, engine)
+            runCatching {
+                git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), commitMessageHotpIncrement(name))
+            }
+            next
+        }
+        refresh()
+        return advance
+    }
+
+    /**
+     * Write OTP-only entries (the URI as the whole entry, what
+     * `pass otp insert` writes), one commit each with pass-otp's message.
+     * Returns the names written; stops at the first failure and rethrows
+     * it after refreshing, so the caller can say how far it got.
+     */
+    suspend fun addOtpEntries(entries: List<Pair<String, String>>): List<String> {
+        val current = store ?: throw StoreException.NoStore()
+        val written = mutableListOf<String>()
+        try {
+            withContext(Dispatchers.IO) {
+                for ((name, uri) in entries) {
+                    current.writeEntry(name, "$uri\n".toByteArray(Charsets.UTF_8), engine)
+                    runCatching {
+                        git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), commitMessageOtpAdd(name))
+                    }
+                    written += name
+                }
+            }
+        } finally {
+            refresh()
+        }
+        return written
+    }
+
+    /**
+     * An encrypted `.passpony` backup of every key this device holds: the
+     * age identities file and each file under pgp-keys/, encrypted to
+     * [recoveryCode] (the canonical code; see docs/BACKUP.md in
+     * PassPonyCore). Returns the age file bytes for the caller to write.
+     */
+    suspend fun buildBackup(recoveryCode: String): ByteArray = withContext(Dispatchers.IO) {
+        val sections = mutableListOf<BackupSection>()
+        AgeIdentityStore.exportText(context)?.let { text ->
+            sections += BackupSection(backupKindAgeIdentities(), "", text.toByteArray(Charsets.UTF_8))
+        }
+        PgpKeyStore.keyDirectory(context).listFiles()
+            ?.filter { it.isFile }
+            ?.sortedBy { it.name }
+            ?.forEach { file ->
+                sections += BackupSection(backupKindPgpSecretKey(), file.name, file.readBytes())
+            }
+        val plaintext = backupEncode(sections)
+        try {
+            ageEncryptWithPassphrase(plaintext, recoveryCode)
+        } finally {
+            plaintext.fill(0)
+            sections.forEach { it.data.fill(0) }
+        }
+    }
+
+    /** What a restore changed. */
+    data class RestoreResult(
+        val identitiesAdded: Int,
+        val identitiesPresent: Int,
+        val pgpKeysAdded: Int,
+        val pgpKeysPresent: Int,
+        val unknownSections: Int,
+    )
+
+    /**
+     * Restore a `.passpony` backup with [recoveryCode] (canonical). Age
+     * identities are merged (never replacing what is here); PGP key files
+     * are added unless an identical file is already present, and a
+     * different file under the same name is kept beside it rather than
+     * overwritten. Wrong code: `CryptoException.DecryptionFailed`, nothing
+     * written. A damaged container: `BackupException`, nothing written.
+     */
+    suspend fun restoreBackup(bytes: ByteArray, recoveryCode: String): RestoreResult {
+        val result = withContext(Dispatchers.IO) {
+            val plaintext = ageDecryptWithPassphrase(bytes, recoveryCode)
+            val sections = try {
+                backupDecode(plaintext)
+            } finally {
+                plaintext.fill(0)
+            }
+            var idAdded = 0
+            var idPresent = 0
+            var pgpAdded = 0
+            var pgpPresent = 0
+            var unknown = 0
+            try {
+                for (section in sections) {
+                    when (section.kind) {
+                        backupKindAgeIdentities() -> {
+                            val r = AgeIdentityStore.importIdentities(context, section.data.toString(Charsets.UTF_8))
+                            idAdded += r.added
+                            idPresent += r.alreadyPresent
+                        }
+                        backupKindPgpSecretKey() -> {
+                            if (restorePgpKey(section.name, section.data)) pgpAdded++ else pgpPresent++
+                        }
+                        else -> unknown++
+                    }
+                }
+            } finally {
+                sections.forEach { it.data.fill(0) }
+            }
+            RestoreResult(idAdded, idPresent, pgpAdded, pgpPresent, unknown)
+        }
+        if (result.identitiesAdded == 0 &&
+            result.identitiesPresent > 0 &&
+            result.identitiesPresent == AgeIdentityStore.identityCount(context)
+        ) {
+            // The backup holds exactly the identities this device has, so
+            // a backup covering this device exists.
+            KeyBackupState.markBackedUp(context)
+        }
+        engine = EngineProvider.engine(context, format)
+        openStore()
+        return result
+    }
+
+    /** True when written, false when an identical file was already there. */
+    private fun restorePgpKey(name: String, data: ByteArray): Boolean {
+        val dir = PgpKeyStore.keyDirectory(context)
+        val safeName = File(name.ifBlank { "restored-key.asc" }).name
+        var target = File(dir, safeName)
+        var n = 2
+        while (target.exists()) {
+            if (target.readBytes().contentEquals(data)) return false
+            target = File(dir, "${safeName.substringBeforeLast('.')}-restored-$n" +
+                (if (safeName.contains('.')) ".${safeName.substringAfterLast('.')}" else ""))
+            n++
+        }
+        target.writeBytes(data)
+        return true
+    }
+
+    /** The keys were written out (backup or plain export) by the user. */
+    suspend fun markKeysBackedUp() {
+        KeyBackupState.markBackedUp(context)
     }
 
     private fun seedDemoStore(store: PassStore) {

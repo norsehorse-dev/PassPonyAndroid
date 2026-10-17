@@ -133,7 +133,6 @@
     <string name="settings_age_present">Identities file present.</string>
     <string name="settings_age_missing">No identities imported. A passage store needs the age identity it was encrypted to.</string>
     <string name="settings_age_import">Import identities file…</string>
-    <string name="settings_age_import_success">Imported your age identity.</string>
     <string name="settings_age_import_failed">That file has no usable age identity.</string>
     <string name="settings_age_passphrase_title">Identities file is encrypted</string>
     <string name="settings_age_passphrase_message">Enter the passphrase this identities file was encrypted with, for example the one gopass asked for. It is only used to decrypt the file on this device.</string>
@@ -160,7 +159,7 @@
     <string name="otp_tab_paste">Paste</string>
     <string name="otp_tab_key">Enter key</string>
     <string name="otp_tab_scan">Scan</string>
-    <string name="otp_paste_hint">otpauth://totp/…</string>
+    <string name="otp_paste_hint">otpauth://…</string>
     <string name="otp_paste_help">Paste the otpauth:// link the site offers during two-factor setup, or the output of pass otp uri on your desktop.</string>
     <string name="otp_key_secret">Secret key</string>
     <string name="otp_key_account">Account</string>
@@ -181,7 +180,7 @@
     <string name="otp_use">Use this code</string>
     <string name="entry_detail_set_up_otp">Set up one-time code</string>
     <string name="add_entry_otp_optional">One-time code (optional)</string>
-    <string name="error_totp_not_totp_uri">This isn\'t an otpauth:// one-time code link. Counter-based (HOTP) codes and Google Authenticator export codes aren\'t supported.</string>
+    <string name="error_totp_not_totp_uri">This isn\'t an otpauth:// one-time code link.</string>
     <string name="error_totp_missing_secret">The code has no secret.</string>
     <string name="error_totp_bad_secret">The secret isn\'t valid base32.</string>
     <string name="error_totp_bad_algorithm">Unsupported algorithm: %1$s</string>
@@ -405,4 +404,111 @@ You can manage this anytime in iOS Settings under AutoFill &amp; Passwords.</str
 
 PassPony speaks the same format as the pass and passage command-line tools: plain files, encrypted with your keys, synced with git.</string>
     <!-- end P13 imported corpus -->
+    <!-- 2.0 rc1: identity import adds, HOTP, Google Authenticator import,
+         keys backup and restore. -->
+    <plurals name="settings_age_import_added">
+        <item quantity="one">Added %1$d age identity.</item>
+        <item quantity="other">Added %1$d age identities.</item>
+    </plurals>
+    <plurals name="settings_age_import_added_some_present">
+        <item quantity="one">Added %1$d age identity; %2$d already here.</item>
+        <item quantity="other">Added %1$d age identities; %2$d already here.</item>
+    </plurals>
+    <string name="settings_age_import_already_present">PassPony already has every identity in that file.</string>
+    <string name="error_hotp_missing_counter">This counter-based (HOTP) link has no counter.</string>
+    <string name="error_backup_not_a_backup">That file isn\'t a PassPony backup.</string>
+    <string name="error_backup_newer_version">That backup was made by a newer version of PassPony. Update the app to restore it.</string>
+    <string name="error_backup_damaged">That backup is damaged or incomplete. Nothing was restored.</string>
+    <string name="error_backup_code_length">A recovery code has 30 characters.</string>
+    <string name="error_backup_code_character">That recovery code has a character codes never use.</string>
+    <string name="error_backup_code_checksum">That recovery code has a typo. Check each group against what you wrote down.</string>
+    <string name="error_backup_random">This device couldn\'t generate a recovery code. Try again.</string>
+    <string name="error_migration_not_export">That isn\'t a Google Authenticator export code.</string>
+    <string name="error_migration_damaged">That export code couldn\'t be read. Scan it again.</string>
+    <string name="otp_hotp_summary_format">%1$s · %2$d digits · counter %3$d</string>
+    <string name="otp_hotp_preview_note">Counter-based code. Codes are shown on the entry, one at a time, when you ask for the next one.</string>
+    <string name="otp_scan_is_authenticator_export">That\'s a Google Authenticator export. Use Import from Authenticator in the store list menu.</string>
+    <string name="otp_hotp_next_code">Show next code</string>
+    <string name="otp_hotp_next_code_footer">Each code uses up one counter value and is saved to the entry, the same as pass otp code.</string>
+    <string name="otp_import_title">Import from Authenticator</string>
+    <string name="otp_import_intro">In Google Authenticator, choose Transfer accounts, then Export accounts. Scan every QR code it shows. Each account you pick becomes its own one-time code entry.</string>
+    <string name="otp_import_scan">Scan export codes</string>
+    <string name="otp_import_paste_hint">or paste an otpauth-migration:// link</string>
+    <string name="otp_import_paste_add">Add link</string>
+    <string name="otp_import_progress">%1$d of %2$d codes scanned</string>
+    <string name="otp_import_already_scanned">Already scanned. %1$d of %2$d codes so far.</string>
+    <string name="otp_import_other_export">That code is from a different export. Finish this one or start over.</string>
+    <string name="otp_import_accounts_header">Accounts</string>
+    <string name="otp_import_kind_hotp">counter-based</string>
+    <string name="otp_import_entry_name">Entry name</string>
+    <string name="otp_import_name_blank">Give this entry a name.</string>
+    <string name="otp_import_name_duplicate">Another account here has the same name.</string>
+    <string name="otp_import_name_exists">An entry with this name already exists.</string>
+    <string name="otp_import_skipped_header">Not imported</string>
+    <string name="otp_import_skipped_line">%1$s: %2$s</string>
+    <string name="otp_import_skip_md5">uses MD5, which PassPony and pass-otp don\'t support</string>
+    <string name="otp_import_skip_empty">has no secret</string>
+    <string name="otp_import_skip_unsupported">uses settings PassPony doesn\'t support</string>
+    <string name="otp_import_start_over">Start over</string>
+    <plurals name="otp_import_done">
+        <item quantity="one">Imported %1$d entry.</item>
+        <item quantity="other">Imported %1$d entries.</item>
+    </plurals>
+    <plurals name="otp_import_button">
+        <item quantity="one">Import %1$d entry</item>
+        <item quantity="other">Import %1$d entries</item>
+    </plurals>
+    <string name="store_list_import_authenticator">Import from Authenticator</string>
+    <string name="store_list_back_up_keys">Back up keys</string>
+    <string name="store_list_backup_banner_title">Your key isn\'t backed up</string>
+    <string name="store_list_backup_banner_body">If you lose this phone, your passage entries can\'t be read without it. Tap to back it up.</string>
+    <string name="settings_backup_header">Backup</string>
+    <string name="settings_backup_row_title">Back up and restore keys</string>
+    <string name="settings_backup_row_subtitle">Encrypted backup, plain export, restore</string>
+    <string name="backup_title">Keys backup</string>
+    <string name="backup_status_done">Your keys are backed up.</string>
+    <string name="backup_status_needed">Your keys aren\'t backed up yet.</string>
+    <string name="backup_sync_is_not_backup">Sync copies your encrypted entries, not your keys. A new phone can clone your store but can\'t read it without a key backup.</string>
+    <string name="backup_encrypted_header">Encrypted backup</string>
+    <string name="backup_encrypted_body">Your age identities and any imported PGP keys, in one .passpony file locked with a recovery code. Keep the file wherever you like. Without the code it can\'t be opened.</string>
+    <string name="backup_create">Create backup…</string>
+    <string name="backup_code_intro">This is your recovery code. Write it down and keep it somewhere safe.</string>
+    <string name="backup_code_warning">The backup can\'t be opened without this code, and PassPony can\'t show it again after this.</string>
+    <string name="backup_code_written">I\'ve written it down</string>
+    <string name="backup_confirm_intro">Type the recovery code from what you wrote down.</string>
+    <string name="backup_code_hint">Recovery code</string>
+    <string name="backup_confirm_mismatch">That\'s a valid code, but not this one. Check what you wrote down.</string>
+    <string name="backup_save">Save backup…</string>
+    <string name="backup_show_code_again">Show the code again</string>
+    <string name="backup_choose_location">Choose where to save the backup.</string>
+    <string name="backup_saved">Backup saved.</string>
+    <string name="backup_save_failed">Couldn\'t save: %1$s</string>
+    <string name="backup_plain_header">Plain export</string>
+    <string name="backup_plain_body">Your age identities file as plain text, the same file the passage and age tools read.</string>
+    <string name="backup_plain_export">Export identities file…</string>
+    <string name="backup_plain_saved">Identities file saved.</string>
+    <string name="backup_plain_warning_title">Export your key unencrypted?</string>
+    <string name="backup_plain_warning_body">Anyone who gets this file can read your passage entries. Keep it somewhere only you can reach, or use the encrypted backup instead.</string>
+    <string name="backup_plain_export_confirm">Export</string>
+    <string name="backup_restore_header">Restore</string>
+    <string name="backup_restore_body">Restore keys from a .passpony backup. They are added to the keys already here; nothing is replaced.</string>
+    <string name="backup_restore_button">Restore from backup…</string>
+    <string name="backup_restore_unreadable">That file couldn\'t be read.</string>
+    <string name="backup_restore_wrong_code">That recovery code doesn\'t open this backup.</string>
+    <string name="backup_restore_title">Restore backup</string>
+    <string name="backup_restore_message">Enter the recovery code you wrote down when you made this backup.</string>
+    <plurals name="backup_restore_identities">
+        <item quantity="one">%1$d age identity</item>
+        <item quantity="other">%1$d age identities</item>
+    </plurals>
+    <plurals name="backup_restore_pgp_keys">
+        <item quantity="one">%1$d PGP key</item>
+        <item quantity="other">%1$d PGP keys</item>
+    </plurals>
+    <plurals name="backup_restore_unknown">
+        <item quantity="one">%1$d item from a newer version was skipped.</item>
+        <item quantity="other">%1$d items from a newer version were skipped.</item>
+    </plurals>
+    <string name="backup_restore_nothing_new">Restored. Every key in the backup was already here.</string>
+    <string name="backup_restore_done">Restored %1$s.</string>
 </resources>

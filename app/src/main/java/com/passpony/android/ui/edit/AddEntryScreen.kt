@@ -33,8 +33,8 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.ui.components.otpSummaryLine
 import com.passpony.android.ui.AppViewModel
-import uniffi.pass_ffi.totpDescribe
 
 /**
  * Port of PassPony iOS's AddEntryView: name, password with a Generate
@@ -159,8 +159,7 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
             if (pendingUri == null) {
                 TextButton(onClick = { showOtpSheet = true }) { Text(stringResource(R.string.otp_add)) }
             } else {
-                val summary = remember(pendingUri) { runCatching { totpDescribe(pendingUri) }.getOrNull() }
-                if (summary != null) Text(totpSummaryLine(summary))
+                otpSummaryLine(pendingUri)?.let { Text(it) }
                 Row {
                     TextButton(onClick = { showOtpSheet = true }) { Text(stringResource(R.string.otp_change)) }
                     Spacer(Modifier.width(8.dp))

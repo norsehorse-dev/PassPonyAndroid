@@ -62,6 +62,9 @@ class MainActivity : AppCompatActivity() {
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->
+                            if (UnlockGateLogic.shouldStampOnLeave(event, lockedNow = locked)) {
+                                UnlockGate.markLeftForeground(context)
+                            }
                             if (UnlockGateLogic.shouldRelock(event, UnlockGate.isFresh(context))) {
                                 locked = true
                             }

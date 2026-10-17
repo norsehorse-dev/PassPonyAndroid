@@ -54,12 +54,16 @@ import androidx.core.content.ContextCompat
 import com.passpony.android.R
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.components.TotpRing
+import com.passpony.android.ui.components.otpSummaryLine
+import com.passpony.android.ui.components.validateOtpUri
 import com.passpony.android.ui.scan.QrScannerDialog
+import com.passpony.android.ui.scan.ScanFeedback
 import com.passpony.android.ui.util.SecureScreenEffect
+import uniffi.pass_ffi.OtpKind
 import uniffi.pass_ffi.TotpAlgorithm
 import uniffi.pass_ffi.TotpSummary
+import uniffi.pass_ffi.otpUriKind
 import uniffi.pass_ffi.totpBuildUri
-import uniffi.pass_ffi.totpDescribe
 
 private const val TAB_PASTE = 0
 private const val TAB_KEY = 1
@@ -108,7 +112,8 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
     val candidate: Result<String>? = remember(tab, pasted, secret, account, issuer, algorithm, digits, period) {
         when (tab) {
             TAB_PASTE -> pasted.trim().takeIf { it.isNotEmpty() }?.let { text ->
-                runCatching { totpDescribe(text); text }
+                // TOTP or, since 2.0, HOTP (counter-based) links.
+                runCatching { validateOtpUri(text); text }
             }
             TAB_KEY -> if (secret.isBlank()) null else runCatching {
                 totpBuildUri(
@@ -124,9 +129,8 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
         }
     }
     val candidateUri = candidate?.getOrNull()
-    val summary: TotpSummary? = remember(candidateUri) {
-        candidateUri?.let { runCatching { totpDescribe(it) }.getOrNull() }
-    }
+    val summary: String? = candidateUri?.let { otpSummaryLine(it) }
+    val isTotp = remember(candidateUri) { candidateUri?.let { otpUriKind(it) } == OtpKind.TOTP }
     val problem = candidate?.exceptionOrNull()?.ponyMessage(context)
 
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -151,14 +155,17 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
     if (showScanner) {
         QrScannerDialog(
             onDecoded = { text ->
-                val failure = runCatching { totpDescribe(text) }.exceptionOrNull()
-                if (failure == null) {
-                    pasted = text
-                    tab = TAB_PASTE
-                    showScanner = false
-                    null
-                } else {
-                    context.getString(R.string.otp_scan_rejected, failure.ponyMessage(context))
+                val failure = runCatching { validateOtpUri(text) }.exceptionOrNull()
+                when {
+                    failure == null -> {
+                        pasted = text
+                        tab = TAB_PASTE
+                        showScanner = false
+                        null
+                    }
+                    text.startsWith("otpauth-migration:") ->
+                        ScanFeedback(context.getString(R.string.otp_scan_is_authenticator_export))
+                    else -> ScanFeedback(context.getString(R.string.otp_scan_rejected, failure.ponyMessage(context)))
                 }
             },
             onClose = { showScanner = false }
@@ -316,10 +323,20 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
                     style = MaterialTheme.typography.labelMedium,
                     color = MaterialTheme.colorScheme.secondary
                 )
-                Text(totpSummaryLine(summary), style = MaterialTheme.typography.bodyMedium)
-                // A one-line entry whose first line is the URI is the shape
-                // `pass otp insert` writes, and the ring reads it directly.
-                TotpRing("$candidateUri\n".toByteArray(Charsets.UTF_8))
+                Text(summary, style = MaterialTheme.typography.bodyMedium)
+                if (isTotp) {
+                    // A one-line entry whose first line is the URI is the shape
+                    // `pass otp insert` writes, and the ring reads it directly.
+                    TotpRing("$candidateUri\n".toByteArray(Charsets.UTF_8))
+                } else {
+                    // No live preview for HOTP: showing a code would mean
+                    // using up a counter value before the entry is saved.
+                    Text(
+                        stringResource(R.string.otp_hotp_preview_note),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.secondary
+                    )
+                }
             }
 
             Spacer(Modifier.height(16.dp))

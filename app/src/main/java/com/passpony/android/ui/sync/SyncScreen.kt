@@ -89,6 +89,14 @@ fun SyncScreen(
                 .padding(16.dp)
         ) {
             StatusSection(status)
+            // 2.0: sync carries encrypted entries only. Said here because
+            // this is where people assume their store is "backed up".
+            Text(
+                stringResource(R.string.backup_sync_is_not_backup),
+                style = MaterialTheme.typography.bodySmall,
+                color = MaterialTheme.colorScheme.secondary,
+                modifier = Modifier.padding(top = 8.dp)
+            )
             Spacer(Modifier.height(16.dp))
 
             if (status == null) {

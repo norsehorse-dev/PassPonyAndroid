@@ -19,13 +19,21 @@ listings, the signed release flow) is the packet in progress now -- see
 - One-time codes: scan a QR code, paste an otpauth link, or type the
   key; live codes with a countdown ring. Reads and writes the same
   `otpauth://` line as pass-otp, including entries made with
-  `pass otp insert`.
+  `pass otp insert`. Counter-based (HOTP) codes advance and commit the
+  counter the way `pass otp code` does.
+- Import from Google Authenticator: scan its export QR codes and each
+  account becomes its own one-time code entry.
 - Password generator with length and character-class options; the
   untouched default is pass's own 25 from the full set.
 - Import an existing age identity for passage stores, plaintext or
   passphrase-protected (the `age -p` format gopass's age backend writes,
   binary or armored); the passphrase is asked for on import and the file
-  is decrypted on the device.
+  is decrypted on the device. Imported identities are added to the ones
+  already here, never replacing them.
+- Keys backup: an encrypted `.passpony` backup of every key on the
+  device, locked with a generated recovery code (a plain age file; see
+  PassPonyCore's `docs/BACKUP.md`), a plain identities export, and
+  restore. A banner says so until the generated age identity is backed up.
 - Ephemeral, local-only clipboard that clears after 45 seconds.
 - Git sync: clone, publish, push, and per-entry conflict resolution.
   Commit messages match the pass CLI format, so a store stays
@@ -135,7 +143,6 @@ UnlockGate parity.
 - SSH remotes for git sync; use HTTPS with a token for now.
 - Credential Manager / passkey-era autofill APIs (format spike done in
   PassPonyCore's `docs/passkeys-format.md`; the release after 1.2).
-- HOTP (counter-based) codes and Google Authenticator migration QR codes.
 - armeabi-v7a (32-bit) builds.
 
 ## License

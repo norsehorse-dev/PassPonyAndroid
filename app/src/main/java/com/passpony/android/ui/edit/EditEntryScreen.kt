@@ -35,9 +35,10 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.ui.components.entryOtpSummaryLine
+import com.passpony.android.ui.components.otpSummaryLine
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.detail.Utf8Text
-import uniffi.pass_ffi.TotpSummary
 import uniffi.pass_ffi.entryFields
 import uniffi.pass_ffi.entryIsOtpOnly
 import uniffi.pass_ffi.entryPassword
@@ -45,8 +46,7 @@ import uniffi.pass_ffi.entryRemoveOtpauth
 import uniffi.pass_ffi.entrySetField
 import uniffi.pass_ffi.entrySetOtpauth
 import uniffi.pass_ffi.entrySetPassword
-import uniffi.pass_ffi.entryTotpSummary
-import uniffi.pass_ffi.totpDescribe
+import uniffi.pass_ffi.entryOtpKind
 
 /**
  * Port of PassPony iOS's EditEntryView: field-level editing over the
@@ -84,7 +84,8 @@ fun EditEntryScreen(
     var originalPassword by remember(name) { mutableStateOf("") }
     var originalValues by remember(name) { mutableStateOf<Map<String, String>>(emptyMap()) }
     var fieldKeys by remember(name) { mutableStateOf<List<String>>(emptyList()) }
-    var originalTotp by remember(name) { mutableStateOf<TotpSummary?>(null) }
+    // Whether the entry already carries an otpauth line (TOTP or HOTP).
+    var hasOriginalOtp by remember(name) { mutableStateOf(false) }
     var otpOnly by remember(name) { mutableStateOf(false) }
 
     var password by remember(name) { mutableStateOf("") }
@@ -121,7 +122,7 @@ fun EditEntryScreen(
         fieldKeys = keys
         password = decodedPassword
         values = pairs
-        originalTotp = entryTotpSummary(content)
+        hasOriginalOtp = entryOtpKind(content) != null
         otpOnly = entryIsOtpOnly(content)
     }
     DisposableEffect(name) {
@@ -136,7 +137,7 @@ fun EditEntryScreen(
         values = values,
         newKey = newKey,
         newValue = newValue,
-        hasOriginalOtpauth = originalTotp != null,
+        hasOriginalOtpauth = hasOriginalOtp,
         otpauthEdit = otpauthEdit,
     )
 
@@ -260,7 +261,7 @@ fun EditEntryScreen(
 
             Spacer(Modifier.height(16.dp))
             OtpauthSection(
-                original = originalTotp,
+                original = original?.takeIf { hasOriginalOtp }?.let { entryOtpSummaryLine(it) ?: "" },
                 otpOnly = otpOnly,
                 edit = otpauthEdit,
                 onAddOrReplace = { showOtpSheet = true },
@@ -301,7 +302,7 @@ fun EditEntryScreen(
  */
 @Composable
 private fun OtpauthSection(
-    original: TotpSummary?,
+    original: String?,
     otpOnly: Boolean,
     edit: OtpauthEdit,
     onAddOrReplace: () -> Unit,
@@ -317,8 +318,7 @@ private fun OtpauthSection(
     Spacer(Modifier.height(4.dp))
     when (edit) {
         is OtpauthEdit.Set -> {
-            val pending = remember(edit.uri) { runCatching { totpDescribe(edit.uri) }.getOrNull() }
-            if (pending != null) Text(totpSummaryLine(pending))
+            otpSummaryLine(edit.uri)?.let { Text(it) }
             Text(
                 stringResource(if (original == null) R.string.otp_added_on_save else R.string.otp_replaces_on_save),
                 style = MaterialTheme.typography.bodySmall,
@@ -349,7 +349,7 @@ private fun OtpauthSection(
                 )
                 TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_add)) }
             } else {
-                Text(totpSummaryLine(original))
+                if (original.isNotEmpty()) Text(original)
                 Row {
                     TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_replace)) }
                     Spacer(Modifier.width(8.dp))

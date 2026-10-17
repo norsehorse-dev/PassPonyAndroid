@@ -49,6 +49,13 @@ import kotlinx.coroutines.delay
 private const val REJECTION_SHOWN_MS = 2_500L
 
 /**
+ * What the scanner shows after a decode it did not accept: an error
+ * (wrong kind of code) or, since 2.0, a progress note for a multi-code
+ * export ("1 of 3 scanned"). Either way scanning resumes after a moment.
+ */
+data class ScanFeedback(val message: String, val isError: Boolean = true)
+
+/**
  * Full-screen QR scanner: CameraX preview plus a [QrAnalyzer] feeding
  * zxing. Hosted as a Dialog by the setup sheet, deliberately not a
  * navigation destination, so the decoded URI (a secret) stays in the
@@ -61,7 +68,7 @@ private const val REJECTION_SHOWN_MS = 2_500L
  * export, a URL) is explained rather than silently ignored.
  */
 @Composable
-fun QrScannerDialog(onDecoded: (String) -> String?, onClose: () -> Unit) {
+fun QrScannerDialog(onDecoded: (String) -> ScanFeedback?, onClose: () -> Unit) {
     Dialog(
         onDismissRequest = onClose,
         properties = DialogProperties(usePlatformDefaultWidth = false)
@@ -71,14 +78,14 @@ fun QrScannerDialog(onDecoded: (String) -> String?, onClose: () -> Unit) {
 }
 
 @Composable
-fun QrScannerScreen(onDecoded: (String) -> String?, onClose: () -> Unit) {
+fun QrScannerScreen(onDecoded: (String) -> ScanFeedback?, onClose: () -> Unit) {
     val context = LocalContext.current
     val lifecycleOwner = LocalLifecycleOwner.current
     val previewView = remember { PreviewView(context) }
     val analyzerExecutor = remember { Executors.newSingleThreadExecutor() }
     var camera by remember { mutableStateOf<Camera?>(null) }
     var torchOn by remember { mutableStateOf(false) }
-    var rejection by remember { mutableStateOf<String?>(null) }
+    var rejection by remember { mutableStateOf<ScanFeedback?>(null) }
     var analyzer by remember { mutableStateOf<QrAnalyzer?>(null) }
 
     SecureScreenEffect()
@@ -170,9 +177,10 @@ fun QrScannerScreen(onDecoded: (String) -> String?, onClose: () -> Unit) {
                 .navigationBarsPadding()
                 .padding(16.dp)
         ) {
+            val feedback = rejection
             Text(
-                rejection ?: stringResource(R.string.otp_scan_help),
-                color = if (rejection != null) MaterialTheme.colorScheme.error else Color.White,
+                feedback?.message ?: stringResource(R.string.otp_scan_help),
+                color = if (feedback?.isError == true) MaterialTheme.colorScheme.error else Color.White,
                 style = MaterialTheme.typography.bodyMedium
             )
         }
