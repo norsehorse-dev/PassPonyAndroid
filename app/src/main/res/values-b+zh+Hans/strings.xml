@@ -65,6 +65,14 @@
     <string name="delete_entry_confirm">删除</string>
     <string name="delete_entry_message">这将从密码库中删除“%1$s”。此操作无法撤销。</string>
     <string name="delete_entry_title">删除条目？</string>
+    <string name="device_key_body">另一台设备已将此密钥添加到你的密码库，此后你保存的内容它都能读取：</string>
+    <string name="device_key_help">请将它与你另一台设备上 PassPony“设置”中的密钥进行核对。如果是你的密钥，请重新加密，让那台设备也能读取你现有的条目。如果你不认识它，请将其移除。</string>
+    <string name="device_key_later">稍后</string>
+    <string name="device_key_reencrypted">已为新密钥重新加密的条目：%1$d。</string>
+    <string name="device_key_remove">移除密钥</string>
+    <string name="device_key_removed">密钥已移除。此后保存的内容都不会再为它加密。</string>
+    <string name="device_key_skipped">此设备无法读取、已留给保存它们的设备处理的条目：%1$d。</string>
+    <string name="device_key_title">新设备密钥</string>
     <string name="diagnostics_app">应用</string>
     <string name="diagnostics_copied">报告已复制。</string>
     <string name="diagnostics_copy">复制报告</string>

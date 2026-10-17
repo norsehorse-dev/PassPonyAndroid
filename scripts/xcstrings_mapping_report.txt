@@ -1,16 +1,16 @@
 P13 xcstrings -> Android mapping report
 source: /home/claude/ios/passpony/Sources/Shared/Localizable.xcstrings
-total xcstrings keys considered: 420
-  under an existing hand-authored resource name: 345
+total xcstrings keys considered: 428
+  under an existing hand-authored resource name: 353
   under a generated xc_-prefixed name: 75
 
 per-language coverage (translated / total selected keys):
-  es         407 / 420
-  fr         407 / 420
-  de         407 / 420
-  ru         407 / 420
-  zh-Hans    407 / 420
-  pt-BR      407 / 420
+  es         415 / 428
+  fr         415 / 428
+  de         415 / 428
+  ru         415 / 428
+  zh-Hans    415 / 428
+  pt-BR      415 / 428
 
 key -> android resource name:
   '%@ · %lld digits · %lld s' -> otp_summary_format
@@ -50,6 +50,7 @@ key -> android resource name:
   'Already using pass or passage? Clone your existing store from its git remote, or import your OpenPGP key files.\n\nStarting fresh? Just continue.' -> xc_already_using_pass_or_passage_clone_your_existin
   'An entry with this name already exists.' -> otp_import_name_exists
   'Another account here has the same name.' -> otp_import_name_duplicate
+  'Another device added this key to your store, so it can read what you save from now on:' -> device_key_body
   'Anyone who gets this file can read your passage entries. Keep it somewhere only you can reach, or use the encrypted backup instead.' -> backup_plain_warning_body
   'App' -> diagnostics_app
   'Autofill' -> settings_autofill_header
@@ -64,6 +65,7 @@ key -> android resource name:
   'Camera access was denied. Paste the link or enter the key instead.' -> otp_scan_denied
   'Cancel' -> delete_entry_cancel
   'Change…' -> otp_change
+  "Check it against the key in PassPony's Settings on your other device. If it's yours, re-encrypt so that device can read your existing entries too. If you don't recognize it, remove it." -> device_key_help
   'Choose entry' -> xc_choose_entry
   "Choose the language you'd like to use.\n\nYou can change this anytime in Settings." -> xc_choose_the_language_you_d_like_to_use_you_can_ch
   'Choose where to save the backup.' -> backup_choose_location
@@ -112,6 +114,8 @@ key -> android resource name:
   'Enter the recovery code you wrote down when you made this backup.' -> backup_restore_message
   'Entire store' -> reencrypt_scope_entire_store
   'Entries' -> settings_diagnostics_entries
+  'Entries re-encrypted for the new key: %lld.' -> device_key_reencrypted
+  "Entries this device can't read, left for the device that saved them: %lld." -> device_key_skipped
   'Entry' -> xc_entry
   'Entry name' -> otp_import_entry_name
   'Every code in this export is scanned.' -> otp_import_all_scanned
@@ -168,10 +172,12 @@ key -> android resource name:
   'Kept the current SSH key.' -> backup_ssh_kept
   'Key for %@ has no usable encryption subkey (RSA keys need the smartcard path)' -> xc_key_for_has_no_usable_encryption_subkey_rsa_keys
   'Key passphrase' -> settings_key_passphrase_hint
+  'Key removed. Nothing saved from now on will be encrypted to it.' -> device_key_removed
   'Key unlocked.' -> settings_key_unlocked
   'Keys' -> diagnostics_keys
   'Keys backup' -> backup_title
   'Language' -> settings_language
+  'Later' -> device_key_later
   'Length' -> generator_length
   'Length must be between %lld and %lld.' -> error_generate_bad_length
   'Letters and digits only, like pass generate --no-symbols.' -> generator_symbols_none_hint
@@ -185,6 +191,7 @@ key -> android resource name:
   'Move / rename' -> entry_detail_move_rename
   'Name (e.g. web/github)' -> add_entry_name_hint
   'New URL (https://user:token@… or git@host:…)' -> sync_remote_new_url_hint
+  'New device key' -> device_key_title
   'New entry' -> add_entry_title
   'New name' -> xc_new_name
   'New password' -> generator_regenerate
@@ -259,6 +266,7 @@ key -> android resource name:
   'Remote' -> sync_remote_header
   'Remote updated.' -> sync_remote_updated
   'Remove' -> otp_remove
+  'Remove key' -> device_key_remove
   'Removed when you save.' -> otp_removed_on_save
   'Replace' -> backup_ssh_replace
   "Replace this app's SSH key?" -> backup_ssh_replace_title

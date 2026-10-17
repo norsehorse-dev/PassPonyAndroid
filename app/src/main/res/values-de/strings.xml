@@ -68,6 +68,14 @@
     <string name="delete_entry_confirm">Löschen</string>
     <string name="delete_entry_message">Damit wird „%1$s“ aus dem Speicher gelöscht. Das lässt sich nicht rückgängig machen.</string>
     <string name="delete_entry_title">Eintrag löschen?</string>
+    <string name="device_key_body">Ein anderes Gerät hat diesen Schlüssel zu deinem Speicher hinzugefügt und kann ab jetzt lesen, was du sicherst:</string>
+    <string name="device_key_help">Vergleiche ihn mit dem Schlüssel in den Einstellungen von PassPony auf deinem anderen Gerät. Wenn es deiner ist, verschlüssle neu, damit das andere Gerät auch deine vorhandenen Einträge lesen kann. Wenn du ihn nicht erkennst, entferne ihn.</string>
+    <string name="device_key_later">Später</string>
+    <string name="device_key_reencrypted">Für den neuen Schlüssel neu verschlüsselte Einträge: %1$d.</string>
+    <string name="device_key_remove">Schlüssel entfernen</string>
+    <string name="device_key_removed">Schlüssel entfernt. Was du ab jetzt sicherst, wird nicht mehr für ihn verschlüsselt.</string>
+    <string name="device_key_skipped">Einträge, die dieses Gerät nicht lesen kann, bleiben für das Gerät, das sie gesichert hat: %1$d.</string>
+    <string name="device_key_title">Neuer Geräteschlüssel</string>
     <string name="diagnostics_app">App</string>
     <string name="diagnostics_copied">Bericht kopiert.</string>
     <string name="diagnostics_copy">Bericht kopieren</string>

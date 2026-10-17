@@ -74,6 +74,14 @@
     <string name="delete_entry_confirm">Удалить</string>
     <string name="delete_entry_message">Запись «%1$s» будет удалена из хранилища. Это действие нельзя отменить.</string>
     <string name="delete_entry_title">Удалить запись?</string>
+    <string name="device_key_body">Другое устройство добавило этот ключ в ваше хранилище, поэтому оно сможет читать всё, что вы сохраните с этого момента:</string>
+    <string name="device_key_help">Сверьте его с ключом в настройках PassPony на другом устройстве. Если это ваш ключ, перешифруйте хранилище, чтобы то устройство могло читать и уже существующие записи. Если вы его не узнаёте, уберите его.</string>
+    <string name="device_key_later">Позже</string>
+    <string name="device_key_reencrypted">Записей перешифровано для нового ключа: %1$d.</string>
+    <string name="device_key_remove">Убрать ключ</string>
+    <string name="device_key_removed">Ключ убран. Всё, что вы сохраните с этого момента, не будет шифроваться для него.</string>
+    <string name="device_key_skipped">Записей, недоступных этому устройству и оставленных для устройства, которое их сохранило: %1$d.</string>
+    <string name="device_key_title">Новый ключ устройства</string>
     <string name="diagnostics_app">Приложение</string>
     <string name="diagnostics_copied">Отчёт скопирован.</string>
     <string name="diagnostics_copy">Скопировать отчёт</string>

@@ -13,6 +13,7 @@ import com.passpony.android.store.KeyBackupState
 import java.io.File
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
+import com.passpony.android.store.DeviceKeys
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.settings.ReencryptOps
@@ -31,6 +32,7 @@ import uniffi.pass_ffi.EntryRef
 import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.GitSync
 import uniffi.pass_ffi.PassStore
+import uniffi.pass_ffi.ReencryptReport
 import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.StoreFormat
 import uniffi.pass_ffi.SyncOutcome
@@ -96,6 +98,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      * both stay live without a separate poll.
      */
     val syncStatus: StateFlow<SyncStatus?> = _syncStatus.asStateFlow()
+
+    private val _pendingDeviceKeys = MutableStateFlow<List<String>>(emptyList())
+
+    /**
+     * 2.0 rc4: keys another device added to `.age-recipients` that this
+     * one has not been asked about. The Sync screen asks, one at a time.
+     */
+    val pendingDeviceKeys: StateFlow<List<String>> = _pendingDeviceKeys.asStateFlow()
 
     val visibleEntries: StateFlow<List<EntryRef>> =
         combine(_entries, _searchText) { all, query -> BrowseModel.visibleEntries(all, query) }
@@ -320,9 +330,62 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             handle.setSsh(SshKeyStore.config(context))
             handle.sync(resolver)
         }
+        joinRecipients()
         refresh()
         if (outcome !is SyncOutcome.UpToDate) rebuildPasskeyIndex()
         return outcome
+    }
+
+    /**
+     * 2.0 rc4: list this device in `.age-recipients` (committing and
+     * pushing when that changed anything), then look for keys other
+     * devices added. A failed push leaves the commit for the next Push;
+     * the sync itself already succeeded.
+     */
+    private suspend fun joinRecipients() {
+        val current = store ?: return
+        withContext(Dispatchers.IO) {
+            if (runCatching { DeviceKeys.join(context, format, current, git) }.getOrDefault(false)) {
+                runCatching {
+                    git?.setSsh(SshKeyStore.config(context))
+                    git?.push()
+                }
+            }
+            _pendingDeviceKeys.value = DeviceKeys.pending(context, format, current)
+        }
+    }
+
+    /** The person recognized [key]: re-encrypt what this device can read, push. */
+    suspend fun approveDeviceKey(key: String): ReencryptReport {
+        val current = store ?: throw StoreException.NoStore()
+        val report = withContext(Dispatchers.IO) {
+            val r = DeviceKeys.approve(context, format, current, engine, git, key)
+            if (r.rewritten.isNotEmpty()) {
+                git?.setSsh(SshKeyStore.config(context))
+                git?.push()
+            }
+            _pendingDeviceKeys.value = DeviceKeys.pending(context, format, current)
+            r
+        }
+        refresh()
+        return report
+    }
+
+    /** The person did not recognize [key]: take it out of the file, push. */
+    suspend fun removeDeviceKey(key: String) {
+        val current = store ?: throw StoreException.NoStore()
+        withContext(Dispatchers.IO) {
+            DeviceKeys.remove(format, current, git, key)
+            git?.setSsh(SshKeyStore.config(context))
+            git?.push()
+            _pendingDeviceKeys.value = DeviceKeys.pending(context, format, current)
+        }
+        refresh()
+    }
+
+    /** "Later": stop asking until the next sync. */
+    fun deferDeviceKeys() {
+        _pendingDeviceKeys.value = emptyList()
     }
 
     /**
@@ -334,6 +397,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun publishStore(url: String) {
         withContext(Dispatchers.IO) {
             val handle = git ?: GitSync.init(StorePaths.storeRoot(context, format).absolutePath, format)
+            store?.let { DeviceKeys.join(context, format, it, handle) }
             handle.setRemote(url)
             handle.setSsh(SshKeyStore.config(context))
             handle.push()
@@ -359,6 +423,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
         }
         openStore()
+        store?.let { cloned ->
+            withContext(Dispatchers.IO) { DeviceKeys.baseline(context, format, cloned) }
+        }
+        joinRecipients()
+        refresh()
     }
 
     /**

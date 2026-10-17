@@ -68,6 +68,14 @@
     <string name="delete_entry_confirm">Eliminar</string>
     <string name="delete_entry_message">Esto elimina «%1$s» del almacén. No se puede deshacer.</string>
     <string name="delete_entry_title">¿Eliminar la entrada?</string>
+    <string name="device_key_body">Otro dispositivo añadió esta clave a tu almacén, así que podrá leer lo que guardes a partir de ahora:</string>
+    <string name="device_key_help">Compárala con la clave que aparece en Ajustes de PassPony en tu otro dispositivo. Si es tuya, vuelve a cifrar para que ese dispositivo también pueda leer tus entradas existentes. Si no la reconoces, quítala.</string>
+    <string name="device_key_later">Más tarde</string>
+    <string name="device_key_reencrypted">Entradas que se volvieron a cifrar para la nueva clave: %1$d.</string>
+    <string name="device_key_remove">Quitar clave</string>
+    <string name="device_key_removed">Se quitó la clave. Nada de lo que se guarde a partir de ahora se cifrará para ella.</string>
+    <string name="device_key_skipped">Entradas que este dispositivo no puede leer, sin cambios para el dispositivo que las guardó: %1$d.</string>
+    <string name="device_key_title">Nueva clave de dispositivo</string>
     <string name="diagnostics_app">App</string>
     <string name="diagnostics_copied">Informe copiado.</string>
     <string name="diagnostics_copy">Copiar informe</string>

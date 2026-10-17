@@ -68,6 +68,14 @@
     <string name="delete_entry_confirm">Excluir</string>
     <string name="delete_entry_message">Isso exclui \"%1$s\" do cofre. Não é possível desfazer.</string>
     <string name="delete_entry_title">Excluir entrada?</string>
+    <string name="device_key_body">Outro dispositivo adicionou esta chave ao seu cofre, então ele poderá ler o que você salvar a partir de agora:</string>
+    <string name="device_key_help">Compare-a com a chave nos Ajustes do PassPony no seu outro dispositivo. Se for sua, recriptografe para que esse dispositivo também possa ler suas entradas existentes. Se você não a reconhecer, remova-a.</string>
+    <string name="device_key_later">Mais tarde</string>
+    <string name="device_key_reencrypted">Entradas recriptografadas para a nova chave: %1$d.</string>
+    <string name="device_key_remove">Remover chave</string>
+    <string name="device_key_removed">Chave removida. Nada do que for salvo a partir de agora será criptografado para ela.</string>
+    <string name="device_key_skipped">Entradas que este dispositivo não consegue ler, mantidas para o dispositivo que as salvou: %1$d.</string>
+    <string name="device_key_title">Nova chave de dispositivo</string>
     <string name="diagnostics_app">App</string>
     <string name="diagnostics_copied">Relatório copiado.</string>
     <string name="diagnostics_copy">Copiar relatório</string>

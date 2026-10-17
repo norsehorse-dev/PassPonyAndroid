@@ -68,6 +68,14 @@
     <string name="delete_entry_confirm">Supprimer</string>
     <string name="delete_entry_message">Cela supprime « %1$s » du coffre. Cette action est irréversible.</string>
     <string name="delete_entry_title">Supprimer l\'entrée ?</string>
+    <string name="device_key_body">Un autre appareil a ajouté cette clé à votre coffre. Il pourra lire tout ce que vous enregistrerez désormais :</string>
+    <string name="device_key_help">Comparez-la avec la clé affichée dans les Réglages de PassPony sur votre autre appareil. Si c\'est la vôtre, rechiffrez pour que cet appareil puisse aussi lire vos entrées existantes. Si vous ne la reconnaissez pas, retirez-la.</string>
+    <string name="device_key_later">Plus tard</string>
+    <string name="device_key_reencrypted">Entrées rechiffrées pour la nouvelle clé : %1$d.</string>
+    <string name="device_key_remove">Retirer la clé</string>
+    <string name="device_key_removed">Clé retirée. Rien de ce que vous enregistrerez désormais ne sera chiffré pour elle.</string>
+    <string name="device_key_skipped">Entrées que cet appareil ne peut pas lire, laissées pour l\'appareil qui les a enregistrées : %1$d.</string>
+    <string name="device_key_title">Nouvelle clé d\'appareil</string>
     <string name="diagnostics_app">App</string>
     <string name="diagnostics_copied">Rapport copié.</string>
     <string name="diagnostics_copy">Copier le rapport</string>

@@ -28,6 +28,7 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
@@ -71,6 +72,20 @@ fun SyncScreen(
     val busy = syncViewModel.busy
     val message = syncViewModel.message
     val conflictPath = syncViewModel.resolver.conflictPath
+    val pendingKeys by appViewModel.pendingDeviceKeys.collectAsState()
+
+    // 2.0 rc4: another device listed its key in .age-recipients. Ask
+    // before re-encrypting anything to it, one key at a time.
+    pendingKeys.firstOrNull()?.let { key ->
+        if (!busy) {
+            DeviceKeyDialog(
+                key = key,
+                onApprove = { syncViewModel.approveDeviceKey(appViewModel, key) },
+                onRemove = { syncViewModel.removeDeviceKey(appViewModel, key) },
+                onLater = { appViewModel.deferDeviceKeys() },
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -305,4 +320,49 @@ private fun ActionsSection(busy: Boolean, onSyncNow: () -> Unit, onPush: () -> U
     if (busy) {
         LinearProgressIndicator(modifier = Modifier.fillMaxWidth().padding(top = 8.dp))
     }
+}
+
+/**
+ * 2.0 rc4: a key another device added to the store's `.age-recipients`.
+ * Shown whole, so it can be compared with the key the other device's
+ * Settings shows.
+ */
+@Composable
+private fun DeviceKeyDialog(
+    key: String,
+    onApprove: () -> Unit,
+    onRemove: () -> Unit,
+    onLater: () -> Unit,
+) {
+    AlertDialog(
+        onDismissRequest = onLater,
+        title = { Text(stringResource(R.string.device_key_title)) },
+        text = {
+            Column {
+                Text(stringResource(R.string.device_key_body))
+                Text(
+                    key,
+                    style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                    modifier = Modifier.padding(vertical = 12.dp)
+                )
+                Text(
+                    stringResource(R.string.device_key_help),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.secondary
+                )
+            }
+        },
+        confirmButton = {
+            Row {
+                TextButton(
+                    onClick = onRemove,
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.device_key_remove)) }
+                TextButton(onClick = onApprove) { Text(stringResource(R.string.reencrypt_title)) }
+            }
+        },
+        dismissButton = {
+            TextButton(onClick = onLater) { Text(stringResource(R.string.device_key_later)) }
+        }
+    )
 }

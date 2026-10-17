@@ -80,6 +80,23 @@ class SyncViewModel(application: Application) : AndroidViewModel(application) {
         appViewModel.cloneReplaceStore(url)
     }
 
+    /** 2.0 rc4: the new device key is one of the person's devices. */
+    fun approveDeviceKey(appViewModel: AppViewModel, key: String) = run {
+        val report = appViewModel.approveDeviceKey(key)
+        val done = context.getString(R.string.device_key_reencrypted, report.rewritten.size)
+        message = if (report.skipped > 0u) {
+            done + " " + context.getString(R.string.device_key_skipped, report.skipped.toInt())
+        } else {
+            done
+        }
+    }
+
+    /** 2.0 rc4: the person doesn't recognize the key; take it out. */
+    fun removeDeviceKey(appViewModel: AppViewModel, key: String) = run {
+        appViewModel.removeDeviceKey(key)
+        message = context.getString(R.string.device_key_removed)
+    }
+
     fun resolveConflict(choice: ConflictChoice) {
         resolver.resolve(choice)
     }

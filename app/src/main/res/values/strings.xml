@@ -584,4 +584,13 @@ PassPony speaks the same format as the pass and passage command-line tools: plai
     <string name="error_passkey">Something went wrong with this passkey.</string>
     <string name="settings_passkeys_body">PassPony can save and use passkeys in your browser. Turn it on as a passkey provider in Passwords &amp; accounts.</string>
     <string name="settings_passkeys_open">Open passkey settings</string>
+    <!-- 2.0 rc4: devices sharing a store through .age-recipients. -->
+    <string name="device_key_title">New device key</string>
+    <string name="device_key_body">Another device added this key to your store, so it can read what you save from now on:</string>
+    <string name="device_key_help">Check it against the key in PassPony\'s Settings on your other device. If it\'s yours, re-encrypt so that device can read your existing entries too. If you don\'t recognize it, remove it.</string>
+    <string name="device_key_remove">Remove key</string>
+    <string name="device_key_later">Later</string>
+    <string name="device_key_reencrypted">Entries re-encrypted for the new key: %1$d.</string>
+    <string name="device_key_skipped">Entries this device can\'t read, left for the device that saved them: %1$d.</string>
+    <string name="device_key_removed">Key removed. Nothing saved from now on will be encrypted to it.</string>
 </resources>

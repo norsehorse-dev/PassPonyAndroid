@@ -151,6 +151,14 @@ mean contacting that site. Key generation and ES256 signing use the
 platform's software EC provider (`passkey/PasskeyVault.kt`); the unlock
 gate is the user verification.
 
+Phones share a passage store through its root `.age-recipients` (2.0):
+after a sync, clone or publish, PassPony adds this device's public key
+there and commits, so everything saved from then on is readable by every
+listed device. When another device's key shows up, PassPony asks before
+re-encrypting the existing entries to it, or removing it
+(`store/DeviceKeys.kt`). Secret keys never leave a device. pass stores'
+`.gpg-id` is left alone.
+
 ## Not yet
 
 - Smartcard decrypt (NFC and USB-C YubiKey).
