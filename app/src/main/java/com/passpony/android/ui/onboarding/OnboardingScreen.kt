@@ -10,6 +10,7 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.pager.HorizontalPager
 import androidx.compose.foundation.pager.rememberPagerState
@@ -64,7 +65,16 @@ fun OnboardingScreen(appViewModel: AppViewModel, onComplete: () -> Unit) {
     val isLastPage = pagerState.currentPage == slides.lastIndex
 
     Surface(modifier = Modifier.fillMaxSize()) {
-        Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
+        // MainActivity runs edge-to-edge (enforced at targetSdk 35+), and
+        // this screen has no Scaffold to inset it, so pad for the system
+        // bars, display cutout and IME here. Without it, Skip sat under the
+        // status bar and Next behind the navigation bar on Android 16.
+        Column(
+            modifier = Modifier
+                .fillMaxSize()
+                .safeDrawingPadding()
+                .padding(16.dp)
+        ) {
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 horizontalArrangement = Arrangement.End
