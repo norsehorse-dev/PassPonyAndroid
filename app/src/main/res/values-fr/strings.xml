@@ -76,6 +76,7 @@
     <string name="edit_entry_add_field">Ajouter un champ</string>
     <string name="edit_entry_new_key">clé</string>
     <string name="edit_entry_new_value">valeur</string>
+    <string name="entry_detail_copy">Copier</string>
     <string name="entry_detail_edit_fields">Modifier les champs</string>
     <string name="entry_detail_fields">Champs</string>
     <string name="entry_detail_move_rename">Déplacer / renommer</string>

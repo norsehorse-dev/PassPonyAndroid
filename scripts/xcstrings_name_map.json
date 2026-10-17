@@ -60,6 +60,7 @@
   "Close": "otp_scan_close",
   "Commits the current store and pushes it to an empty remote. SSH remotes land with the SSH-auth work; use HTTPS with a token for now.": "sync_publish_footer",
   "Contact": "settings_contact",
+  "Copy": "entry_detail_copy",
   "Copy report": "diagnostics_copy",
   "Core": "settings_diagnostics_core",
   "Couldn't decrypt this entry. The matching key may be missing or locked.": "error_decryption_failed",

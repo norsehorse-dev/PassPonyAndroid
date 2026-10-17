@@ -82,6 +82,7 @@
     <string name="edit_entry_add_field">Добавить поле</string>
     <string name="edit_entry_new_key">ключ</string>
     <string name="edit_entry_new_value">значение</string>
+    <string name="entry_detail_copy">Копировать</string>
     <string name="entry_detail_edit_fields">Изменить поля</string>
     <string name="entry_detail_fields">Поля</string>
     <string name="entry_detail_move_rename">Переместить / переименовать</string>

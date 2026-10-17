@@ -1,16 +1,16 @@
 P13 xcstrings -> Android mapping report
-source: /home/claude/l10n/Localizable.xcstrings
-total xcstrings keys considered: 344
-  under an existing hand-authored resource name: 274
+source: /sessions/rcw-01vrqpsrxjak5g63mfitghjr/mnt/PassPony/Sources/Shared/Localizable.xcstrings
+total xcstrings keys considered: 345
+  under an existing hand-authored resource name: 275
   under a generated xc_-prefixed name: 70
 
 per-language coverage (translated / total selected keys):
-  es         330 / 344
-  fr         330 / 344
-  de         330 / 344
-  ru         330 / 344
-  zh-Hans    330 / 344
-  pt-BR      330 / 344
+  es         331 / 345
+  fr         331 / 345
+  de         331 / 345
+  ru         331 / 345
+  zh-Hans    331 / 345
+  pt-BR      331 / 345
 
 key -> android resource name:
   '%@ · %lld digits · %lld s' -> otp_summary_format
@@ -74,6 +74,7 @@ key -> android resource name:
   'Close' -> otp_scan_close
   'Commits the current store and pushes it to an empty remote. SSH remotes land with the SSH-auth work; use HTTPS with a token for now.' -> sync_publish_footer
   'Contact' -> settings_contact
+  'Copy' -> entry_detail_copy
   'Copy report' -> diagnostics_copy
   'Core' -> settings_diagnostics_core
   "Couldn't decrypt this entry. The matching key may be missing or locked." -> error_decryption_failed

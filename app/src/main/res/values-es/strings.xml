@@ -76,6 +76,7 @@
     <string name="edit_entry_add_field">Añadir campo</string>
     <string name="edit_entry_new_key">clave</string>
     <string name="edit_entry_new_value">valor</string>
+    <string name="entry_detail_copy">Copiar</string>
     <string name="entry_detail_edit_fields">Editar campos</string>
     <string name="entry_detail_fields">Campos</string>
     <string name="entry_detail_move_rename">Mover / renombrar</string>

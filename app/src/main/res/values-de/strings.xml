@@ -76,6 +76,7 @@
     <string name="edit_entry_add_field">Feld hinzufügen</string>
     <string name="edit_entry_new_key">Schlüssel</string>
     <string name="edit_entry_new_value">Wert</string>
+    <string name="entry_detail_copy">Kopieren</string>
     <string name="entry_detail_edit_fields">Felder bearbeiten</string>
     <string name="entry_detail_fields">Felder</string>
     <string name="entry_detail_move_rename">Verschieben / Umbenennen</string>

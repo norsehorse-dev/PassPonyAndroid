@@ -3,6 +3,7 @@ package com.passpony.android.ui.settings
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,6 +14,7 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material.icons.filled.ContentCopy
 import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.Button
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -33,6 +35,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
@@ -46,6 +49,7 @@ import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.KeyBackupState
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
+import com.passpony.android.ui.util.Clipboard
 import com.passpony.android.ui.util.SecureScreenEffect
 import java.time.LocalDate
 import kotlinx.coroutines.Dispatchers
@@ -187,11 +191,19 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
 
                 is BackupStep.ShowCode -> {
                     Text(stringResource(R.string.backup_code_intro), style = MaterialTheme.typography.bodyMedium)
-                    Text(
-                        s.code,
-                        style = MaterialTheme.typography.headlineSmall.copy(fontFamily = FontFamily.Monospace),
+                    Row(
+                        verticalAlignment = Alignment.CenterVertically,
                         modifier = Modifier.padding(vertical = 12.dp)
-                    )
+                    ) {
+                        Text(
+                            s.code,
+                            style = MaterialTheme.typography.headlineSmall.copy(fontFamily = FontFamily.Monospace),
+                            modifier = Modifier.weight(1f)
+                        )
+                        IconButton(onClick = { Clipboard.copyEphemeral(context, s.code) }) {
+                            Icon(Icons.Filled.ContentCopy, contentDescription = stringResource(R.string.entry_detail_copy))
+                        }
+                    }
                     Text(
                         stringResource(R.string.backup_code_warning),
                         style = MaterialTheme.typography.bodySmall,

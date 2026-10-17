@@ -73,6 +73,7 @@
     <string name="edit_entry_add_field">添加字段</string>
     <string name="edit_entry_new_key">键</string>
     <string name="edit_entry_new_value">值</string>
+    <string name="entry_detail_copy">复制</string>
     <string name="entry_detail_edit_fields">编辑字段</string>
     <string name="entry_detail_fields">字段</string>
     <string name="entry_detail_move_rename">移动 / 重命名</string>
