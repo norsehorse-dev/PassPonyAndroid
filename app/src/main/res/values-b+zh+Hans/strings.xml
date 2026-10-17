@@ -142,6 +142,7 @@
     <string name="otp_hotp_preview_note">基于计数器的验证码。每当你请求下一个验证码时，验证码会逐个显示在条目中。</string>
     <string name="otp_hotp_summary_format">%1$s · %2$d 位 · 计数器 %3$d</string>
     <string name="otp_import_accounts_header">帐号</string>
+    <string name="otp_import_all_scanned">此次导出的所有导出码都已扫描。</string>
     <string name="otp_import_already_scanned">已扫描过。目前已扫描 %1$d 个导出码，共 %2$d 个。</string>
     <plurals name="otp_import_button">
         <item quantity="other">导入 %1$d 个条目</item>
@@ -160,6 +161,8 @@
     <string name="otp_import_paste_hint">或粘贴 otpauth-migration:// 链接</string>
     <string name="otp_import_progress">已扫描 %1$d 个导出码，共 %2$d 个</string>
     <string name="otp_import_scan">扫描导出码</string>
+    <string name="otp_import_scan_help">将相机对准 Google Authenticator 显示的二维码。</string>
+    <string name="otp_import_scan_next">现在请在 Google Authenticator 中显示下一个导出码。</string>
     <string name="otp_import_skip_empty">没有密钥</string>
     <string name="otp_import_skip_md5">使用了 PassPony 和 pass-otp 不支持的 MD5</string>
     <string name="otp_import_skip_unsupported">使用了 PassPony 不支持的设置</string>

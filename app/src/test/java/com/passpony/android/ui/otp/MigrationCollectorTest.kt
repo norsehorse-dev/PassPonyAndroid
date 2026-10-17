@@ -23,13 +23,16 @@ class MigrationCollectorTest {
     @Test
     fun collectsAMultiCodeExportInAnyOrder() {
         val c = MigrationCollector()
+        assertEquals(emptyList<Boolean>(), c.progress())
         assertEquals(MigrationCollector.Outcome.Added(1, 3), c.add(batch(7, 2, 3, "c")))
         assertFalse(c.complete)
+        assertEquals(listOf(false, false, true), c.progress())
         assertEquals(MigrationCollector.Outcome.Duplicate(1, 3), c.add(batch(7, 2, 3, "c")))
         assertEquals(MigrationCollector.Outcome.Added(2, 3), c.add(batch(7, 0, 3, "a")))
         assertEquals(MigrationCollector.Outcome.OtherExport, c.add(batch(8, 1, 3, "x")))
         assertEquals(MigrationCollector.Outcome.Added(3, 3), c.add(batch(7, 1, 3, "b")))
         assertTrue(c.complete)
+        assertEquals(listOf(true, true, true), c.progress())
         assertEquals(listOf("a", "b", "c"), c.accounts().map { it.account })
     }
 

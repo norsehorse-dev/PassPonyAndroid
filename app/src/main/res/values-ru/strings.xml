@@ -151,6 +151,7 @@
     <string name="otp_hotp_preview_note">Код на основе счётчика. Коды показываются в записи по одному, когда вы запрашиваете следующий.</string>
     <string name="otp_hotp_summary_format">%1$s · цифр: %2$d · счётчик %3$d</string>
     <string name="otp_import_accounts_header">Аккаунты</string>
+    <string name="otp_import_all_scanned">Все коды этого экспорта отсканированы.</string>
     <string name="otp_import_already_scanned">Этот код уже отсканирован. Пока отсканировано %1$d из %2$d.</string>
     <plurals name="otp_import_button">
         <item quantity="one">Импортировать %1$d запись</item>
@@ -175,6 +176,8 @@
     <string name="otp_import_paste_hint">или вставьте ссылку otpauth-migration://</string>
     <string name="otp_import_progress">Отсканировано кодов: %1$d из %2$d</string>
     <string name="otp_import_scan">Сканировать коды экспорта</string>
+    <string name="otp_import_scan_help">Наведите камеру на QR-код, который показывает Google Authenticator.</string>
+    <string name="otp_import_scan_next">Теперь покажите следующий код в Google Authenticator.</string>
     <string name="otp_import_skip_empty">не содержит секрета</string>
     <string name="otp_import_skip_md5">использует MD5, который не поддерживают PassPony и pass-otp</string>
     <string name="otp_import_skip_unsupported">использует параметры, которые PassPony не поддерживает</string>

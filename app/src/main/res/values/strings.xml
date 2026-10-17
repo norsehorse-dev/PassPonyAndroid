@@ -433,6 +433,9 @@ PassPony speaks the same format as the pass and passage command-line tools: plai
     <string name="otp_import_paste_add">Add link</string>
     <string name="otp_import_progress">%1$d of %2$d codes scanned</string>
     <string name="otp_import_already_scanned">Already scanned. %1$d of %2$d codes so far.</string>
+    <string name="otp_import_scan_help">Point the camera at a QR code Google Authenticator shows.</string>
+    <string name="otp_import_scan_next">Now show the next code in Google Authenticator.</string>
+    <string name="otp_import_all_scanned">Every code in this export is scanned.</string>
     <string name="otp_import_other_export">That code is from a different export. Finish this one or start over.</string>
     <string name="otp_import_accounts_header">Accounts</string>
     <string name="otp_import_kind_hotp">counter-based</string>

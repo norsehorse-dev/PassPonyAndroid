@@ -1,16 +1,16 @@
 P13 xcstrings -> Android mapping report
 source: /sessions/rcw-01vrqpsrxjak5g63mfitghjr/mnt/PassPony/Sources/Shared/Localizable.xcstrings
-total xcstrings keys considered: 345
-  under an existing hand-authored resource name: 275
+total xcstrings keys considered: 348
+  under an existing hand-authored resource name: 278
   under a generated xc_-prefixed name: 70
 
 per-language coverage (translated / total selected keys):
-  es         331 / 345
-  fr         331 / 345
-  de         331 / 345
-  ru         331 / 345
-  zh-Hans    331 / 345
-  pt-BR      331 / 345
+  es         334 / 348
+  fr         334 / 348
+  de         334 / 348
+  ru         334 / 348
+  zh-Hans    334 / 348
+  pt-BR      334 / 348
 
 key -> android resource name:
   '%@ · %lld digits · %lld s' -> otp_summary_format
@@ -107,6 +107,7 @@ key -> android resource name:
   'Entries' -> settings_diagnostics_entries
   'Entry' -> xc_entry
   'Entry name' -> otp_import_entry_name
+  'Every code in this export is scanned.' -> otp_import_all_scanned
   'Every entry in scope is decrypted and re-encrypted to the recipients its directory currently resolves to.' -> reencrypt_footer
   'Export' -> backup_plain_export_confirm
   'Export identities file…' -> backup_plain_export
@@ -184,6 +185,7 @@ key -> android resource name:
   'No usable key. Import the key for this store in Settings.' -> error_no_usable_key
   'None' -> generator_symbols_none
   'Not imported' -> otp_import_skipped_header
+  'Now show the next code in Google Authenticator.' -> otp_import_scan_next
   'One-time code' -> entry_detail_totp
   'One-time code (optional)' -> add_entry_otp_optional
   'Open Settings' -> xc_open_settings
@@ -206,6 +208,7 @@ key -> android resource name:
   'Paste the otpauth:// link the site offers during two-factor setup, or the output of pass otp uri on your desktop.' -> otp_paste_help
   'Period (seconds)' -> otp_key_period
   'Plain export' -> backup_plain_header
+  'Point the camera at a QR code Google Authenticator shows.' -> otp_import_scan_help
   'Point the camera at the QR code the site shows during two-factor setup.' -> otp_scan_help
   'Preview' -> reencrypt_preview
   'Publish' -> sync_publish

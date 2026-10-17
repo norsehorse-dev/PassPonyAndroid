@@ -145,6 +145,7 @@
     <string name="otp_hotp_preview_note">Zählerbasierter Code. Die Codes werden im Eintrag einzeln angezeigt, wenn du den nächsten anforderst.</string>
     <string name="otp_hotp_summary_format">%1$s · %2$d Stellen · Zähler %3$d</string>
     <string name="otp_import_accounts_header">Konten</string>
+    <string name="otp_import_all_scanned">Alle Codes dieses Exports sind gescannt.</string>
     <string name="otp_import_already_scanned">Bereits gescannt. Bisher %1$d von %2$d Codes.</string>
     <plurals name="otp_import_button">
         <item quantity="one">%1$d Eintrag importieren</item>
@@ -165,6 +166,8 @@
     <string name="otp_import_paste_hint">oder einen otpauth-migration://-Link einsetzen</string>
     <string name="otp_import_progress">%1$d von %2$d Codes gescannt</string>
     <string name="otp_import_scan">Exportcodes scannen</string>
+    <string name="otp_import_scan_help">Richte die Kamera auf einen QR-Code, den Google Authenticator zeigt.</string>
+    <string name="otp_import_scan_next">Zeige jetzt den nächsten Code in Google Authenticator an.</string>
     <string name="otp_import_skip_empty">hat keinen geheimen Schlüssel</string>
     <string name="otp_import_skip_md5">nutzt MD5, das PassPony und pass-otp nicht unterstützen</string>
     <string name="otp_import_skip_unsupported">nutzt Einstellungen, die PassPony nicht unterstützt</string>

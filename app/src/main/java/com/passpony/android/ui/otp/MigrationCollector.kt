@@ -28,6 +28,9 @@ class MigrationCollector {
     val total: Int get() = size
     val complete: Boolean get() = size > 0 && parts.size >= size
 
+    /** One flag per code of the export, true where that code is scanned. */
+    fun progress(): List<Boolean> = (0 until size).map { parts.containsKey(it) }
+
     fun add(batch: MigrationBatch): Outcome {
         val id = batchId
         if (id != null && id != batch.batchId) return Outcome.OtherExport
