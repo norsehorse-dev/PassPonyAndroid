@@ -8,6 +8,7 @@ import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.crypto.SshKeyStore
+import com.passpony.android.passkey.PasskeyIndex
 import com.passpony.android.store.KeyBackupState
 import java.io.File
 import com.passpony.android.store.BrowseModel
@@ -22,6 +23,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import uniffi.pass_ffi.ConflictResolver
 import uniffi.pass_ffi.CryptoBackend
@@ -53,6 +55,8 @@ import uniffi.pass_ffi.HostKey
 import uniffi.pass_ffi.SshKey
 import uniffi.pass_ffi.backupKindSshPrivateKey
 import uniffi.pass_ffi.sshImportKey
+import uniffi.pass_ffi.commitMessagePasskeyRemove
+import uniffi.pass_ffi.entryRemovePasskey
 
 /**
  * Same structure as PassPony iOS's AppModel: open/refresh/read/save/move/
@@ -152,9 +156,47 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             refresh()
+            rebuildPasskeyIndex()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
         }
+    }
+
+    /**
+     * 2.0 rc3: re-read which entries hold passkeys (the provider lists
+     * candidates from this index before anything is unlocked). Runs on
+     * every store open, which covers a clone, a format switch and a key
+     * import (entries that only just became readable), and after a sync
+     * brings in changes. Only Android 14+ has a passkey provider, so older
+     * devices skip the decrypt work entirely.
+     */
+    private fun rebuildPasskeyIndex() {
+        if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) return
+        val current = store ?: return
+        val currentFormat = format
+        val currentEngine = engine
+        viewModelScope.launch(Dispatchers.IO) {
+            runCatching { PasskeyIndex.rebuild(context, currentFormat, current, currentEngine) }
+        }
+    }
+
+    /**
+     * Delete one passkey from an entry, with one commit; returns the new
+     * content for the screen showing it.
+     */
+    suspend fun removePasskey(name: String, content: ByteArray, credentialId: ByteArray): ByteArray {
+        val current = store ?: throw StoreException.NoStore()
+        val updated = withContext(Dispatchers.IO) {
+            val next = entryRemovePasskey(content, credentialId)
+            current.writeEntry(name, next, engine)
+            runCatching {
+                git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), commitMessagePasskeyRemove(name))
+            }
+            PasskeyIndex.updateEntry(context, format, name, next)
+            next
+        }
+        refresh()
+        return updated
     }
 
     fun refresh() {
@@ -193,6 +235,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             current.writeEntry(name, content, engine)
             val message = if (isNew) commitMessageAdd(name) else commitMessageEdit(name)
             runCatching { git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), message) }
+            runCatching { PasskeyIndex.updateEntry(context, format, name, content) }
             refresh()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
@@ -215,6 +258,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     commitMessageRename(from, to)
                 )
             }
+            runCatching { PasskeyIndex.renameEntry(context, format, from, to) }
             refresh()
             true
         } catch (e: Exception) {
@@ -228,6 +272,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         try {
             current.removeEntry(name)
             runCatching { git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), commitMessageRemove(name)) }
+            runCatching { PasskeyIndex.updateEntry(context, format, name, null) }
             refresh()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
@@ -276,6 +321,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             handle.sync(resolver)
         }
         refresh()
+        if (outcome !is SyncOutcome.UpToDate) rebuildPasskeyIndex()
         return outcome
     }
 

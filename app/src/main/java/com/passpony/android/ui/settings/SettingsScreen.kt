@@ -252,6 +252,11 @@ fun SettingsScreen(
             Spacer(Modifier.height(16.dp))
             SshKeyRow(onOpen = onSshKey)
 
+            if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
+                Spacer(Modifier.height(16.dp))
+                PasskeysSection(context)
+            }
+
             Spacer(Modifier.height(16.dp))
             MaintenanceSection(onReencrypt = onReencrypt)
 
@@ -643,6 +648,28 @@ private fun OtherAppsSection(context: Context) {
 private const val APP_REPO_URL = "https://github.com/norsehorse-dev/PassPonyAndroid"
 private const val CORE_REPO_URL = "https://github.com/norsehorse-dev/PassPonyCore"
 private const val NORSEHORSE_SITE_URL = "https://pony.norsehor.se"
+
+/**
+ * 2.0 rc3, Android 14+: where to turn PassPony on as a passkey provider.
+ * The switch itself lives in the system's Passwords and accounts screen.
+ */
+@androidx.annotation.RequiresApi(android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
+@Composable
+private fun PasskeysSection(context: Context) {
+    SectionHeader(stringResource(R.string.passkeys_header))
+    Text(
+        stringResource(R.string.settings_passkeys_body),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.secondary
+    )
+    TextButton(onClick = {
+        runCatching {
+            androidx.credentials.CredentialManager.create(context).createSettingsPendingIntent().send()
+        }
+    }) {
+        Text(stringResource(R.string.settings_passkeys_open))
+    }
+}
 
 @Composable
 private fun SshKeyRow(onOpen: () -> Unit) {

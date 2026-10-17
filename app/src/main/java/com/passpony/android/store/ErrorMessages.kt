@@ -7,6 +7,7 @@ import uniffi.pass_ffi.CryptoException
 import uniffi.pass_ffi.GenerateException
 import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.MigrationException
+import uniffi.pass_ffi.PasskeyException
 import uniffi.pass_ffi.SshKeyException
 import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.TotpException
@@ -28,6 +29,7 @@ fun Throwable.ponyMessage(context: Context): String = when (this) {
     is BackupException -> ponyMessage(context)
     is MigrationException -> ponyMessage(context)
     is SshKeyException -> ponyMessage(context)
+    is PasskeyException -> context.getString(R.string.error_passkey)
     // Unlike iOS's fallback, which shows the raw Swift description, this
     // never surfaces raw exception text: the house rule is no raw
     // exception text with entry names or paths in UI toasts, and an

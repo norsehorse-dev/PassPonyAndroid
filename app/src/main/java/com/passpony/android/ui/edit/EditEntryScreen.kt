@@ -111,6 +111,9 @@ fun EditEntryScreen(
         val pairs = LinkedHashMap<String, String>()
         val keys = mutableListOf<String>()
         for (field in fields) {
+            // Passkey lines (2.0) carry a private key and are managed from
+            // the entry view; the form leaves them untouched.
+            if (field.key == "passkey") continue
             // First occurrence wins, matching the codec's set-field semantics.
             if (!pairs.containsKey(field.key)) {
                 pairs[field.key] = field.value

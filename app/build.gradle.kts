@@ -198,6 +198,10 @@ dependencies {
     // in the service, so a problem here never affects the RemoteViews
     // dropdown or the picker fallback, which don't depend on it.
     implementation("androidx.autofill:autofill:1.3.0")
+    // 2.0 rc3: passkey provider (Credential Manager, Android 14+). The
+    // core artifact only; no Play services module, so the foss flavor
+    // carries nothing from Google Play.
+    implementation("androidx.credentials:credentials:1.5.0")
 
     // -- QR scanning for one-time code setup (P18) --
     // CameraX for the preview and the frame feed, zxing core (pure Java,

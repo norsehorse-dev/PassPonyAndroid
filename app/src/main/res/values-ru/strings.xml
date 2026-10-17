@@ -120,6 +120,7 @@
     <string name="error_no_store">Хранилище не открыто.</string>
     <string name="error_no_usable_key">Нет пригодного ключа. Импортируйте ключ этого хранилища в настройках.</string>
     <string name="error_not_in_store">Этой записи нет в хранилище.</string>
+    <string name="error_passkey">С этим ключом доступа что-то пошло не так.</string>
     <string name="error_ssh_auth_failed">SSH-хост не принял ключ PassPony. Проверьте, что его открытый ключ добавлен в ваш аккаунт на хосте.</string>
     <string name="error_ssh_host_changed">Ключ SSH-хоста %1$s изменился, поэтому PassPony не будет подключаться. Если сервер был переустановлен или получил новый ключ, забудьте этот хост в разделе «SSH-ключ и доверенные хосты», затем подключитесь снова и проверьте новый отпечаток.</string>
     <string name="error_ssh_key_missing">Это удалённый репозиторий SSH, а у PassPony ещё нет SSH-ключа. Настройте его в разделе «SSH-ключ и доверенные хосты».</string>
@@ -231,6 +232,20 @@
     <string name="otp_tab_scan">Сканировать</string>
     <string name="otp_undo_remove">Отменить</string>
     <string name="otp_use">Использовать этот код</string>
+    <string name="passkey_browser_only">Пока ключи доступа PassPony работают только в браузере.</string>
+    <string name="passkey_browser_only_detail">Пока ключи доступа PassPony работают только в браузере. Приложения ещё не могут их использовать: чтобы проверить, что приложение принадлежит сайту, нужно связаться с этим сайтом, а PassPony обращается только к вашему собственному удалённому git-репозиторию.</string>
+    <string name="passkey_create_description">Сохранить ключ доступа в хранилище паролей</string>
+    <string name="passkey_create_entry_help">Ключ доступа будет добавлен в эту запись. Если её ещё нет, PassPony её создаст.</string>
+    <string name="passkey_create_for">Для %1$s</string>
+    <string name="passkey_create_title">Сохранить ключ доступа</string>
+    <string name="passkey_delete">Удалить ключ доступа</string>
+    <string name="passkey_delete_body">Вы больше не сможете входить на %1$s с его помощью. Удалите его также из своего аккаунта на сайте.</string>
+    <string name="passkey_delete_title">Удалить этот ключ доступа?</string>
+    <string name="passkey_for">Ключ доступа для %1$s</string>
+    <string name="passkey_for_user">Ключ доступа для %1$s, %2$s</string>
+    <string name="passkey_unlock_needed">Чтобы сохранить ключ доступа, нужно разблокировать PassPony.</string>
+    <string name="passkey_unlock_reason">Разблокируйте PassPony, чтобы использовать ключ доступа</string>
+    <string name="passkeys_header">Ключи доступа</string>
     <string name="reencrypt_done">Готово</string>
     <string name="reencrypt_footer">Каждая запись в выбранной области расшифровывается и заново шифруется для получателей, которых сейчас определяет её каталог.</string>
     <string name="reencrypt_now">Перешифровать сейчас</string>
@@ -283,6 +298,8 @@
     <string name="settings_maintenance_header">Обслуживание</string>
     <string name="settings_other_apps_footer">Другие приложения того же разработчика.</string>
     <string name="settings_other_apps_header">Ещё от NorseHorse</string>
+    <string name="settings_passkeys_body">PassPony может сохранять и использовать ключи доступа в браузере. Включите PassPony как сервис ключей доступа в разделе «Пароли и аккаунты».</string>
+    <string name="settings_passkeys_open">Открыть настройки ключей доступа</string>
     <string name="settings_pgp_import">Импортировать файл ключа…</string>
     <string name="settings_pgp_keys_empty">Ключи не импортированы. Хранилищу pass нужен как минимум открытый ключ, соответствующий его .gpg-id (и секретный ключ для расшифровки).</string>
     <string name="settings_pgp_keys_header">Ключи OpenPGP</string>
@@ -407,11 +424,13 @@
     <string name="xc_new_name">Новое имя</string>
     <string name="xc_next">Далее</string>
     <string name="xc_no_imported_key_matches_fingerprint_or_16_hex_ke">Ни один импортированный ключ не соответствует %1$s (отпечаток или 16-значный hex ID ключа)</string>
+    <string name="xc_no_passkeys">Нет ключей доступа</string>
     <string name="xc_open_settings">Открыть настройки</string>
     <string name="xc_openpgp_messages_files_and_keys">Сообщения, файлы и ключи OpenPGP</string>
     <string name="xc_passage_encrypts_with_modern_age_identities_pass">passage шифрует современными идентификаторами age. pass шифрует ключами OpenPGP и работает с существующими хранилищами pass.
 
 У каждого формата своё хранилище, переключиться можно в любой момент в настройках.</string>
+    <string name="xc_passpony_has_no_passkey_for">В PassPony нет ключа доступа для %1$s.</string>
     <string name="xc_passpony_is_locked">PassPony заблокирован</string>
     <plurals name="xc_passpony_locks_behind_face_id_touch_id_or_your_p">
         <item quantity="one">PassPony блокируется с помощью Face ID, Touch ID или код-пароля.
@@ -427,6 +446,7 @@
 
 После разблокировки он остаётся открытым %1$d минут (совместно с автозаполнением), затем снова блокируется.</item>
     </plurals>
+    <string name="xc_passpony_needs_to_be_unlocked_to_use_the_passkey">Чтобы использовать ключ доступа, нужно разблокировать PassPony.</string>
     <string name="xc_pgp_chat_and_encrypted_files">PGP-чат и зашифрованные файлы</string>
     <string name="xc_pulled_changes_from_remote">Изменения получены с удалённого репозитория.</string>
     <string name="xc_quorum_key_backup_recovery">Кворумное резервирование и восстановление ключей</string>
@@ -447,6 +467,7 @@
     <string name="xc_saved_that_s_your_first_pass">Сохранено. Это ваша первая запись.</string>
     <string name="xc_self_destructing_encrypted_messages">Самоуничтожающиеся зашифрованные сообщения</string>
     <string name="xc_simple_modern_file_encryption_age">Простое современное шифрование файлов (age)</string>
+    <string name="xc_site">Сайт</string>
     <string name="xc_skip">Пропустить</string>
     <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">У хранилища уже есть .gpg-id — смена ключей появится вместе с процессом перешифрования.</string>
     <string name="xc_store_cloned">Хранилище клонировано.</string>
@@ -461,6 +482,7 @@
         <item quantity="other">Парольная фраза кешируется на %1$d минут (совместно с автозаполнением), затем удаляется.</item>
     </plurals>
     <string name="xc_the_remote_has_new_changes_sync_before_pushing">В удалённом репозитории есть новые изменения — синхронизируйтесь перед отправкой.</string>
+    <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Этот сайт запросил тип ключа доступа, который PassPony не умеет создавать.</string>
     <string name="xc_turn_on_autofill">Включить автозаполнение</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Включите автозаполнение, и ваши записи будут появляться прямо в панели QuickType при входе.
 

@@ -114,6 +114,7 @@
     <string name="error_no_store">Aucun coffre n\'est ouvert.</string>
     <string name="error_no_usable_key">Aucune clé utilisable. Importez la clé de ce coffre dans Réglages.</string>
     <string name="error_not_in_store">Cette entrée n\'est pas dans le coffre.</string>
+    <string name="error_passkey">Un problème est survenu avec cette clé d\'accès.</string>
     <string name="error_ssh_auth_failed">L\'hôte SSH n\'a pas accepté la clé de PassPony. Vérifiez que sa clé publique est ajoutée à votre compte sur l\'hôte.</string>
     <string name="error_ssh_host_changed">La clé d\'hôte SSH de %1$s a changé, PassPony ne se connectera donc pas. Si le serveur a été reconstruit ou a reçu de nouvelles clés, oubliez l\'hôte dans Clé SSH et hôtes de confiance, puis reconnectez-vous et vérifiez la nouvelle empreinte.</string>
     <string name="error_ssh_key_missing">Ce distant utilise SSH et PassPony n\'a pas encore de clé SSH. Configurez-en une dans Clé SSH et hôtes de confiance.</string>
@@ -221,6 +222,20 @@
     <string name="otp_tab_scan">Scanner</string>
     <string name="otp_undo_remove">Rétablir</string>
     <string name="otp_use">Utiliser ce code</string>
+    <string name="passkey_browser_only">Les clés d\'accès PassPony fonctionnent dans votre navigateur pour l\'instant.</string>
+    <string name="passkey_browser_only_detail">Les clés d\'accès PassPony fonctionnent dans votre navigateur pour l\'instant. Les apps ne peuvent pas encore les utiliser : vérifier qu\'une app appartient à un site web implique de contacter ce site, et PassPony ne communique qu\'avec votre propre dépôt git distant.</string>
+    <string name="passkey_create_description">Enregistrer la clé d\'accès dans votre coffre de mots de passe</string>
+    <string name="passkey_create_entry_help">La clé d\'accès est ajoutée à cette entrée. Si elle n\'existe pas encore, PassPony la crée.</string>
+    <string name="passkey_create_for">Pour %1$s</string>
+    <string name="passkey_create_title">Enregistrer la clé d\'accès</string>
+    <string name="passkey_delete">Supprimer la clé d\'accès</string>
+    <string name="passkey_delete_body">Vous ne pourrez plus vous connecter à %1$s avec cette clé. Supprimez-la aussi de votre compte sur le site.</string>
+    <string name="passkey_delete_title">Supprimer cette clé d\'accès ?</string>
+    <string name="passkey_for">Clé d\'accès pour %1$s</string>
+    <string name="passkey_for_user">Clé d\'accès pour %1$s, %2$s</string>
+    <string name="passkey_unlock_needed">PassPony doit être déverrouillé pour enregistrer la clé d\'accès.</string>
+    <string name="passkey_unlock_reason">Déverrouillez PassPony pour utiliser votre clé d\'accès</string>
+    <string name="passkeys_header">Clés d\'accès</string>
     <string name="reencrypt_done">OK</string>
     <string name="reencrypt_footer">Chaque entrée dans la portée est déchiffrée puis rechiffrée pour les destinataires que son dossier résout actuellement.</string>
     <string name="reencrypt_now">Rechiffrer maintenant</string>
@@ -271,6 +286,8 @@
     <string name="settings_maintenance_header">Maintenance</string>
     <string name="settings_other_apps_footer">D\'autres apps du même développeur.</string>
     <string name="settings_other_apps_header">Plus de NorseHorse</string>
+    <string name="settings_passkeys_body">PassPony peut enregistrer et utiliser des clés d\'accès dans votre navigateur. Activez-le comme fournisseur de clés d\'accès dans Mots de passe et comptes.</string>
+    <string name="settings_passkeys_open">Ouvrir les réglages des clés d\'accès</string>
     <string name="settings_pgp_import">Importer un fichier de clé…</string>
     <string name="settings_pgp_keys_empty">Aucune clé importée. Un coffre pass a besoin d\'au moins une clé publique correspondant à son .gpg-id (et de la clé secrète pour déchiffrer).</string>
     <string name="settings_pgp_keys_header">Clés OpenPGP</string>
@@ -389,11 +406,13 @@ Vous pouvez la changer à tout moment dans Réglages.</string>
     <string name="xc_new_name">Nouveau nom</string>
     <string name="xc_next">Suivant</string>
     <string name="xc_no_imported_key_matches_fingerprint_or_16_hex_ke">Aucune clé importée ne correspond à %1$s (empreinte ou ID de clé en 16 hex)</string>
+    <string name="xc_no_passkeys">Aucune clé d\'accès</string>
     <string name="xc_open_settings">Ouvrir les Réglages</string>
     <string name="xc_openpgp_messages_files_and_keys">Messages, fichiers et clés OpenPGP</string>
     <string name="xc_passage_encrypts_with_modern_age_identities_pass">passage chiffre avec des identités age modernes. pass chiffre avec des clés OpenPGP et fonctionne avec les coffres pass existants.
 
 Chaque format garde son propre coffre, et vous pouvez changer à tout moment dans Réglages.</string>
+    <string name="xc_passpony_has_no_passkey_for">PassPony n\'a aucune clé d\'accès pour %1$s.</string>
     <string name="xc_passpony_is_locked">PassPony est verrouillé</string>
     <plurals name="xc_passpony_locks_behind_face_id_touch_id_or_your_p">
         <item quantity="one">PassPony se verrouille derrière Face ID, Touch ID ou votre code.
@@ -403,6 +422,7 @@ Après déverrouillage, il reste ouvert pendant %1$d minute (partagé avec le re
 
 Après déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le remplissage automatique), puis se verrouille à nouveau.</item>
     </plurals>
+    <string name="xc_passpony_needs_to_be_unlocked_to_use_the_passkey">PassPony doit être déverrouillé pour utiliser la clé d\'accès.</string>
     <string name="xc_pgp_chat_and_encrypted_files">Chat PGP et fichiers chiffrés</string>
     <string name="xc_pulled_changes_from_remote">Modifications récupérées depuis le distant.</string>
     <string name="xc_quorum_key_backup_recovery">Sauvegarde et récupération de clés par quorum</string>
@@ -419,6 +439,7 @@ Après déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le r
     <string name="xc_saved_that_s_your_first_pass">Enregistrée. C\'est votre première entrée.</string>
     <string name="xc_self_destructing_encrypted_messages">Messages chiffrés à autodestruction</string>
     <string name="xc_simple_modern_file_encryption_age">Chiffrement de fichiers simple et moderne (age)</string>
+    <string name="xc_site">Site</string>
     <string name="xc_skip">Ignorer</string>
     <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Le coffre a déjà un .gpg-id — le changement de clés arrivera avec le flux de rechiffrement.</string>
     <string name="xc_store_cloned">Coffre cloné.</string>
@@ -431,6 +452,7 @@ Après déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le r
         <item quantity="other">La phrase secrète est mise en cache pendant %1$d minutes (partagée avec le remplissage automatique), puis effacée.</item>
     </plurals>
     <string name="xc_the_remote_has_new_changes_sync_before_pushing">Le distant a de nouvelles modifications — synchronisez avant de pousser.</string>
+    <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Ce site a demandé un type de clé d\'accès que PassPony ne peut pas créer.</string>
     <string name="xc_turn_on_autofill">Activer le remplissage automatique</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Activez le remplissage automatique et vos entrées apparaîtront dans la barre QuickType lors de la connexion.
 

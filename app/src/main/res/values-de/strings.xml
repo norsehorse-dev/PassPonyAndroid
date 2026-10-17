@@ -114,6 +114,7 @@
     <string name="error_no_store">Kein Speicher geöffnet.</string>
     <string name="error_no_usable_key">Kein nutzbarer Schlüssel. Importiere den Schlüssel für diesen Speicher in den Einstellungen.</string>
     <string name="error_not_in_store">Dieser Eintrag ist nicht im Speicher.</string>
+    <string name="error_passkey">Bei diesem Passkey ist etwas schiefgelaufen.</string>
     <string name="error_ssh_auth_failed">Der SSH-Host hat den Schlüssel von PassPony nicht akzeptiert. Prüfe, ob der zugehörige öffentliche Schlüssel deinem Konto auf dem Host hinzugefügt wurde.</string>
     <string name="error_ssh_host_changed">Der SSH-Host-Schlüssel für %1$s hat sich geändert, daher verbindet sich PassPony nicht. Wenn der Server neu aufgesetzt oder mit neuen Schlüsseln versehen wurde, vergiss den Host unter „SSH-Schlüssel und vertrauenswürdige Hosts“, verbinde dich dann erneut und prüfe den neuen Fingerabdruck.</string>
     <string name="error_ssh_key_missing">Das ist ein SSH-Remote, und PassPony hat noch keinen SSH-Schlüssel. Richte einen unter „SSH-Schlüssel und vertrauenswürdige Hosts“ ein.</string>
@@ -221,6 +222,20 @@
     <string name="otp_tab_scan">Scannen</string>
     <string name="otp_undo_remove">Widerrufen</string>
     <string name="otp_use">Diesen Code verwenden</string>
+    <string name="passkey_browser_only">Passkeys von PassPony funktionieren vorerst nur in deinem Browser.</string>
+    <string name="passkey_browser_only_detail">Passkeys von PassPony funktionieren vorerst nur in deinem Browser. Apps können sie noch nicht nutzen: Um zu prüfen, ob eine App zu einer Website gehört, müsste diese Website kontaktiert werden, und PassPony kommuniziert ausschließlich mit deinem eigenen Git-Remote.</string>
+    <string name="passkey_create_description">Passkey in deinem Passwort-Speicher sichern</string>
+    <string name="passkey_create_entry_help">Der Passkey wird diesem Eintrag hinzugefügt. Falls der Eintrag noch nicht existiert, legt PassPony ihn an.</string>
+    <string name="passkey_create_for">Für %1$s</string>
+    <string name="passkey_create_title">Passkey sichern</string>
+    <string name="passkey_delete">Passkey löschen</string>
+    <string name="passkey_delete_body">Du kannst dich damit nicht mehr bei %1$s anmelden. Entferne ihn auch aus deinem Konto auf der Website.</string>
+    <string name="passkey_delete_title">Diesen Passkey löschen?</string>
+    <string name="passkey_for">Passkey für %1$s</string>
+    <string name="passkey_for_user">Passkey für %1$s, %2$s</string>
+    <string name="passkey_unlock_needed">PassPony muss entsperrt werden, um den Passkey zu sichern.</string>
+    <string name="passkey_unlock_reason">PassPony entsperren, um deinen Passkey zu verwenden</string>
+    <string name="passkeys_header">Passkeys</string>
     <string name="reencrypt_done">Fertig</string>
     <string name="reencrypt_footer">Jeder Eintrag im Bereich wird entschlüsselt und für die Empfänger neu verschlüsselt, die sein Verzeichnis aktuell auflöst.</string>
     <string name="reencrypt_now">Jetzt neu verschlüsseln</string>
@@ -271,6 +286,8 @@
     <string name="settings_maintenance_header">Wartung</string>
     <string name="settings_other_apps_footer">Weitere Apps desselben Entwicklers.</string>
     <string name="settings_other_apps_header">Mehr von NorseHorse</string>
+    <string name="settings_passkeys_body">PassPony kann Passkeys in deinem Browser sichern und verwenden. Aktiviere PassPony unter „Passwörter und Konten“ als Passkey-Anbieter.</string>
+    <string name="settings_passkeys_open">Passkey-Einstellungen öffnen</string>
     <string name="settings_pgp_import">Schlüsseldatei importieren …</string>
     <string name="settings_pgp_keys_empty">Keine Schlüssel importiert. Ein pass-Speicher braucht mindestens einen öffentlichen Schlüssel passend zu seiner .gpg-id (und den geheimen Schlüssel zum Entschlüsseln).</string>
     <string name="settings_pgp_keys_header">OpenPGP-Schlüssel</string>
@@ -389,11 +406,13 @@ Du kannst sie jederzeit in den Einstellungen ändern.</string>
     <string name="xc_new_name">Neuer Name</string>
     <string name="xc_next">Weiter</string>
     <string name="xc_no_imported_key_matches_fingerprint_or_16_hex_ke">Kein importierter Schlüssel passt zu %1$s (Fingerabdruck oder 16-Hex-Schlüssel-ID)</string>
+    <string name="xc_no_passkeys">Keine Passkeys</string>
     <string name="xc_open_settings">Einstellungen öffnen</string>
     <string name="xc_openpgp_messages_files_and_keys">OpenPGP-Nachrichten, -Dateien und -Schlüssel</string>
     <string name="xc_passage_encrypts_with_modern_age_identities_pass">passage verschlüsselt mit modernen age-Identitäten. pass verschlüsselt mit OpenPGP-Schlüsseln und funktioniert mit vorhandenen pass-Speichern.
 
 Jedes Format hat seinen eigenen Speicher, und du kannst jederzeit in den Einstellungen wechseln.</string>
+    <string name="xc_passpony_has_no_passkey_for">PassPony hat keinen Passkey für %1$s.</string>
     <string name="xc_passpony_is_locked">PassPony ist gesperrt</string>
     <plurals name="xc_passpony_locks_behind_face_id_touch_id_or_your_p">
         <item quantity="one">PassPony ist hinter Face ID, Touch ID oder deinem Code gesperrt.
@@ -403,6 +422,7 @@ Nach dem Entsperren bleibt es %1$d Minute offen (mit AutoFill geteilt) und sperr
 
 Nach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sperrt sich dann wieder.</item>
     </plurals>
+    <string name="xc_passpony_needs_to_be_unlocked_to_use_the_passkey">PassPony muss entsperrt werden, um den Passkey zu verwenden.</string>
     <string name="xc_pgp_chat_and_encrypted_files">PGP-Chat und verschlüsselte Dateien</string>
     <string name="xc_pulled_changes_from_remote">Änderungen vom Remote geholt.</string>
     <string name="xc_quorum_key_backup_recovery">Schlüssel-Backup und -Wiederherstellung per Quorum</string>
@@ -419,6 +439,7 @@ Nach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sper
     <string name="xc_saved_that_s_your_first_pass">Gesichert. Das ist dein erster Eintrag.</string>
     <string name="xc_self_destructing_encrypted_messages">Selbstzerstörende verschlüsselte Nachrichten</string>
     <string name="xc_simple_modern_file_encryption_age">Einfache, moderne Dateiverschlüsselung (age)</string>
+    <string name="xc_site">Website</string>
     <string name="xc_skip">Überspringen</string>
     <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Der Speicher hat bereits eine .gpg-id — das Umschlüsseln kommt mit dem Neuverschlüsselungs-Ablauf.</string>
     <string name="xc_store_cloned">Speicher geklont.</string>
@@ -431,6 +452,7 @@ Nach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sper
         <item quantity="other">Die Passphrase wird %1$d Minuten lang zwischengespeichert (mit AutoFill geteilt) und dann gelöscht.</item>
     </plurals>
     <string name="xc_the_remote_has_new_changes_sync_before_pushing">Das Remote hat neue Änderungen — synchronisiere vor dem Push.</string>
+    <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Diese Website verlangt eine Art von Passkey, die PassPony nicht erstellen kann.</string>
     <string name="xc_turn_on_autofill">AutoFill aktivieren</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Aktiviere AutoFill, dann erscheinen deine Einträge beim Anmelden direkt in der QuickType-Leiste.
 

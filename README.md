@@ -142,11 +142,19 @@ Keystore key (`crypto/SshKeyStore.kt`) and unsealed per sync; the core
 hands it to libssh2 from memory. SSH hosts are trusted on first use and
 pinned in an app-private known_hosts file; a changed host key is refused.
 
+Passkeys (2.0, Android 14 and later) are stored as one `passkey:` line
+each inside the encrypted entry, so they sync and back up with the rest
+of the store. The provider serves browsers on the bundled privileged list
+(`res/raw/passkey_browsers.json`, Google's published list); a native
+app's request is declined, since confirming an app's claim to a site would
+mean contacting that site. Key generation and ES256 signing use the
+platform's software EC provider (`passkey/PasskeyVault.kt`); the unlock
+gate is the user verification.
+
 ## Not yet
 
 - Smartcard decrypt (NFC and USB-C YubiKey).
-- Credential Manager / passkey-era autofill APIs (format spike done in
-  PassPonyCore's `docs/passkeys-format.md`; the release after 1.2).
+- Passkeys for native apps (browsers only in 2.0).
 - armeabi-v7a (32-bit) builds.
 
 ## License

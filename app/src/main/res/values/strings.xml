@@ -333,11 +333,13 @@ You can change this anytime in Settings.</string>
     <string name="xc_new_name">New name</string>
     <string name="xc_next">Next</string>
     <string name="xc_no_imported_key_matches_fingerprint_or_16_hex_ke">No imported key matches %1$s (fingerprint or 16-hex key ID)</string>
+    <string name="xc_no_passkeys">No passkeys</string>
     <string name="xc_open_settings">Open Settings</string>
     <string name="xc_openpgp_messages_files_and_keys">OpenPGP messages, files, and keys</string>
     <string name="xc_passage_encrypts_with_modern_age_identities_pass">passage encrypts with modern age identities. pass encrypts with OpenPGP keys and works with existing pass stores.
 
 Each format keeps its own store, and you can switch anytime in Settings.</string>
+    <string name="xc_passpony_has_no_passkey_for">PassPony has no passkey for %1$s.</string>
     <string name="xc_passpony_is_locked">PassPony is locked</string>
     <plurals name="xc_passpony_locks_behind_face_id_touch_id_or_your_p">
         <item quantity="one">PassPony locks behind Face ID, Touch ID, or your passcode.
@@ -347,6 +349,7 @@ After you unlock, it stays open for %1$d minute (shared with autofill), then loc
 
 After you unlock, it stays open for %1$d minutes (shared with autofill), then locks again.</item>
     </plurals>
+    <string name="xc_passpony_needs_to_be_unlocked_to_use_the_passkey">PassPony needs to be unlocked to use the passkey.</string>
     <string name="xc_pgp_chat_and_encrypted_files">PGP chat and encrypted files</string>
     <string name="xc_pulled_changes_from_remote">Pulled changes from remote.</string>
     <string name="xc_quorum_key_backup_recovery">Quorum key backup &amp; recovery</string>
@@ -364,6 +367,7 @@ After you unlock, it stays open for %1$d minutes (shared with autofill), then lo
     <string name="xc_saved_that_s_your_first_pass">Saved. That\'s your first pass.</string>
     <string name="xc_self_destructing_encrypted_messages">Self-destructing encrypted messages</string>
     <string name="xc_simple_modern_file_encryption_age">Simple, modern file encryption (age)</string>
+    <string name="xc_site">Site</string>
     <string name="xc_skip">Skip</string>
     <string name="xc_spike">Spike</string>
     <string name="xc_spike_in_extension_capabilities">Spike: in-extension capabilities</string>
@@ -379,6 +383,7 @@ After you unlock, it stays open for %1$d minutes (shared with autofill), then lo
         <item quantity="other">The passphrase is cached for %1$d minutes (shared with autofill), then cleared.</item>
     </plurals>
     <string name="xc_the_remote_has_new_changes_sync_before_pushing">The remote has new changes — sync before pushing.</string>
+    <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">This site asked for a kind of passkey PassPony can\'t make.</string>
     <string name="xc_turn_on_autofill">Turn on autofill</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Turn on autofill and your passes appear right in the QuickType bar when you sign in.
 
@@ -561,4 +566,22 @@ PassPony speaks the same format as the pass and passage command-line tools: plai
     <string name="backup_ssh_keep">Keep current key</string>
     <string name="backup_ssh_replaced">The SSH key from the backup is now this app\'s key.</string>
     <string name="backup_ssh_kept">Kept the current SSH key.</string>
+    <!-- 2.0 rc3: passkeys. -->
+    <string name="passkeys_header">Passkeys</string>
+    <string name="passkey_for">Passkey for %1$s</string>
+    <string name="passkey_for_user">Passkey for %1$s, %2$s</string>
+    <string name="passkey_delete">Delete passkey</string>
+    <string name="passkey_delete_title">Delete this passkey?</string>
+    <string name="passkey_delete_body">You won\'t be able to sign in to %1$s with it anymore. Remove it from your account on the site too.</string>
+    <string name="passkey_browser_only">PassPony passkeys work in your browser for now.</string>
+    <string name="passkey_browser_only_detail">PassPony passkeys work in your browser for now. Apps can\'t use them yet: checking that an app belongs to a website means contacting that website, and PassPony only ever talks to your own git remote.</string>
+    <string name="passkey_create_description">Save the passkey in your password store</string>
+    <string name="passkey_create_title">Save passkey</string>
+    <string name="passkey_create_for">For %1$s</string>
+    <string name="passkey_create_entry_help">The passkey is added to this entry. If it doesn\'t exist yet, PassPony creates it.</string>
+    <string name="passkey_unlock_reason">Unlock PassPony to use your passkey</string>
+    <string name="passkey_unlock_needed">PassPony needs to be unlocked to save the passkey.</string>
+    <string name="error_passkey">Something went wrong with this passkey.</string>
+    <string name="settings_passkeys_body">PassPony can save and use passkeys in your browser. Turn it on as a passkey provider in Passwords &amp; accounts.</string>
+    <string name="settings_passkeys_open">Open passkey settings</string>
 </resources>

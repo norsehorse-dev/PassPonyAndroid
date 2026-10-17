@@ -114,6 +114,7 @@
     <string name="error_no_store">No hay ningún almacén abierto.</string>
     <string name="error_no_usable_key">No hay ninguna clave utilizable. Importa la clave de este almacén en Ajustes.</string>
     <string name="error_not_in_store">Esta entrada no está en el almacén.</string>
+    <string name="error_passkey">Algo salió mal con esta llave de acceso.</string>
     <string name="error_ssh_auth_failed">El servidor SSH no aceptó la clave de PassPony. Comprueba que su clave pública esté añadida a tu cuenta en el servidor.</string>
     <string name="error_ssh_host_changed">La clave del servidor SSH de %1$s ha cambiado, así que PassPony no se conectará. Si el servidor se reconstruyó o cambió sus claves, olvida el servidor en Clave SSH y servidores de confianza, vuelve a conectarte y comprueba la nueva huella.</string>
     <string name="error_ssh_key_missing">Este es un remoto SSH y PassPony aún no tiene ninguna clave SSH. Configura una en Clave SSH y servidores de confianza.</string>
@@ -221,6 +222,20 @@
     <string name="otp_tab_scan">Escanear</string>
     <string name="otp_undo_remove">Deshacer</string>
     <string name="otp_use">Usar este código</string>
+    <string name="passkey_browser_only">Por ahora, las llaves de acceso de PassPony funcionan en tu navegador.</string>
+    <string name="passkey_browser_only_detail">Por ahora, las llaves de acceso de PassPony funcionan en tu navegador. Las apps aún no pueden usarlas: comprobar que una app pertenece a un sitio web implica contactar con ese sitio, y PassPony solo se comunica con tu propio remoto git.</string>
+    <string name="passkey_create_description">Guarda la llave de acceso en tu almacén de contraseñas</string>
+    <string name="passkey_create_entry_help">La llave de acceso se añade a esta entrada. Si aún no existe, PassPony la crea.</string>
+    <string name="passkey_create_for">Para %1$s</string>
+    <string name="passkey_create_title">Guardar llave de acceso</string>
+    <string name="passkey_delete">Eliminar llave de acceso</string>
+    <string name="passkey_delete_body">Ya no podrás iniciar sesión en %1$s con ella. Elimínala también de tu cuenta en el sitio.</string>
+    <string name="passkey_delete_title">¿Eliminar esta llave de acceso?</string>
+    <string name="passkey_for">Llave de acceso para %1$s</string>
+    <string name="passkey_for_user">Llave de acceso para %1$s, %2$s</string>
+    <string name="passkey_unlock_needed">PassPony debe estar desbloqueado para guardar la llave de acceso.</string>
+    <string name="passkey_unlock_reason">Desbloquea PassPony para usar tu llave de acceso</string>
+    <string name="passkeys_header">Llaves de acceso</string>
     <string name="reencrypt_done">Listo</string>
     <string name="reencrypt_footer">Cada entrada dentro del ámbito se descifra y se vuelve a cifrar para los destinatarios que su directorio resuelve actualmente.</string>
     <string name="reencrypt_now">Volver a cifrar ahora</string>
@@ -271,6 +286,8 @@
     <string name="settings_maintenance_header">Mantenimiento</string>
     <string name="settings_other_apps_footer">Otras apps del mismo desarrollador.</string>
     <string name="settings_other_apps_header">Más de NorseHorse</string>
+    <string name="settings_passkeys_body">PassPony puede guardar y usar llaves de acceso en tu navegador. Actívalo como proveedor de llaves de acceso en Contraseñas y cuentas.</string>
+    <string name="settings_passkeys_open">Abrir ajustes de llaves de acceso</string>
     <string name="settings_pgp_import">Importar archivo de clave…</string>
     <string name="settings_pgp_keys_empty">No hay claves importadas. Un almacén pass necesita al menos una clave pública que coincida con su .gpg-id (y la clave secreta para descifrar).</string>
     <string name="settings_pgp_keys_header">Claves OpenPGP</string>
@@ -389,11 +406,13 @@ Puedes cambiarlo en cualquier momento en Ajustes.</string>
     <string name="xc_new_name">Nuevo nombre</string>
     <string name="xc_next">Siguiente</string>
     <string name="xc_no_imported_key_matches_fingerprint_or_16_hex_ke">Ninguna clave importada coincide con %1$s (huella o ID de clave de 16 hex)</string>
+    <string name="xc_no_passkeys">No hay llaves de acceso</string>
     <string name="xc_open_settings">Abrir Ajustes</string>
     <string name="xc_openpgp_messages_files_and_keys">Mensajes, archivos y claves OpenPGP</string>
     <string name="xc_passage_encrypts_with_modern_age_identities_pass">passage cifra con identidades age modernas. pass cifra con claves OpenPGP y funciona con almacenes de pass existentes.
 
 Cada formato mantiene su propio almacén y puedes cambiar en cualquier momento en Ajustes.</string>
+    <string name="xc_passpony_has_no_passkey_for">PassPony no tiene ninguna llave de acceso para %1$s.</string>
     <string name="xc_passpony_is_locked">PassPony está bloqueado</string>
     <plurals name="xc_passpony_locks_behind_face_id_touch_id_or_your_p">
         <item quantity="one">PassPony se bloquea con Face ID, Touch ID o tu código.
@@ -403,6 +422,7 @@ Después de desbloquear, permanece abierto durante %1$d minuto (compartido con e
 
 Después de desbloquear, permanece abierto durante %1$d minutos (compartido con el autorrelleno) y luego se vuelve a bloquear.</item>
     </plurals>
+    <string name="xc_passpony_needs_to_be_unlocked_to_use_the_passkey">PassPony debe estar desbloqueado para usar la llave de acceso.</string>
     <string name="xc_pgp_chat_and_encrypted_files">Chat PGP y archivos cifrados</string>
     <string name="xc_pulled_changes_from_remote">Se descargaron cambios del remoto.</string>
     <string name="xc_quorum_key_backup_recovery">Copia de seguridad y recuperación de claves por quórum</string>
@@ -419,6 +439,7 @@ Después de desbloquear, permanece abierto durante %1$d minutos (compartido con 
     <string name="xc_saved_that_s_your_first_pass">Guardada. Esa es tu primera entrada.</string>
     <string name="xc_self_destructing_encrypted_messages">Mensajes cifrados que se autodestruyen</string>
     <string name="xc_simple_modern_file_encryption_age">Cifrado de archivos simple y moderno (age)</string>
+    <string name="xc_site">Sitio</string>
     <string name="xc_skip">Omitir</string>
     <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">El almacén ya tiene un .gpg-id; el cambio de claves llegará con el flujo de recifrado.</string>
     <string name="xc_store_cloned">Almacén clonado.</string>
@@ -431,6 +452,7 @@ Después de desbloquear, permanece abierto durante %1$d minutos (compartido con 
         <item quantity="other">La frase de contraseña se guarda en caché durante %1$d minutos (compartida con el autorrelleno) y luego se borra.</item>
     </plurals>
     <string name="xc_the_remote_has_new_changes_sync_before_pushing">El remoto tiene cambios nuevos: sincroniza antes de hacer push.</string>
+    <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Este sitio pidió un tipo de llave de acceso que PassPony no puede crear.</string>
     <string name="xc_turn_on_autofill">Activar el autorrelleno</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Activa el autorrelleno y tus entradas aparecerán en la barra QuickType al iniciar sesión.
 

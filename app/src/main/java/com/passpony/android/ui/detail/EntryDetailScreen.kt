@@ -11,12 +11,16 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.Key
 import androidx.compose.material.icons.filled.DriveFileMove
 import androidx.compose.material.icons.filled.Edit
 import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.material.icons.filled.Timer
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.FilledTonalButton
 import androidx.compose.material3.DropdownMenu
@@ -28,6 +32,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
@@ -55,6 +60,8 @@ import com.passpony.android.ui.util.Clipboard
 import com.passpony.android.ui.util.SecureScreenEffect
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.OtpKind
+import uniffi.pass_ffi.PasskeyInfo
+import uniffi.pass_ffi.entryPasskeys
 import uniffi.pass_ffi.entryFields
 import uniffi.pass_ffi.entryOtpKind
 import uniffi.pass_ffi.entryIsOtpOnly
@@ -183,6 +190,12 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
                         FieldsSection(current)
                         otpSection()
                     }
+                    PasskeysSection(
+                        name = name,
+                        content = current,
+                        viewModel = viewModel,
+                        onChanged = { content = it }
+                    )
                 }
                 loadAttempted -> {
                     Text(
@@ -242,7 +255,8 @@ private fun PasswordSection(content: ByteArray, revealed: Boolean, onRevealToggl
 
 @Composable
 private fun FieldsSection(content: ByteArray) {
-    val fields = remember(content) { entryFields(content) }
+    // Passkey lines are shown by PasskeysSection, never as raw text.
+    val fields = remember(content) { entryFields(content).filter { it.key != PASSKEY_FIELD } }
     if (fields.isEmpty()) return
 
     val context = LocalContext.current
@@ -265,6 +279,82 @@ private fun FieldsSection(content: ByteArray) {
             }
         }
         HorizontalDivider()
+    }
+}
+
+private const val PASSKEY_FIELD = "passkey"
+
+/**
+ * 2.0 rc3: each passkey line as "Passkey for <site>, <user>", with delete.
+ * The line itself is a base64 blob holding a private key; it is never
+ * shown or copied.
+ */
+@Composable
+private fun PasskeysSection(
+    name: String,
+    content: ByteArray,
+    viewModel: AppViewModel,
+    onChanged: (ByteArray) -> Unit,
+) {
+    val passkeys = remember(content) { entryPasskeys(content) }
+    if (passkeys.isEmpty()) return
+    val context = LocalContext.current
+    val scope = rememberCoroutineScope()
+    var confirm by remember { mutableStateOf<PasskeyInfo?>(null) }
+    var error by remember { mutableStateOf<String?>(null) }
+    Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
+        SectionHeader(stringResource(R.string.passkeys_header))
+        for (passkey in passkeys) {
+            Row(
+                modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
+                verticalAlignment = Alignment.CenterVertically
+            ) {
+                Icon(Icons.Filled.Key, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                Text(
+                    passkeyLabel(context, passkey),
+                    modifier = Modifier.weight(1f).padding(start = 12.dp)
+                )
+                IconButton(onClick = { confirm = passkey }) {
+                    Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.passkey_delete))
+                }
+            }
+        }
+        error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
+        HorizontalDivider()
+    }
+    confirm?.let { passkey ->
+        AlertDialog(
+            onDismissRequest = { confirm = null },
+            title = { Text(stringResource(R.string.passkey_delete_title)) },
+            text = { Text(stringResource(R.string.passkey_delete_body, passkey.rpId)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirm = null
+                        scope.launch {
+                            try {
+                                onChanged(viewModel.removePasskey(name, content, passkey.credentialId))
+                            } catch (e: Exception) {
+                                error = e.ponyMessage(context)
+                            }
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.passkey_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirm = null }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        )
+    }
+}
+
+private fun passkeyLabel(context: android.content.Context, passkey: PasskeyInfo): String {
+    val user = passkey.username.ifEmpty { passkey.userDisplayName }
+    return if (user.isEmpty()) {
+        context.getString(R.string.passkey_for, passkey.rpId)
+    } else {
+        context.getString(R.string.passkey_for_user, passkey.rpId, user)
     }
 }
 

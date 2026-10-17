@@ -111,6 +111,7 @@
     <string name="error_no_store">没有打开的密码库。</string>
     <string name="error_no_usable_key">没有可用的密钥。请在“设置”中导入此密码库的密钥。</string>
     <string name="error_not_in_store">此条目不在密码库中。</string>
+    <string name="error_passkey">此通行密钥出了点问题。</string>
     <string name="error_ssh_auth_failed">该 SSH 主机不接受 PassPony 的密钥。请检查其公钥是否已添加到你在该主机上的帐号。</string>
     <string name="error_ssh_host_changed">%1$s 的 SSH 主机密钥已更改，因此 PassPony 不会连接。如果服务器已重建或更换了密钥，请在“SSH 密钥和受信任的主机”中忘记该主机，然后重新连接并核对新的指纹。</string>
     <string name="error_ssh_key_missing">这是一个 SSH 远程仓库，而 PassPony 尚无 SSH 密钥。请在“SSH 密钥和受信任的主机”中设置一个。</string>
@@ -216,6 +217,20 @@
     <string name="otp_tab_scan">扫描</string>
     <string name="otp_undo_remove">撤销</string>
     <string name="otp_use">使用此验证码</string>
+    <string name="passkey_browser_only">PassPony 的通行密钥目前只能在浏览器中使用。</string>
+    <string name="passkey_browser_only_detail">PassPony 的通行密钥目前只能在浏览器中使用。应用暂时还无法使用它们：要确认某个应用属于某个网站，就必须联系该网站，而 PassPony 只会与你自己的 git 远程仓库通信。</string>
+    <string name="passkey_create_description">将通行密钥保存到你的密码库中</string>
+    <string name="passkey_create_entry_help">通行密钥会添加到此条目中。如果该条目尚不存在，PassPony 会创建它。</string>
+    <string name="passkey_create_for">用于 %1$s</string>
+    <string name="passkey_create_title">保存通行密钥</string>
+    <string name="passkey_delete">删除通行密钥</string>
+    <string name="passkey_delete_body">你将无法再用它登录 %1$s。请同时在该网站上从你的帐号中移除它。</string>
+    <string name="passkey_delete_title">删除此通行密钥？</string>
+    <string name="passkey_for">%1$s 的通行密钥</string>
+    <string name="passkey_for_user">%1$s（%2$s）的通行密钥</string>
+    <string name="passkey_unlock_needed">需要解锁 PassPony 才能保存通行密钥。</string>
+    <string name="passkey_unlock_reason">解锁 PassPony 以使用你的通行密钥</string>
+    <string name="passkeys_header">通行密钥</string>
     <string name="reencrypt_done">完成</string>
     <string name="reencrypt_footer">范围内的每个条目都会被解密，并为其目录当前解析到的接收者重新加密。</string>
     <string name="reencrypt_now">立即重新加密</string>
@@ -265,6 +280,8 @@
     <string name="settings_maintenance_header">维护</string>
     <string name="settings_other_apps_footer">来自同一开发者的其他应用。</string>
     <string name="settings_other_apps_header">更多来自 NorseHorse 的应用</string>
+    <string name="settings_passkeys_body">PassPony 可以在浏览器中保存和使用通行密钥。请在“密码和帐号”中将其开启为通行密钥提供程序。</string>
+    <string name="settings_passkeys_open">打开通行密钥设置</string>
     <string name="settings_pgp_import">导入密钥文件…</string>
     <string name="settings_pgp_keys_empty">尚未导入密钥。pass 密码库至少需要一个与其 .gpg-id 匹配的公钥（以及用于解密的私钥）。</string>
     <string name="settings_pgp_keys_header">OpenPGP 密钥</string>
@@ -380,17 +397,20 @@
     <string name="xc_new_name">新名称</string>
     <string name="xc_next">下一步</string>
     <string name="xc_no_imported_key_matches_fingerprint_or_16_hex_ke">没有已导入的密钥与 %1$s 匹配（指纹或 16 位十六进制密钥 ID）</string>
+    <string name="xc_no_passkeys">没有通行密钥</string>
     <string name="xc_open_settings">打开设置</string>
     <string name="xc_openpgp_messages_files_and_keys">OpenPGP 消息、文件与密钥</string>
     <string name="xc_passage_encrypts_with_modern_age_identities_pass">passage 使用现代的 age 身份加密。pass 使用 OpenPGP 密钥加密，并兼容现有的 pass 密码库。
 
 每种格式都有自己的密码库，之后随时可以在“设置”中切换。</string>
+    <string name="xc_passpony_has_no_passkey_for">PassPony 中没有 %1$s 的通行密钥。</string>
     <string name="xc_passpony_is_locked">PassPony 已锁定</string>
     <plurals name="xc_passpony_locks_behind_face_id_touch_id_or_your_p">
         <item quantity="other">PassPony 通过面容 ID、触控 ID 或设备密码锁定。
 
 解锁后会保持开启 %1$d 分钟（与自动填充共享），之后再次锁定。</item>
     </plurals>
+    <string name="xc_passpony_needs_to_be_unlocked_to_use_the_passkey">需要解锁 PassPony 才能使用通行密钥。</string>
     <string name="xc_pgp_chat_and_encrypted_files">PGP 聊天与加密文件</string>
     <string name="xc_pulled_changes_from_remote">已从远程拉取更改。</string>
     <string name="xc_quorum_key_backup_recovery">法定人数密钥备份与恢复</string>
@@ -405,6 +425,7 @@
     <string name="xc_saved_that_s_your_first_pass">已保存。这是你的第一个条目。</string>
     <string name="xc_self_destructing_encrypted_messages">阅后即焚的加密消息</string>
     <string name="xc_simple_modern_file_encryption_age">简单、现代的文件加密（age）</string>
+    <string name="xc_site">网站</string>
     <string name="xc_skip">跳过</string>
     <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">密码库已有 .gpg-id——更换密钥将随重新加密流程推出。</string>
     <string name="xc_store_cloned">已克隆密码库。</string>
@@ -416,6 +437,7 @@
         <item quantity="other">密码短语会缓存 %1$d 分钟（与自动填充共享），之后清除。</item>
     </plurals>
     <string name="xc_the_remote_has_new_changes_sync_before_pushing">远程有新的更改——请先同步再推送。</string>
+    <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">此网站要求的通行密钥类型是 PassPony 无法创建的。</string>
     <string name="xc_turn_on_autofill">开启自动填充</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">开启自动填充后，登录时你的条目会直接出现在 QuickType 栏中。
 
