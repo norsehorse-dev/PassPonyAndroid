@@ -83,6 +83,7 @@ fun SettingsScreen(
     onReencrypt: () -> Unit,
     onDiagnostics: () -> Unit,
     onBackup: () -> Unit,
+    onSshKey: () -> Unit,
     onLock: () -> Unit,
     onRestartOnboarding: () -> Unit,
 ) {
@@ -247,6 +248,9 @@ fun SettingsScreen(
 
             Spacer(Modifier.height(16.dp))
             BackupRow(onOpen = onBackup)
+
+            Spacer(Modifier.height(16.dp))
+            SshKeyRow(onOpen = onSshKey)
 
             Spacer(Modifier.height(16.dp))
             MaintenanceSection(onReencrypt = onReencrypt)
@@ -639,6 +643,24 @@ private fun OtherAppsSection(context: Context) {
 private const val APP_REPO_URL = "https://github.com/norsehorse-dev/PassPonyAndroid"
 private const val CORE_REPO_URL = "https://github.com/norsehorse-dev/PassPonyCore"
 private const val NORSEHORSE_SITE_URL = "https://pony.norsehor.se"
+
+@Composable
+private fun SshKeyRow(onOpen: () -> Unit) {
+    SectionHeader(stringResource(R.string.settings_ssh_header))
+    Column(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable(onClick = onOpen)
+            .padding(vertical = 6.dp)
+    ) {
+        Text(stringResource(R.string.ssh_manage))
+        Text(
+            stringResource(R.string.settings_ssh_row_subtitle),
+            style = MaterialTheme.typography.bodySmall,
+            color = MaterialTheme.colorScheme.secondary
+        )
+    }
+}
 
 @Composable
 private fun BackupRow(onOpen: () -> Unit) {

@@ -71,6 +71,7 @@ class DiagnosticsReportTest {
             Autofill: on
             Language: system
             Keys: 2 OpenPGP key files
+            SSH key: none
         """.trimIndent()
         assertEquals(expected, text)
     }
@@ -90,6 +91,23 @@ class DiagnosticsReportTest {
         assertTrue(
             report(keys = DiagnosticsReport.KeyInfo.Passage(false)).render()
                 .contains("Keys: no identities file")
+        )
+    }
+
+    @Test
+    fun render_sshRemoteShowsSchemeAndPinningOnly() {
+        val url = "ssh://deploy@git.example.org:2222/you/store.git"
+        val text = report(
+            git = DiagnosticsReport.GitInfo(0, 0, false, DiagnosticsReport.remoteHost(url), "ssh", true)
+        ).copy(sshKey = "ssh-ed25519").render()
+        assertTrue(text.contains("Git: ahead 0, behind 0, remote ssh git.example.org (host pinned)"))
+        assertTrue(text.contains("SSH key: ssh-ed25519"))
+        assertFalse(text.contains("deploy"))
+        assertFalse(text.contains("2222"))
+        assertFalse(text.contains("SHA256"))
+        assertTrue(
+            report(git = DiagnosticsReport.GitInfo(0, 0, false, "h", "ssh", false)).render()
+                .contains("remote ssh h (host not pinned)")
         )
     }
 

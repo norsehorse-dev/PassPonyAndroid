@@ -32,6 +32,8 @@ data class DiagnosticsReport(
     /** A BCP 47 tag, or empty for "follow the system". */
     val languageTag: String,
     val keys: KeyInfo,
+    /** The SSH key's algorithm (`ssh-ed25519`), or null with none. Never the key. */
+    val sshKey: String? = null,
 ) {
     data class GitInfo(
         val ahead: Int,
@@ -39,6 +41,10 @@ data class DiagnosticsReport(
         val dirty: Boolean,
         /** Already reduced to a host by [remoteHost]; null when no remote. */
         val remoteHost: String?,
+        /** `https`, `ssh`, ...; null when no remote. Never the URL's user. */
+        val scheme: String? = null,
+        /** SSH remotes: whether the host's key is pinned. Never the key. */
+        val hostPinned: Boolean? = null,
     )
 
     sealed class KeyInfo {
@@ -66,7 +72,9 @@ data class DiagnosticsReport(
                 append("ahead ${git.ahead}, behind ${git.behind}")
                 if (git.dirty) append(", dirty")
                 append(", remote ")
+                git.scheme?.let { append(it).append(' ') }
                 append(git.remoteHost ?: "none")
+                git.hostPinned?.let { append(if (it) " (host pinned)" else " (host not pinned)") }
             }
         }
         lines += "Autofill: " + if (autofillEnabled) "on" else "off"
@@ -75,6 +83,7 @@ data class DiagnosticsReport(
             is KeyInfo.Pass -> "${keys.keyFiles} OpenPGP key files"
             is KeyInfo.Passage -> if (keys.identitiesPresent) "identities file present" else "no identities file"
         }
+        lines += "SSH key: " + (sshKey ?: "none")
         return lines.joinToString("\n")
     }
 

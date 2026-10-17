@@ -43,10 +43,14 @@ import com.passpony.android.BuildConfig
 import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.PgpKeyStore
+import com.passpony.android.crypto.SshKeyStore
 import com.passpony.android.store.StorePaths
 import com.passpony.android.ui.AppViewModel
+import uniffi.pass_ffi.RemoteScheme
 import uniffi.pass_ffi.StoreFormat
 import uniffi.pass_ffi.coreVersion
+import uniffi.pass_ffi.remoteScheme
+import uniffi.pass_ffi.sshKnownHostsName
 
 /**
  * Settings, then Diagnostics: the screen the support page describes,
@@ -88,10 +92,15 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                     behind = status.behind.toInt(),
                     dirty = status.dirty,
                     remoteHost = if (status.hasRemote) DiagnosticsReport.remoteHost(appViewModel.remoteUrl()) else null,
+                    scheme = appViewModel.remoteUrl()?.takeIf { status.hasRemote }?.let { schemeName(remoteScheme(it)) },
+                    hostPinned = appViewModel.remoteUrl()?.takeIf { status.hasRemote }
+                        ?.let { sshKnownHostsName(it) }
+                        ?.let { SshKeyStore.isPinned(context, it) },
                 )
             },
             autofillEnabled = isAutofillEnabled(context),
             languageTag = LanguageManager.currentTag(),
+            sshKey = SshKeyStore.load(context)?.algorithm,
             keys = if (format == StoreFormat.PASSAGE) {
                 DiagnosticsReport.KeyInfo.Passage(AgeIdentityStore.identitiesFile(context).exists())
             } else {
@@ -135,7 +144,9 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 report.git?.let { git ->
                     "↑${git.ahead} ↓${git.behind}" +
                         (if (git.dirty) " (dirty)" else "") +
-                        (git.remoteHost?.let { " $it" } ?: "")
+                        (git.scheme?.let { " $it" } ?: "") +
+                        (git.remoteHost?.let { " $it" } ?: "") +
+                        (git.hostPinned?.let { if (it) " (host pinned)" else " (host not pinned)" } ?: "")
                 } ?: stringResource(R.string.settings_diagnostics_git_not_configured)
             )
             DiagnosticRow(
@@ -154,6 +165,10 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                         if (keys.identitiesPresent) R.string.diagnostics_keys_passage_present else R.string.diagnostics_keys_passage_missing
                     )
                 }
+            )
+            DiagnosticRow(
+                stringResource(R.string.ssh_title),
+                report.sshKey ?: stringResource(R.string.sync_remote_none)
             )
 
             Spacer(Modifier.height(16.dp))
@@ -213,4 +228,12 @@ private fun share(context: Context, text: String) {
         putExtra(Intent.EXTRA_TEXT, text)
     }
     runCatching { context.startActivity(Intent.createChooser(send, null)) }
+}
+
+private fun schemeName(scheme: RemoteScheme): String = when (scheme) {
+    RemoteScheme.HTTPS -> "https"
+    RemoteScheme.HTTP -> "http"
+    RemoteScheme.SSH -> "ssh"
+    RemoteScheme.FILE -> "file"
+    RemoteScheme.OTHER -> "other"
 }

@@ -7,6 +7,7 @@ import uniffi.pass_ffi.CryptoException
 import uniffi.pass_ffi.GenerateException
 import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.MigrationException
+import uniffi.pass_ffi.SshKeyException
 import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.TotpException
 
@@ -26,6 +27,7 @@ fun Throwable.ponyMessage(context: Context): String = when (this) {
     is GenerateException -> ponyMessage(context)
     is BackupException -> ponyMessage(context)
     is MigrationException -> ponyMessage(context)
+    is SshKeyException -> ponyMessage(context)
     // Unlike iOS's fallback, which shows the raw Swift description, this
     // never surfaces raw exception text: the house rule is no raw
     // exception text with entry names or paths in UI toasts, and an
@@ -47,7 +49,23 @@ fun GitException.ponyMessage(context: Context): String = when (this) {
     is GitException.NonFastForward -> context.getString(R.string.error_non_fast_forward)
     is GitException.UpstreamRewritten -> context.getString(R.string.error_upstream_rewritten)
     is GitException.DirtyWorkdir -> context.getString(R.string.error_dirty_workdir)
+    is GitException.UnknownHostKey -> context.getString(R.string.error_ssh_unknown_host, host)
+    is GitException.HostKeyChanged -> context.getString(R.string.error_ssh_host_changed, host)
+    is GitException.NoHostKey -> context.getString(R.string.error_ssh_no_host_key)
+    is GitException.SshKeyMissing -> context.getString(R.string.error_ssh_key_missing)
+    is GitException.SshAuthFailed -> context.getString(R.string.error_ssh_auth_failed)
     is GitException.Other -> context.getString(R.string.error_git_other, reason)
+}
+
+/** An SSH key file that could not be imported, or a key that could not be made. */
+fun SshKeyException.ponyMessage(context: Context): String = when (this) {
+    is SshKeyException.NeedsPassphrase -> context.getString(R.string.error_sshkey_needs_passphrase)
+    is SshKeyException.WrongPassphrase -> context.getString(R.string.ssh_passphrase_wrong)
+    is SshKeyException.LegacyPem -> context.getString(R.string.error_sshkey_legacy_pem)
+    is SshKeyException.PublicKey -> context.getString(R.string.error_sshkey_public)
+    is SshKeyException.NotAKey -> context.getString(R.string.error_sshkey_not_a_key)
+    is SshKeyException.Unsupported -> context.getString(R.string.error_sshkey_unsupported, algorithm)
+    is SshKeyException.Random -> context.getString(R.string.error_sshkey_random)
 }
 
 fun StoreException.ponyMessage(context: Context): String = when (this) {

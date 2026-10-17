@@ -11,6 +11,8 @@ import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.ConflictChoice
+import uniffi.pass_ffi.GitException
+import uniffi.pass_ffi.HostKey
 
 /**
  * The Sync screen's busy/message/conflict state. A real ViewModel --
@@ -38,6 +40,25 @@ class SyncViewModel(application: Application) : AndroidViewModel(application) {
         private set
 
     val resolver = BlockingResolver()
+
+    /** An SSH host to confirm, and the action to run again once trusted. */
+    class HostPrompt(val host: String, val key: HostKey, val retry: suspend () -> Unit)
+
+    var hostPrompt by mutableStateOf<HostPrompt?>(null)
+        private set
+
+    /** The user compared the fingerprint and trusts the host: pin, retry. */
+    fun trustHost(appViewModel: AppViewModel) {
+        val prompt = hostPrompt ?: return
+        hostPrompt = null
+        appViewModel.trustHost(prompt.host, prompt.key)
+        run(prompt.retry)
+    }
+
+    fun declineHost() {
+        hostPrompt = null
+        message = context.getString(R.string.ssh_host_not_trusted)
+    }
 
     fun push(appViewModel: AppViewModel) = run { appViewModel.pushToRemote() }
 
@@ -71,6 +92,8 @@ class SyncViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             try {
                 work()
+            } catch (e: GitException.UnknownHostKey) {
+                hostPrompt = HostPrompt(e.host, e.key, work)
             } catch (e: Exception) {
                 message = e.ponyMessage(context)
             } finally {

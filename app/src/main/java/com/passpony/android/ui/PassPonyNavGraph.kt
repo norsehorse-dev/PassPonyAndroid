@@ -17,6 +17,7 @@ import com.passpony.android.ui.settings.DiagnosticsScreen
 import com.passpony.android.ui.settings.InitializeStoreScreen
 import com.passpony.android.ui.settings.ReencryptScreen
 import com.passpony.android.ui.settings.SettingsScreen
+import com.passpony.android.ui.settings.SshKeyScreen
 import com.passpony.android.ui.sync.SyncScreen
 
 object Routes {
@@ -35,6 +36,7 @@ object Routes {
     const val REENCRYPT = "settings/reencrypt"
     const val DIAGNOSTICS = "settings/diagnostics"
     const val BACKUP = "settings/backup"
+    const val SSH_KEY = "settings/ssh"
     const val IMPORT_AUTHENTICATOR = "import/authenticator"
 
     /** Path segments can contain slashes; encode so the route stays one segment. */
@@ -107,7 +109,11 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
             )
         }
         composable(Routes.SYNC) {
-            SyncScreen(appViewModel, onDone = { navController.popBackStack() })
+            SyncScreen(
+                appViewModel,
+                onDone = { navController.popBackStack() },
+                onSshKey = { navController.navigate(Routes.SSH_KEY) }
+            )
         }
         composable(Routes.SETTINGS) {
             SettingsScreen(
@@ -117,6 +123,7 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
                 onReencrypt = { navController.navigate(Routes.REENCRYPT) },
                 onDiagnostics = { navController.navigate(Routes.DIAGNOSTICS) },
                 onBackup = { navController.navigate(Routes.BACKUP) },
+                onSshKey = { navController.navigate(Routes.SSH_KEY) },
                 onLock = onLock,
                 onRestartOnboarding = onRestartOnboarding,
             )
@@ -136,6 +143,9 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
         }
         composable(Routes.BACKUP) {
             BackupScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.SSH_KEY) {
+            SshKeyScreen(onDone = { navController.popBackStack() })
         }
         composable(Routes.IMPORT_AUTHENTICATOR) {
             AuthenticatorImportScreen(appViewModel, onDone = { navController.popBackStack() })

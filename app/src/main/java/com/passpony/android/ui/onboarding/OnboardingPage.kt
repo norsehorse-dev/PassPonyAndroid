@@ -63,9 +63,11 @@ import com.passpony.android.ui.edit.PasswordGenerator
 import com.passpony.android.ui.settings.LanguageManager
 import com.passpony.android.ui.settings.rememberAgeIdentitiesImporter
 import com.passpony.android.ui.settings.rememberBackupRestorer
+import com.passpony.android.ui.sync.HostKeyTrustDialog
 import com.passpony.android.ui.util.safDisplayName
 import java.io.File
 import kotlinx.coroutines.launch
+import uniffi.pass_ffi.GitException
 import uniffi.pass_ffi.StoreFormat
 
 /**
@@ -282,6 +284,40 @@ private fun OnboardingCloneDialog(appViewModel: AppViewModel, onCloned: () -> Un
     var url by remember { mutableStateOf("") }
     var busy by remember { mutableStateOf(false) }
     var error by remember { mutableStateOf<String?>(null) }
+    var hostPrompt by remember { mutableStateOf<GitException.UnknownHostKey?>(null) }
+
+    fun clone() {
+        busy = true
+        error = null
+        scope.launch {
+            try {
+                appViewModel.cloneReplaceStore(url)
+                onCloned()
+            } catch (e: GitException.UnknownHostKey) {
+                hostPrompt = e
+            } catch (e: Exception) {
+                error = e.ponyMessage(context)
+            } finally {
+                busy = false
+            }
+        }
+    }
+
+    hostPrompt?.let { prompt ->
+        HostKeyTrustDialog(
+            host = prompt.host,
+            key = prompt.key,
+            onTrust = {
+                hostPrompt = null
+                appViewModel.trustHost(prompt.host, prompt.key)
+                clone()
+            },
+            onCancel = {
+                hostPrompt = null
+                error = context.getString(R.string.ssh_host_not_trusted)
+            }
+        )
+    }
 
     AlertDialog(
         onDismissRequest = { if (!busy) onDismiss() },
@@ -314,20 +350,7 @@ private fun OnboardingCloneDialog(appViewModel: AppViewModel, onCloned: () -> Un
         },
         confirmButton = {
             TextButton(
-                onClick = {
-                    busy = true
-                    error = null
-                    scope.launch {
-                        try {
-                            appViewModel.cloneReplaceStore(url)
-                            onCloned()
-                        } catch (e: Exception) {
-                            error = e.ponyMessage(context)
-                        } finally {
-                            busy = false
-                        }
-                    }
-                },
+                onClick = { clone() },
                 enabled = url.isNotEmpty() && !busy
             ) { Text(stringResource(R.string.xc_clone)) }
         },

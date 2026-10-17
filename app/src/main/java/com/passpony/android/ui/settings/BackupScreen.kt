@@ -46,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.PgpKeyStore
+import com.passpony.android.crypto.SshKeyStore
 import com.passpony.android.store.KeyBackupState
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
@@ -88,6 +89,7 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
     var showPlainWarning by remember { mutableStateOf(false) }
     val backedUp by KeyBackupState.backedUp(context).collectAsState(initial = true)
     val hasAgeIdentities = remember { AgeIdentityStore.hasIdentities(context) }
+    val hasSshKey = remember { SshKeyStore.hasKey(context) }
     val pgpKeyCount = remember { PgpKeyStore.keyDirectory(context).listFiles()?.count { it.isFile } ?: 0 }
     val today = remember { LocalDate.now().toString() }
 
@@ -186,7 +188,7 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                             BackupStep.Idle
                         }
                     },
-                    enabled = hasAgeIdentities || pgpKeyCount > 0
+                    enabled = hasAgeIdentities || pgpKeyCount > 0 || hasSshKey
                 ) { Text(stringResource(R.string.backup_create)) }
 
                 is BackupStep.ShowCode -> {

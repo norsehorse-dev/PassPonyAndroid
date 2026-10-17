@@ -58,6 +58,7 @@ import uniffi.pass_ffi.SyncStatus
 fun SyncScreen(
     appViewModel: AppViewModel,
     onDone: () -> Unit,
+    onSshKey: () -> Unit,
     syncViewModel: SyncViewModel = viewModel()
 ) {
     // A plain val (not `by`), so the null checks below actually let
@@ -145,7 +146,21 @@ fun SyncScreen(
                 Spacer(Modifier.height(16.dp))
                 Text(it, style = MaterialTheme.typography.bodySmall)
             }
+
+            // 2.0 rc2: SSH remotes use the app's key and pinned hosts.
+            Spacer(Modifier.height(16.dp))
+            SectionHeader(stringResource(R.string.settings_ssh_header))
+            TextButton(onClick = onSshKey) { Text(stringResource(R.string.ssh_manage)) }
         }
+    }
+
+    syncViewModel.hostPrompt?.let { prompt ->
+        HostKeyTrustDialog(
+            host = prompt.host,
+            key = prompt.key,
+            onTrust = { syncViewModel.trustHost(appViewModel) },
+            onCancel = { syncViewModel.declineHost() }
+        )
     }
 
     conflictPath?.let { path ->

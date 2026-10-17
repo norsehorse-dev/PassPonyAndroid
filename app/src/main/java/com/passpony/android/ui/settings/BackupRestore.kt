@@ -32,6 +32,7 @@ import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.CryptoException
+import uniffi.pass_ffi.SshKey
 import uniffi.pass_ffi.ageIsEncryptedIdentitiesFile
 import uniffi.pass_ffi.backupNormalizeRecoveryCode
 
@@ -50,6 +51,7 @@ fun rememberBackupRestorer(appViewModel: AppViewModel, onResult: (String) -> Uni
     var pending by remember { mutableStateOf<ByteArray?>(null) }
     var dialogError by remember { mutableStateOf<String?>(null) }
     var busy by remember { mutableStateOf(false) }
+    var sshToConfirm by remember { mutableStateOf<SshKey?>(null) }
 
     val launcher = rememberLauncherForActivityResult(ActivityResultContracts.OpenDocument()) { uri ->
         if (uri == null) return@rememberLauncherForActivityResult
@@ -83,6 +85,7 @@ fun rememberBackupRestorer(appViewModel: AppViewModel, onResult: (String) -> Uni
                     try {
                         val result = appViewModel.restoreBackup(bytes, code)
                         onResult(restoreSummary(context, result))
+                        sshToConfirm = result.sshKeyToConfirm
                         pending = null
                     } catch (e: CryptoException.DecryptionFailed) {
                         dialogError = context.getString(R.string.backup_restore_wrong_code)
@@ -98,6 +101,32 @@ fun rememberBackupRestorer(appViewModel: AppViewModel, onResult: (String) -> Uni
         )
     }
 
+    sshToConfirm?.let { key ->
+        // The backup's SSH key differs from this app's: replacing it could
+        // lock the app out of a host that only knows the current key.
+        AlertDialog(
+            onDismissRequest = {
+                sshToConfirm = null
+                onResult(context.getString(R.string.backup_ssh_kept))
+            },
+            title = { Text(stringResource(R.string.backup_ssh_replace_title)) },
+            text = { Text(stringResource(R.string.backup_ssh_replace_body)) },
+            confirmButton = {
+                TextButton(onClick = {
+                    appViewModel.replaceSshKey(key)
+                    sshToConfirm = null
+                    onResult(context.getString(R.string.backup_ssh_replaced))
+                }) { Text(stringResource(R.string.backup_ssh_replace)) }
+            },
+            dismissButton = {
+                TextButton(onClick = {
+                    sshToConfirm = null
+                    onResult(context.getString(R.string.backup_ssh_kept))
+                }) { Text(stringResource(R.string.backup_ssh_keep)) }
+            }
+        )
+    }
+
     return { launcher.launch(arrayOf("*/*")) }
 }
 
@@ -109,8 +138,13 @@ internal fun restoreSummary(context: Context, r: AppViewModel.RestoreResult): St
     if (r.pgpKeysAdded > 0) {
         parts += context.resources.getQuantityString(R.plurals.backup_restore_pgp_keys, r.pgpKeysAdded, r.pgpKeysAdded)
     }
-    val head = if (parts.isEmpty()) {
+    if (r.sshKeyRestored) {
+        parts += context.getString(R.string.backup_restore_ssh_key)
+    }
+    val head = if (parts.isEmpty() && r.sshKeyToConfirm == null) {
         context.getString(R.string.backup_restore_nothing_new)
+    } else if (parts.isEmpty()) {
+        context.getString(R.string.backup_restore_ssh_differs)
     } else {
         context.getString(R.string.backup_restore_done, parts.joinToString(", "))
     }

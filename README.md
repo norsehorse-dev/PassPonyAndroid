@@ -137,10 +137,14 @@ Android's own `store/UnlockGate.kt` -- one 5-minute window shared across
 biometric unlock, autofill, and the pass passphrase cache, matching iOS's
 UnlockGate parity.
 
+The SSH key for git remotes (2.0) is sealed the same way under its own
+Keystore key (`crypto/SshKeyStore.kt`) and unsealed per sync; the core
+hands it to libssh2 from memory. SSH hosts are trusted on first use and
+pinned in an app-private known_hosts file; a changed host key is refused.
+
 ## Not yet
 
 - Smartcard decrypt (NFC and USB-C YubiKey).
-- SSH remotes for git sync; use HTTPS with a token for now.
 - Credential Manager / passkey-era autofill APIs (format spike done in
   PassPonyCore's `docs/passkeys-format.md`; the release after 1.2).
 - armeabi-v7a (32-bit) builds.

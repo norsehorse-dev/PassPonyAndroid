@@ -7,6 +7,7 @@ import com.passpony.android.BuildConfig
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
 import com.passpony.android.crypto.PgpKeyStore
+import com.passpony.android.crypto.SshKeyStore
 import com.passpony.android.store.KeyBackupState
 import java.io.File
 import com.passpony.android.store.BrowseModel
@@ -48,6 +49,10 @@ import uniffi.pass_ffi.backupKindPgpSecretKey
 import uniffi.pass_ffi.commitMessageHotpIncrement
 import uniffi.pass_ffi.commitMessageOtpAdd
 import uniffi.pass_ffi.entryHotpNext
+import uniffi.pass_ffi.HostKey
+import uniffi.pass_ffi.SshKey
+import uniffi.pass_ffi.backupKindSshPrivateKey
+import uniffi.pass_ffi.sshImportKey
 
 /**
  * Same structure as PassPony iOS's AppModel: open/refresh/read/save/move/
@@ -235,7 +240,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /** Push the current branch to origin. Network I/O -- always off Main. */
     suspend fun pushToRemote() {
         withContext(Dispatchers.IO) {
-            git?.push() ?: throw GitException.NoRepository()
+            val handle = git ?: throw GitException.NoRepository()
+            handle.setSsh(SshKeyStore.config(context))
+            handle.push()
         }
         refresh()
     }
@@ -249,6 +256,14 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     /**
+     * Pin an SSH host's key after the user confirmed its fingerprint
+     * (from `GitException.UnknownHostKey`); the caller then retries.
+     */
+    fun trustHost(host: String, key: HostKey) {
+        SshKeyStore.trust(context, host, key)
+    }
+
+    /**
      * Fetch + rebase (or fast-forward, or nothing). [resolver] is asked
      * once per conflicted file, on this IO-dispatcher thread -- see
      * ui/sync/BlockingResolver, which bridges that blocking callback to
@@ -256,7 +271,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     suspend fun syncNow(resolver: ConflictResolver): SyncOutcome {
         val outcome = withContext(Dispatchers.IO) {
-            git?.sync(resolver) ?: throw GitException.NoRepository()
+            val handle = git ?: throw GitException.NoRepository()
+            handle.setSsh(SshKeyStore.config(context))
+            handle.sync(resolver)
         }
         refresh()
         return outcome
@@ -272,6 +289,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         withContext(Dispatchers.IO) {
             val handle = git ?: GitSync.init(StorePaths.storeRoot(context, format).absolutePath, format)
             handle.setRemote(url)
+            handle.setSsh(SshKeyStore.config(context))
             handle.push()
         }
         openStore()
@@ -288,7 +306,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val scratch = StorePaths.cloneScratchDir(context)
         withContext(Dispatchers.IO) {
             scratch.deleteRecursively()
-            GitSync.cloneFrom(url, scratch.absolutePath, null).close()
+            GitSync.cloneWithSsh(url, scratch.absolutePath, null, SshKeyStore.config(context)).close()
             root.deleteRecursively()
             if (!scratch.renameTo(root)) {
                 throw GitException.Other("couldn't move the cloned store into place")
@@ -402,6 +420,9 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         AgeIdentityStore.exportText(context)?.let { text ->
             sections += BackupSection(backupKindAgeIdentities(), "", text.toByteArray(Charsets.UTF_8))
         }
+        SshKeyStore.load(context)?.let { key ->
+            sections += BackupSection(backupKindSshPrivateKey(), "", key.privateKey.toByteArray(Charsets.UTF_8))
+        }
         PgpKeyStore.keyDirectory(context).listFiles()
             ?.filter { it.isFile }
             ?.sortedBy { it.name }
@@ -424,6 +445,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val pgpKeysAdded: Int,
         val pgpKeysPresent: Int,
         val unknownSections: Int,
+        /** The backup's SSH key became this app's key (it had none). */
+        val sshKeyRestored: Boolean = false,
+        /**
+         * The backup's SSH key differs from the one this app has; the
+         * caller asks before [replaceSshKey]. Nothing was changed yet.
+         */
+        val sshKeyToConfirm: SshKey? = null,
     )
 
     /**
@@ -447,6 +475,8 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             var pgpAdded = 0
             var pgpPresent = 0
             var unknown = 0
+            var sshRestored = false
+            var sshToConfirm: SshKey? = null
             try {
                 for (section in sections) {
                     when (section.kind) {
@@ -458,13 +488,26 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                         backupKindPgpSecretKey() -> {
                             if (restorePgpKey(section.name, section.data)) pgpAdded++ else pgpPresent++
                         }
+                        backupKindSshPrivateKey() -> {
+                            val restored = runCatching { sshImportKey(section.data, null) }.getOrNull()
+                            val current = SshKeyStore.load(context)
+                            when {
+                                restored == null -> unknown++
+                                current == null && !SshKeyStore.hasKey(context) -> {
+                                    SshKeyStore.save(context, restored)
+                                    sshRestored = true
+                                }
+                                current?.fingerprint == restored.fingerprint -> {}
+                                else -> sshToConfirm = restored
+                            }
+                        }
                         else -> unknown++
                     }
                 }
             } finally {
                 sections.forEach { it.data.fill(0) }
             }
-            RestoreResult(idAdded, idPresent, pgpAdded, pgpPresent, unknown)
+            RestoreResult(idAdded, idPresent, pgpAdded, pgpPresent, unknown, sshRestored, sshToConfirm)
         }
         if (result.identitiesAdded == 0 &&
             result.identitiesPresent > 0 &&
@@ -477,6 +520,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         engine = EngineProvider.engine(context, format)
         openStore()
         return result
+    }
+
+    /** The user chose the backup's SSH key over the one this app had. */
+    fun replaceSshKey(key: SshKey) {
+        SshKeyStore.save(context, key)
     }
 
     /** True when written, false when an identical file was already there. */
