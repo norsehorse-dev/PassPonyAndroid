@@ -96,6 +96,8 @@ fun EditEntryScreen(
     var showOtpSheet by remember(name) { mutableStateOf(openOtpSetup) }
     var showGeneratorSheet by remember(name) { mutableStateOf(false) }
     var confirmDelete by remember(name) { mutableStateOf(false) }
+    // Why the last Save failed; the screen stays open to show it.
+    var saveError by remember(name) { mutableStateOf<String?>(null) }
 
     LaunchedEffect(name) {
         val content = viewModel.readEntry(name) ?: return@LaunchedEffect
@@ -198,8 +200,11 @@ fun EditEntryScreen(
                                         entryRemoveOtpauth(bytes)
                                 }
                             }
-                            viewModel.saveEntry(name, bytes, isNew = false)
-                            onDone()
+                            if (viewModel.saveEntry(name, bytes, isNew = false)) {
+                                onDone()
+                            } else {
+                                saveError = viewModel.lastError.value
+                            }
                         },
                         enabled = state.hasChanges
                     ) { Text(stringResource(R.string.action_save)) }
@@ -214,6 +219,14 @@ fun EditEntryScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            saveError?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
             if (otpOnly) {
                 // Line 1 is the URI, so there is no password to edit; the
                 // code section below owns that line.

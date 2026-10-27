@@ -57,6 +57,8 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
     var otpauth by remember { mutableStateOf<String?>(null) }
     var showOtpSheet by remember { mutableStateOf(false) }
     var showGeneratorSheet by remember { mutableStateOf(false) }
+    // Why the last Save failed (no .gpg-id yet, no usable key, ...).
+    var saveError by remember { mutableStateOf<String?>(null) }
 
     if (showGeneratorSheet) {
         GeneratorSheet(
@@ -88,8 +90,11 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                     TextButton(
                         onClick = {
                             val content = NewEntryContent.assemble(password, username, url, otpauth)
-                            viewModel.saveEntry(name, content, isNew = true)
-                            onDone()
+                            if (viewModel.saveEntry(name, content, isNew = true)) {
+                                onDone()
+                            } else {
+                                saveError = viewModel.lastError.value
+                            }
                         },
                         enabled = name.isNotEmpty() && (password.isNotEmpty() || otpauth != null)
                     ) { Text(stringResource(R.string.action_save)) }
@@ -104,6 +109,14 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            saveError?.let {
+                Text(
+                    it,
+                    color = MaterialTheme.colorScheme.error,
+                    style = MaterialTheme.typography.bodySmall,
+                    modifier = Modifier.padding(bottom = 12.dp)
+                )
+            }
             OutlinedTextField(
                 value = name,
                 onValueChange = { name = it },

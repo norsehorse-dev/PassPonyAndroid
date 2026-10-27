@@ -239,16 +239,24 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      * never blocks the save, and the failure is not surfaced to
      * lastError since the save itself already succeeded.
      */
-    fun saveEntry(name: String, content: ByteArray, isNew: Boolean) {
-        val current = store ?: return
-        try {
+    fun saveEntry(name: String, content: ByteArray, isNew: Boolean): Boolean {
+        // False (with lastError set) when nothing was written, so the Add
+        // and Edit screens stay open and say why instead of closing on a
+        // save that never happened (no .gpg-id yet, no usable key, ...).
+        val current = store ?: run {
+            _lastError.value = StoreException.NoStore().ponyMessage(context)
+            return false
+        }
+        return try {
             current.writeEntry(name, content, engine)
             val message = if (isNew) commitMessageAdd(name) else commitMessageEdit(name)
             runCatching { git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), message) }
             runCatching { PasskeyIndex.updateEntry(context, format, name, content) }
             refresh()
+            true
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
+            false
         }
     }
 

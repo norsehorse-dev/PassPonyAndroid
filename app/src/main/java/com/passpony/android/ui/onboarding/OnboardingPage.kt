@@ -364,8 +364,8 @@ private fun OnboardingCloneDialog(appViewModel: AppViewModel, onCloned: () -> Un
  * username/url) that saves a REAL entry via the same
  * AppViewModel.saveEntry P08 uses. Auto-advances once the entry count
  * actually increases, same detection iOS uses (entryCountBeforeAdd set
- * at tap time, compared against the live count) rather than trusting
- * saveEntry's own (silent-on-failure) return. */
+ * at tap time, compared against the live count). A failed save (2.0.1:
+ * saveEntry returns false) shows its error under the button. */
 @Composable
 private fun TryPassAction(appViewModel: AppViewModel, onAdvance: () -> Unit) {
     val context = LocalContext.current
@@ -373,6 +373,7 @@ private fun TryPassAction(appViewModel: AppViewModel, onAdvance: () -> Unit) {
     var name by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var entryCountBeforeAdd by remember { mutableStateOf<Int?>(null) }
+    var saveError by remember { mutableStateOf<String?>(null) }
 
     LaunchedEffect(entries.size) {
         val before = entryCountBeforeAdd
@@ -413,11 +414,19 @@ private fun TryPassAction(appViewModel: AppViewModel, onAdvance: () -> Unit) {
         TextButton(
             onClick = {
                 entryCountBeforeAdd = entries.size
-                appViewModel.saveEntry(name, NewEntryContent.assemble(password, "", ""), isNew = true)
+                val saved = appViewModel.saveEntry(name, NewEntryContent.assemble(password, "", ""), isNew = true)
+                saveError = if (saved) null else appViewModel.lastError.value
             },
             enabled = name.isNotEmpty() && password.isNotEmpty()
         ) {
             Text(stringResource(R.string.xc_add_a_pass))
+        }
+        saveError?.let {
+            Text(
+                it,
+                color = MaterialTheme.colorScheme.error,
+                style = MaterialTheme.typography.bodySmall
+            )
         }
     }
 }
