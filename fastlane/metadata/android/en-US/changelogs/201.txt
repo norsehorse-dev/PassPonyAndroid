@@ -1,0 +1,1 @@
+2.0.1: adding or editing an entry no longer closes the screen when the save fails. It stays open and says why, for example when a pass store has no .gpg-id yet or the key for it isn't imported. The first-run tour does the same.
