@@ -1,0 +1,1 @@
+2.1: a plainer look in PassPony orange, dropdown menus in place of cramped segment rows, and clear loading, no-match and error screens. Adding or editing an entry no longer closes the screen when the save fails. It stays open and says why. Around fifty labels that still showed English in other languages are now translated.
