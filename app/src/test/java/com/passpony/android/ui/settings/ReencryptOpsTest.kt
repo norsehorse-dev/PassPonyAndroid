@@ -6,6 +6,7 @@ import org.junit.Test
 import uniffi.pass_ffi.CryptoBackend
 import uniffi.pass_ffi.EntryRef
 import uniffi.pass_ffi.PassStoreInterface
+import uniffi.pass_ffi.ReencryptReport
 import uniffi.pass_ffi.StoreFormat
 
 /**
@@ -44,6 +45,13 @@ class ReencryptOpsTest {
             lastPreviewSubpath = subpath
             return targets
         }
+
+        // 2.0 rc4 interface members; ReencryptOps doesn't use them.
+        override fun reencryptReadable(subpath: String, backend: CryptoBackend): ReencryptReport =
+            ReencryptReport(rewritten = rewritten, skipped = 0u)
+
+        override fun rootRecipients(): String? = null
+        override fun setRootRecipients(text: String) {}
 
         override fun removeEntry(name: String) {}
         override fun writeEntry(name: String, content: ByteArray, backend: CryptoBackend) {}
