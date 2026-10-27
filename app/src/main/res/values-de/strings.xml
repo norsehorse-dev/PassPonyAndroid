@@ -158,7 +158,7 @@
     <string name="generator_use">Passwort verwenden</string>
     <string name="init_store_confirm">Initialisieren</string>
     <string name="init_store_empty">Importiere zuerst eine Schlüsseldatei in den Einstellungen.</string>
-    <string name="init_store_footer">Schreibt die Fingerabdrücke der ausgewählten Schlüssel in die .gpg-id des Speichers — dieselbe Datei, die pass init anlegt. Jeder danach gesicherte Eintrag wird für alle diese Schlüssel verschlüsselt.</string>
+    <string name="init_store_footer">Schreibt die Fingerabdrücke der ausgewählten Schlüssel in die .gpg-id des Speichers, dieselbe Datei, die pass init anlegt. Jeder danach gesicherte Eintrag wird für alle diese Schlüssel verschlüsselt.</string>
     <string name="init_store_header">Neue Einträge verschlüsseln für</string>
     <string name="init_store_title">Speicher initialisieren</string>
     <string name="lock_reason">Passwort-Speicher entsperren</string>
@@ -346,13 +346,13 @@
     <string name="sync_actions_header">Aktionen</string>
     <string name="sync_behind_remote">Hinter dem Remote</string>
     <string name="sync_clone_button">Klonen (ersetzt den aktuellen Speicher)</string>
-    <string name="sync_clone_footer">Der Klon landet zuerst in einem Zwischenbereich — ein fehlgeschlagenes Klonen lässt den aktuellen Speicher unangetastet. Bei Erfolg ersetzt er den aktuellen Speicher dieses Formats. Zum Entschlüsseln geklonter Einträge braucht es weiterhin den passenden Schlüssel: Identities-Datei für passage, importierter OpenPGP-Schlüssel für pass.</string>
+    <string name="sync_clone_footer">Der Klon landet zuerst in einem Zwischenbereich, sodass ein fehlgeschlagenes Klonen den aktuellen Speicher unangetastet lässt. Bei Erfolg ersetzt er den aktuellen Speicher dieses Formats. Zum Entschlüsseln geklonter Einträge braucht es weiterhin den passenden Schlüssel: Identitätsdatei für passage, importierter OpenPGP-Schlüssel für pass.</string>
     <string name="sync_clone_header">Vorhandenen Speicher klonen</string>
     <string name="sync_conflict_body">Dieser Eintrag wurde auf diesem und einem anderen Gerät geändert.</string>
     <string name="sync_conflict_keep_both">Beide behalten</string>
     <string name="sync_conflict_keep_local">Version dieses Geräts behalten</string>
     <string name="sync_conflict_keep_remote">Andere Version behalten</string>
-    <string name="sync_no_repository">Kein Git-Repository — klone einen Speicher oder nutze den rein lokalen Modus.</string>
+    <string name="sync_no_repository">Kein Git-Repository. Klone einen Speicher oder nutze ihn weiter rein lokal.</string>
     <string name="sync_now">Jetzt synchronisieren</string>
     <string name="sync_publish">Veröffentlichen</string>
     <string name="sync_publish_footer">Committet den aktuellen Speicher und pusht ihn zu einem leeren Remote. SSH-Remotes nutzen den SSH-Schlüssel, der unter „SSH-Schlüssel und vertrauenswürdige Hosts“ eingerichtet ist.</string>
@@ -393,7 +393,7 @@ Du kannst sie jederzeit in den Einstellungen ändern.</string>
     <string name="xc_entry">Eintrag</string>
     <string name="xc_file_error">Dateifehler: %1$s</string>
     <string name="xc_fill_passwords_anywhere">Passwörter überall ausfüllen</string>
-    <string name="xc_get_started">Los geht\'s</string>
+    <string name="xc_get_started">Fertig</string>
     <string name="xc_git_error">Git-Fehler: %1$s</string>
     <string name="xc_import_failed_for">Import fehlgeschlagen für %1$s: %2$s</string>
     <plurals name="xc_imported_lld_key_files">
@@ -438,7 +438,7 @@ Nach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sper
         <item quantity="one">%1$d Eintrag neu verschlüsselt.</item>
         <item quantity="other">%1$d Einträge neu verschlüsselt.</item>
     </plurals>
-    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Das Umschlüsseln eines aktiven Speichers ist der Neuverschlüsselungs-Ablauf — er kommt mit der Teilbaum-Vorschau.</string>
+    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Um die Schlüssel eines Speichers zu ändern, der in Gebrauch ist, nutze „Speicher neu verschlüsseln“.</string>
     <plurals name="xc_resolved_lld_conflicts">
         <item quantity="one">%1$d Konflikt gelöst.</item>
         <item quantity="other">%1$d Konflikte gelöst.</item>
@@ -446,10 +446,10 @@ Nach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sper
     <string name="xc_results">Ergebnisse</string>
     <string name="xc_saved_that_s_your_first_pass">Gesichert. Das ist dein erster Eintrag.</string>
     <string name="xc_self_destructing_encrypted_messages">Selbstzerstörende verschlüsselte Nachrichten</string>
-    <string name="xc_simple_modern_file_encryption_age">Einfache, moderne Dateiverschlüsselung (age)</string>
+    <string name="xc_simple_modern_file_encryption_age">Dateiverschlüsselung mit age</string>
     <string name="xc_site">Website</string>
     <string name="xc_skip">Überspringen</string>
-    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Der Speicher hat bereits eine .gpg-id — das Umschlüsseln kommt mit dem Neuverschlüsselungs-Ablauf.</string>
+    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Dieser Speicher hat bereits eine .gpg-id. Um seine Schlüssel zu ändern, nutze „Speicher neu verschlüsseln“.</string>
     <string name="xc_store_cloned">Speicher geklont.</string>
     <string name="xc_store_format">Speicherformat</string>
     <string name="xc_store_unavailable">Speicher nicht verfügbar</string>
@@ -459,7 +459,7 @@ Nach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sper
         <item quantity="one">Die Passphrase wird %1$d Minute lang zwischengespeichert (mit AutoFill geteilt) und dann gelöscht.</item>
         <item quantity="other">Die Passphrase wird %1$d Minuten lang zwischengespeichert (mit AutoFill geteilt) und dann gelöscht.</item>
     </plurals>
-    <string name="xc_the_remote_has_new_changes_sync_before_pushing">Das Remote hat neue Änderungen — synchronisiere vor dem Push.</string>
+    <string name="xc_the_remote_has_new_changes_sync_before_pushing">Das Remote hat neue Änderungen. Synchronisiere vor dem Push.</string>
     <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Diese Website verlangt eine Art von Passkey, die PassPony nicht erstellen kann.</string>
     <string name="xc_turn_on_autofill">AutoFill aktivieren</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Aktiviere AutoFill, dann erscheinen deine Einträge beim Anmelden direkt in der QuickType-Leiste.
@@ -480,7 +480,66 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
         <item quantity="one">Du hast bereits %1$d Eintrag</item>
         <item quantity="other">Du hast bereits %1$d Einträge</item>
     </plurals>
-    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">Deine Passwörter, in einem Speicher, der dir gehört.
-
-PassPony spricht dasselbe Format wie die Kommandozeilen-Tools pass und passage: einfache Dateien, verschlüsselt mit deinen Schlüsseln, synchronisiert über git.</string>
+    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">PassPony spricht dasselbe Format wie die Kommandozeilen-Tools pass und passage: einfache Dateien, verschlüsselt mit deinen Schlüsseln, synchronisiert über git.</string>
+    <string name="init_store_already_exists">Dieser Speicher hat bereits eine .gpg-id. Um seine Schlüssel zu ändern, nutze „Speicher neu verschlüsseln“.</string>
+    <string name="lock_screen_tagline">Entsperre, um deinen Passwort-Speicher zu öffnen.</string>
+    <string name="chrome_autofill_help_body">Chrome hat eine eigene Einstellung für Autofill-Dienste, die die gerade gewählte Android-Standardeinstellung überschreibt. Damit PassPony Anmeldedaten in Chrome ausfüllen kann: Öffne in Chrome das Menü ⋮ → „Settings“ → „Autofill Services“, wähle dort „Autofill using another service“ und schließe Chrome dann vollständig und öffne es neu (nicht nur weg- und zurückwechseln). Das betrifft nur Chrome. Andere Apps und Browser nutzen bereits die Android-Einstellung.</string>
+    <string name="settings_other_apps_vaultpony">VeraCrypt-kompatible verschlüsselte Tresore auf deinem Gerät</string>
+    <string name="settings_gpgid_footer_set">Um die Schlüssel zu ändern, für die dieser Speicher verschlüsselt, nutze unten „Speicher neu verschlüsseln“.</string>
+    <string name="lock_screen_failed">PassPony konnte nicht entsperrt werden. Versuche es erneut.</string>
+    <string name="store_list_no_match">Keine Einträge passen zu „%1$s“.</string>
+    <string name="store_list_open_failed">Der Speicher konnte nicht geöffnet werden</string>
+    <string name="autofill_picker_empty">Dein Speicher hat noch keine Einträge. Füge zuerst einen in PassPony hinzu.</string>
+    <string name="action_back">Zurück</string>
+    <string name="action_cancel">Abbrechen</string>
+    <string name="autofill_pick_failed">Dieser Eintrag konnte nicht ausgefüllt werden.</string>
+    <string name="autofill_picker_search_hint">Einträge durchsuchen</string>
+    <string name="autofill_picker_title">Aus PassPony ausfüllen</string>
+    <string name="autofill_save_not_supported">Neue Einträge per AutoFill zu sichern wird noch nicht unterstützt.</string>
+    <string name="autofill_search_dataset_label">In PassPony suchen</string>
+    <string name="autofill_unlock_reason">PassPony entsperren, um dieses Passwort auszufüllen</string>
+    <string name="chrome_autofill_help_close">Verstanden</string>
+    <string name="chrome_autofill_help_open_chrome">Chrome öffnen</string>
+    <string name="chrome_autofill_help_title">Noch ein Schritt für Chrome</string>
+    <string name="edit_entry_title">%1$s bearbeiten</string>
+    <string name="entry_detail_binary_password">•binär•</string>
+    <string name="entry_detail_hide">Passwort verbergen</string>
+    <string name="entry_detail_more">Weitere Optionen</string>
+    <string name="entry_detail_reveal">Passwort anzeigen</string>
+    <string name="error_git_other">Git-Fehler: %1$s</string>
+    <string name="error_non_fast_forward">Das Remote hat neue Änderungen. Synchronisiere vor dem Push.</string>
+    <string name="error_store_crypto">Verschlüsselungsfehler: %1$s</string>
+    <string name="error_store_io">Dateifehler: %1$s</string>
+    <string name="error_unknown">Etwas ist schiefgelaufen. Versuche es erneut.</string>
+    <string name="lock_screen_authenticating">Authentifizierung …</string>
+    <string name="move_entry_title">Verschieben / Umbenennen</string>
+    <string name="onboarding_autofill_body">Aktiviere AutoFill, dann erscheinen deine Einträge beim Anmelden direkt in den Tastaturvorschlägen.\n\nDu kannst das jederzeit in den Einstellungen unter „Passwörter und AutoFill“ verwalten.</string>
+    <plurals name="onboarding_biometric_body">
+        <item quantity="one">PassPony ist hinter deinem Fingerabdruck, deinem Gesicht oder der Geräte-PIN gesperrt.\n\nNach dem Entsperren bleibt es %1$d Minute offen (mit AutoFill geteilt) und sperrt sich dann wieder.</item>
+        <item quantity="other">PassPony ist hinter deinem Fingerabdruck, deinem Gesicht oder der Geräte-PIN gesperrt.\n\nNach dem Entsperren bleibt es %1$d Minuten offen (mit AutoFill geteilt) und sperrt sich dann wieder.</item>
+    </plurals>
+    <string name="reencrypt_will_rewrite">%1$d Einträge werden neu geschrieben</string>
+    <string name="settings_autofill_chrome_help_link">Chrome bietet PassPony nicht an?</string>
+    <string name="settings_autofill_footer">Erlaubt anderen Apps und Browsern, PassPony um das Ausfüllen von Anmeldedaten zu bitten. Entschlüsselt wird erst, wenn du einen Eintrag auswählst.</string>
+    <string name="settings_autofill_row_title">PassPony als AutoFill-Dienst festlegen …</string>
+    <string name="settings_diagnostics_core">Kern</string>
+    <string name="settings_diagnostics_row_title">Diagnose</string>
+    <string name="settings_import_failed">Import fehlgeschlagen für %1$s: %2$s</string>
+    <string name="settings_import_success">%1$d Schlüsseldateien importiert.</string>
+    <string name="settings_key_delete">Schlüssel löschen</string>
+    <string name="settings_lock_now">Jetzt sperren</string>
+    <string name="settings_locked_keys_footer">Die Passphrase wird %1$d Minuten lang zwischengespeichert (mit AutoFill geteilt) und dann gelöscht.</string>
+    <string name="settings_other_apps_site_title">Alle Pony-Apps von NorseHorse</string>
+    <string name="settings_session_footer">Sperrt sofort und löscht die zwischengespeicherte Schlüssel-Passphrase. Nach %1$d Minuten Inaktivität wird ohnehin automatisch gesperrt.</string>
+    <string name="settings_session_header">Sitzung</string>
+    <string name="settings_unlock">Entsperren</string>
+    <string name="settings_unlocked_some">Einige Schlüssel entsperrt; %1$d sind noch gesperrt.</string>
+    <string name="store_list_add">Eintrag hinzufügen</string>
+    <string name="store_list_lock_now">Jetzt sperren</string>
+    <string name="store_list_more">Mehr</string>
+    <string name="store_list_settings">Einstellungen</string>
+    <string name="store_list_sync">Sync</string>
+    <string name="sync_conflict_title">Sync-Konflikt: %1$s</string>
+    <string name="sync_done">Fertig</string>
+    <string name="sync_remote_label">Remote</string>
 </resources>

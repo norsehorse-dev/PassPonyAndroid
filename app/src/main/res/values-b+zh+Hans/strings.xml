@@ -155,7 +155,7 @@
     <string name="generator_use">使用密码</string>
     <string name="init_store_confirm">初始化</string>
     <string name="init_store_empty">请先在“设置”中导入密钥文件。</string>
-    <string name="init_store_footer">将所选密钥的指纹写入密码库的 .gpg-id——与 pass init 创建的是同一个文件。此后保存的每个条目都会为所有这些密钥加密。</string>
+    <string name="init_store_footer">将所选密钥的指纹写入密码库的 .gpg-id，即 pass init 创建的同一个文件。此后保存的每个条目都会为所有这些密钥加密。</string>
     <string name="init_store_header">为以下密钥加密新条目</string>
     <string name="init_store_title">初始化密码库</string>
     <string name="lock_reason">解锁你的密码库</string>
@@ -340,13 +340,13 @@
     <string name="sync_actions_header">操作</string>
     <string name="sync_behind_remote">落后于远程</string>
     <string name="sync_clone_button">克隆（替换当前密码库）</string>
-    <string name="sync_clone_footer">克隆会先放入暂存区——克隆失败不会影响当前密码库。成功后它会替换该格式的当前密码库。解密克隆的条目仍需要匹配的密钥：passage 需要 identities 文件，pass 需要已导入的 OpenPGP 密钥。</string>
+    <string name="sync_clone_footer">克隆会先放入暂存区，因此克隆失败不会影响当前密码库。成功后它会替换该格式的当前密码库。解密克隆的条目仍需要匹配的密钥：passage 需要身份文件，pass 需要已导入的 OpenPGP 密钥。</string>
     <string name="sync_clone_header">克隆现有密码库</string>
     <string name="sync_conflict_body">此条目在本设备和另一台设备上都发生了更改。</string>
     <string name="sync_conflict_keep_both">两个都保留</string>
     <string name="sync_conflict_keep_local">保留此设备的版本</string>
     <string name="sync_conflict_keep_remote">保留另一个版本</string>
-    <string name="sync_no_repository">没有 git 仓库——克隆一个密码库，或使用仅本地模式。</string>
+    <string name="sync_no_repository">没有 git 仓库。请克隆一个密码库，或继续仅在本地使用。</string>
     <string name="sync_now">立即同步</string>
     <string name="sync_publish">发布</string>
     <string name="sync_publish_footer">提交当前密码库并推送到一个空的远程仓库。SSH 远程仓库使用在“SSH 密钥和受信任的主机”中设置的 SSH 密钥。</string>
@@ -387,7 +387,7 @@
     <string name="xc_entry">条目</string>
     <string name="xc_file_error">文件错误：%1$s</string>
     <string name="xc_fill_passwords_anywhere">随处填充密码</string>
-    <string name="xc_get_started">开始使用</string>
+    <string name="xc_get_started">完成</string>
     <string name="xc_git_error">git 错误：%1$s</string>
     <string name="xc_import_failed_for">导入 %1$s 失败：%2$s</string>
     <plurals name="xc_imported_lld_key_files">
@@ -425,17 +425,17 @@
     <plurals name="xc_re_encrypted_lld_entries">
         <item quantity="other">已重新加密 %1$d 个条目。</item>
     </plurals>
-    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">更换在用密码库的密钥属于重新加密流程——将随子树预览一起推出。</string>
+    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">要更换在用密码库的密钥，请使用“重新加密密码库”。</string>
     <plurals name="xc_resolved_lld_conflicts">
         <item quantity="other">已解决 %1$d 个冲突。</item>
     </plurals>
     <string name="xc_results">结果</string>
     <string name="xc_saved_that_s_your_first_pass">已保存。这是你的第一个条目。</string>
     <string name="xc_self_destructing_encrypted_messages">阅后即焚的加密消息</string>
-    <string name="xc_simple_modern_file_encryption_age">简单、现代的文件加密（age）</string>
+    <string name="xc_simple_modern_file_encryption_age">基于 age 的文件加密</string>
     <string name="xc_site">网站</string>
     <string name="xc_skip">跳过</string>
-    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">密码库已有 .gpg-id——更换密钥将随重新加密流程推出。</string>
+    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">此密码库已有 .gpg-id。要更换其密钥，请使用“重新加密密码库”。</string>
     <string name="xc_store_cloned">已克隆密码库。</string>
     <string name="xc_store_format">密码库格式</string>
     <string name="xc_store_unavailable">密码库不可用</string>
@@ -444,7 +444,7 @@
     <plurals name="xc_the_passphrase_is_cached_for_lld_minutes_shared">
         <item quantity="other">密码短语会缓存 %1$d 分钟（与自动填充共享），之后清除。</item>
     </plurals>
-    <string name="xc_the_remote_has_new_changes_sync_before_pushing">远程有新的更改——请先同步再推送。</string>
+    <string name="xc_the_remote_has_new_changes_sync_before_pushing">远程有新的更改。请先同步再推送。</string>
     <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">此网站要求的通行密钥类型是 PassPony 无法创建的。</string>
     <string name="xc_turn_on_autofill">开启自动填充</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">开启自动填充后，登录时你的条目会直接出现在 QuickType 栏中。
@@ -462,7 +462,65 @@
     <plurals name="xc_you_already_have_lld_passes">
         <item quantity="other">你已有 %1$d 个条目</item>
     </plurals>
-    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">你的密码，存放在属于你自己的密码库中。
-
-PassPony 使用与命令行工具 pass 和 passage 相同的格式：纯文件，用你的密钥加密，通过 git 同步。</string>
+    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">PassPony 使用与命令行工具 pass 和 passage 相同的格式：纯文件，用你的密钥加密，通过 git 同步。</string>
+    <string name="init_store_already_exists">此密码库已有 .gpg-id。要更换其密钥，请使用“重新加密密码库”。</string>
+    <string name="lock_screen_tagline">解锁以打开你的密码库。</string>
+    <string name="chrome_autofill_help_body">Chrome 有自己的“Autofill Services”设置，它会覆盖你刚刚选择的 Android 默认设置。要让 PassPony 在 Chrome 中填充登录信息：打开 Chrome 的 ⋮ 菜单 → 设置 → “Autofill Services”，将其切换为“Autofill using another service”，然后完全关闭并重新打开 Chrome（不要只是切换出去再切回来）。这只影响 Chrome。其他应用和浏览器已经在使用 Android 设置。</string>
+    <string name="settings_other_apps_vaultpony">你设备上与 VeraCrypt 兼容的加密保险库</string>
+    <string name="settings_gpgid_footer_set">要更改此密码库加密所用的密钥，请使用下方的“重新加密密码库”。</string>
+    <string name="lock_screen_failed">无法解锁 PassPony。请重试。</string>
+    <string name="store_list_no_match">没有与“%1$s”匹配的条目。</string>
+    <string name="store_list_open_failed">无法打开密码库</string>
+    <string name="autofill_picker_empty">你的密码库中还没有条目。请先在 PassPony 中添加一个。</string>
+    <string name="action_back">返回</string>
+    <string name="action_cancel">取消</string>
+    <string name="autofill_pick_failed">无法填充该条目。</string>
+    <string name="autofill_picker_search_hint">搜索条目</string>
+    <string name="autofill_picker_title">从 PassPony 填充</string>
+    <string name="autofill_save_not_supported">暂不支持通过自动填充保存新条目。</string>
+    <string name="autofill_search_dataset_label">在 PassPony 中搜索</string>
+    <string name="autofill_unlock_reason">解锁 PassPony 以填充此密码</string>
+    <string name="chrome_autofill_help_close">知道了</string>
+    <string name="chrome_autofill_help_open_chrome">打开 Chrome</string>
+    <string name="chrome_autofill_help_title">Chrome 还需一步</string>
+    <string name="edit_entry_title">编辑 %1$s</string>
+    <string name="entry_detail_binary_password">•二进制•</string>
+    <string name="entry_detail_hide">隐藏密码</string>
+    <string name="entry_detail_more">更多选项</string>
+    <string name="entry_detail_reveal">显示密码</string>
+    <string name="error_git_other">git 错误：%1$s</string>
+    <string name="error_non_fast_forward">远程有新的更改。请先同步再推送。</string>
+    <string name="error_store_crypto">加密错误：%1$s</string>
+    <string name="error_store_io">文件错误：%1$s</string>
+    <string name="error_unknown">出了点问题。请重试。</string>
+    <string name="lock_screen_authenticating">正在验证身份…</string>
+    <string name="move_entry_title">移动 / 重命名</string>
+    <string name="onboarding_autofill_body">开启自动填充后，登录时你的条目会直接出现在键盘建议中。\n\n之后随时可以在“设置”的“密码和自动填充”中管理。</string>
+    <plurals name="onboarding_biometric_body">
+        <item quantity="other">PassPony 通过指纹、人脸或设备 PIN 码锁定。\n\n解锁后会保持开启 %1$d 分钟（与自动填充共享），之后再次锁定。</item>
+    </plurals>
+    <string name="reencrypt_will_rewrite">将重写 %1$d 个条目</string>
+    <string name="settings_autofill_chrome_help_link">Chrome 没有提供 PassPony？</string>
+    <string name="settings_autofill_footer">允许其他应用和浏览器请求 PassPony 填充登录信息。在你选择条目之前，不会解密任何内容。</string>
+    <string name="settings_autofill_row_title">将 PassPony 设为自动填充服务…</string>
+    <string name="settings_diagnostics_core">核心</string>
+    <string name="settings_diagnostics_row_title">诊断</string>
+    <string name="settings_import_failed">导入 %1$s 失败：%2$s</string>
+    <string name="settings_import_success">已导入 %1$d 个密钥文件。</string>
+    <string name="settings_key_delete">删除密钥</string>
+    <string name="settings_lock_now">立即锁定</string>
+    <string name="settings_locked_keys_footer">密码短语会缓存 %1$d 分钟（与自动填充共享），之后清除。</string>
+    <string name="settings_other_apps_site_title">所有 NorseHorse Pony 应用</string>
+    <string name="settings_session_footer">立即锁定并清除缓存的密钥密码短语。无论如何，闲置 %1$d 分钟后都会自动锁定。</string>
+    <string name="settings_session_header">会话</string>
+    <string name="settings_unlock">解锁</string>
+    <string name="settings_unlocked_some">已解锁部分密钥；%1$d 个仍处于锁定状态。</string>
+    <string name="store_list_add">添加条目</string>
+    <string name="store_list_lock_now">立即锁定</string>
+    <string name="store_list_more">更多</string>
+    <string name="store_list_settings">设置</string>
+    <string name="store_list_sync">同步</string>
+    <string name="sync_conflict_title">同步冲突：%1$s</string>
+    <string name="sync_done">完成</string>
+    <string name="sync_remote_label">远程</string>
 </resources>

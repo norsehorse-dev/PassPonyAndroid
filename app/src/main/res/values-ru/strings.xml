@@ -164,7 +164,7 @@
     <string name="generator_use">Использовать пароль</string>
     <string name="init_store_confirm">Инициализировать</string>
     <string name="init_store_empty">Сначала импортируйте файл ключа в настройках.</string>
-    <string name="init_store_footer">Записывает отпечатки выбранных ключей в .gpg-id хранилища — тот же файл, который создаёт pass init. Каждая запись, сохранённая после этого, шифруется для всех этих ключей.</string>
+    <string name="init_store_footer">Записывает отпечатки выбранных ключей в .gpg-id хранилища. Это тот же файл, который создаёт pass init. Каждая запись, сохранённая после этого, шифруется для всех этих ключей.</string>
     <string name="init_store_header">Шифровать новые записи для</string>
     <string name="init_store_title">Инициализировать хранилище</string>
     <string name="lock_reason">Разблокируйте хранилище паролей</string>
@@ -358,13 +358,13 @@
     <string name="sync_actions_header">Действия</string>
     <string name="sync_behind_remote">Отстаёт от удалённого</string>
     <string name="sync_clone_button">Клонировать (заменит текущее хранилище)</string>
-    <string name="sync_clone_footer">Клон сначала попадает во временную область — неудачное клонирование не затрагивает текущее хранилище. При успехе он заменяет текущее хранилище этого формата. Для расшифровки клонированных записей по-прежнему нужен соответствующий ключ: файл identities для passage, импортированный ключ OpenPGP для pass.</string>
+    <string name="sync_clone_footer">Клон сначала попадает во временную область, поэтому неудачное клонирование не затрагивает текущее хранилище. При успехе он заменяет текущее хранилище этого формата. Для расшифровки клонированных записей по-прежнему нужен соответствующий ключ: файл идентификаторов для passage, импортированный ключ OpenPGP для pass.</string>
     <string name="sync_clone_header">Клонировать существующее хранилище</string>
     <string name="sync_conflict_body">Эта запись была изменена на этом и на другом устройстве.</string>
     <string name="sync_conflict_keep_both">Оставить обе</string>
     <string name="sync_conflict_keep_local">Оставить версию с этого устройства</string>
     <string name="sync_conflict_keep_remote">Оставить другую версию</string>
-    <string name="sync_no_repository">Нет git-репозитория — клонируйте хранилище или используйте только локальный режим.</string>
+    <string name="sync_no_repository">Нет git-репозитория. Клонируйте хранилище или продолжайте использовать его только локально.</string>
     <string name="sync_now">Синхронизировать сейчас</string>
     <string name="sync_publish">Опубликовать</string>
     <string name="sync_publish_footer">Коммитит текущее хранилище и отправляет его в пустой удалённый репозиторий. Для удалённых репозиториев SSH используется SSH-ключ, настроенный в разделе «SSH-ключ и доверенные хосты».</string>
@@ -405,7 +405,7 @@
     <string name="xc_entry">Запись</string>
     <string name="xc_file_error">Ошибка файла: %1$s</string>
     <string name="xc_fill_passwords_anywhere">Подставляйте пароли где угодно</string>
-    <string name="xc_get_started">Начать</string>
+    <string name="xc_get_started">Готово</string>
     <string name="xc_git_error">Ошибка git: %1$s</string>
     <string name="xc_import_failed_for">Не удалось импортировать %1$s: %2$s</string>
     <plurals name="xc_imported_lld_key_files">
@@ -464,7 +464,7 @@
         <item quantity="many">Заново зашифровано %1$d записей.</item>
         <item quantity="other">Заново зашифровано %1$d записей.</item>
     </plurals>
-    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Смена ключей действующего хранилища — это процесс перешифрования; он появится вместе с предпросмотром поддерева.</string>
+    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Чтобы сменить ключи используемого хранилища, воспользуйтесь пунктом «Перешифровать хранилище».</string>
     <plurals name="xc_resolved_lld_conflicts">
         <item quantity="one">Разрешён %1$d конфликт.</item>
         <item quantity="few">Разрешены %1$d конфликта.</item>
@@ -474,10 +474,10 @@
     <string name="xc_results">Результаты</string>
     <string name="xc_saved_that_s_your_first_pass">Сохранено. Это ваша первая запись.</string>
     <string name="xc_self_destructing_encrypted_messages">Самоуничтожающиеся зашифрованные сообщения</string>
-    <string name="xc_simple_modern_file_encryption_age">Простое современное шифрование файлов (age)</string>
+    <string name="xc_simple_modern_file_encryption_age">Шифрование файлов с помощью age</string>
     <string name="xc_site">Сайт</string>
     <string name="xc_skip">Пропустить</string>
-    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">У хранилища уже есть .gpg-id — смена ключей появится вместе с процессом перешифрования.</string>
+    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">У этого хранилища уже есть .gpg-id. Чтобы сменить его ключи, воспользуйтесь пунктом «Перешифровать хранилище».</string>
     <string name="xc_store_cloned">Хранилище клонировано.</string>
     <string name="xc_store_format">Формат хранилища</string>
     <string name="xc_store_unavailable">Хранилище недоступно</string>
@@ -489,7 +489,7 @@
         <item quantity="many">Парольная фраза кешируется на %1$d минут (совместно с автозаполнением), затем удаляется.</item>
         <item quantity="other">Парольная фраза кешируется на %1$d минут (совместно с автозаполнением), затем удаляется.</item>
     </plurals>
-    <string name="xc_the_remote_has_new_changes_sync_before_pushing">В удалённом репозитории есть новые изменения — синхронизируйтесь перед отправкой.</string>
+    <string name="xc_the_remote_has_new_changes_sync_before_pushing">В удалённом репозитории есть новые изменения. Синхронизируйтесь перед отправкой.</string>
     <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Этот сайт запросил тип ключа доступа, который PassPony не умеет создавать.</string>
     <string name="xc_turn_on_autofill">Включить автозаполнение</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Включите автозаполнение, и ваши записи будут появляться прямо в панели QuickType при входе.
@@ -516,7 +516,68 @@
         <item quantity="many">У вас уже %1$d записей</item>
         <item quantity="other">У вас уже %1$d записей</item>
     </plurals>
-    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">Ваши пароли в хранилище, которое принадлежит вам.
-
-PassPony использует тот же формат, что и консольные инструменты pass и passage: обычные файлы, зашифрованные вашими ключами и синхронизируемые через git.</string>
+    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">PassPony использует тот же формат, что и консольные инструменты pass и passage: обычные файлы, зашифрованные вашими ключами и синхронизируемые через git.</string>
+    <string name="init_store_already_exists">У этого хранилища уже есть .gpg-id. Чтобы сменить его ключи, воспользуйтесь пунктом «Перешифровать хранилище».</string>
+    <string name="lock_screen_tagline">Разблокируйте, чтобы открыть хранилище паролей.</string>
+    <string name="chrome_autofill_help_body">У Chrome есть собственная настройка «Autofill Services», и она имеет приоритет над службой Android по умолчанию, которую вы только что выбрали. Чтобы PassPony мог подставлять данные для входа в Chrome, откройте меню Chrome ⋮ → Настройки → «Autofill Services», выберите «Autofill using another service», затем полностью закройте Chrome и откройте его снова (недостаточно просто переключиться на другое приложение и вернуться). Это касается только Chrome. Другие приложения и браузеры уже используют настройку Android.</string>
+    <string name="settings_other_apps_vaultpony">Совместимые с VeraCrypt зашифрованные контейнеры на вашем устройстве</string>
+    <string name="settings_gpgid_footer_set">Чтобы изменить ключи, для которых шифрует это хранилище, используйте «Перешифровать хранилище» ниже.</string>
+    <string name="lock_screen_failed">Не удалось разблокировать PassPony. Попробуйте ещё раз.</string>
+    <string name="store_list_no_match">Нет записей, соответствующих «%1$s».</string>
+    <string name="store_list_open_failed">Не удалось открыть хранилище</string>
+    <string name="autofill_picker_empty">В вашем хранилище пока нет записей. Сначала добавьте запись в PassPony.</string>
+    <string name="action_back">Назад</string>
+    <string name="action_cancel">Отмена</string>
+    <string name="autofill_pick_failed">Не удалось подставить эту запись.</string>
+    <string name="autofill_picker_search_hint">Поиск записей</string>
+    <string name="autofill_picker_title">Подставить из PassPony</string>
+    <string name="autofill_save_not_supported">Сохранение новых записей из автозаполнения пока не поддерживается.</string>
+    <string name="autofill_search_dataset_label">Поиск в PassPony</string>
+    <string name="autofill_unlock_reason">Разблокируйте PassPony, чтобы подставить этот пароль</string>
+    <string name="chrome_autofill_help_close">Понятно</string>
+    <string name="chrome_autofill_help_open_chrome">Открыть Chrome</string>
+    <string name="chrome_autofill_help_title">Ещё один шаг для Chrome</string>
+    <string name="edit_entry_title">Изменить %1$s</string>
+    <string name="entry_detail_binary_password">•двоичные данные•</string>
+    <string name="entry_detail_hide">Скрыть пароль</string>
+    <string name="entry_detail_more">Другие действия</string>
+    <string name="entry_detail_reveal">Показать пароль</string>
+    <string name="error_git_other">Ошибка git: %1$s</string>
+    <string name="error_non_fast_forward">В удалённом репозитории есть новые изменения. Синхронизируйтесь перед отправкой.</string>
+    <string name="error_store_crypto">Ошибка шифрования: %1$s</string>
+    <string name="error_store_io">Ошибка файла: %1$s</string>
+    <string name="error_unknown">Что-то пошло не так. Попробуйте ещё раз.</string>
+    <string name="lock_screen_authenticating">Проверка подлинности…</string>
+    <string name="move_entry_title">Переместить / переименовать</string>
+    <string name="onboarding_autofill_body">Включите автозаполнение, и ваши записи будут появляться прямо в подсказках клавиатуры при входе.\n\nУправлять этим можно в любой момент в настройках, в разделе «Пароли и автозаполнение».</string>
+    <plurals name="onboarding_biometric_body">
+        <item quantity="one">PassPony блокируется с помощью отпечатка пальца, распознавания лица или PIN-кода устройства.\n\nПосле разблокировки он остаётся открытым %1$d минуту (совместно с автозаполнением), затем снова блокируется.</item>
+        <item quantity="few">PassPony блокируется с помощью отпечатка пальца, распознавания лица или PIN-кода устройства.\n\nПосле разблокировки он остаётся открытым %1$d минуты (совместно с автозаполнением), затем снова блокируется.</item>
+        <item quantity="many">PassPony блокируется с помощью отпечатка пальца, распознавания лица или PIN-кода устройства.\n\nПосле разблокировки он остаётся открытым %1$d минут (совместно с автозаполнением), затем снова блокируется.</item>
+        <item quantity="other">PassPony блокируется с помощью отпечатка пальца, распознавания лица или PIN-кода устройства.\n\nПосле разблокировки он остаётся открытым %1$d минут (совместно с автозаполнением), затем снова блокируется.</item>
+    </plurals>
+    <string name="reencrypt_will_rewrite">Записей будет переписано: %1$d</string>
+    <string name="settings_autofill_chrome_help_link">Chrome не предлагает PassPony?</string>
+    <string name="settings_autofill_footer">Позволяет другим приложениям и браузерам запрашивать у PassPony данные для входа. Ничего не расшифровывается, пока вы не выберете запись.</string>
+    <string name="settings_autofill_row_title">Сделать PassPony сервисом автозаполнения…</string>
+    <string name="settings_diagnostics_core">Ядро</string>
+    <string name="settings_diagnostics_row_title">Диагностика</string>
+    <string name="settings_import_failed">Не удалось импортировать %1$s: %2$s</string>
+    <string name="settings_import_success">Импортировано файлов ключей: %1$d.</string>
+    <string name="settings_key_delete">Удалить ключ</string>
+    <string name="settings_lock_now">Заблокировать сейчас</string>
+    <string name="settings_locked_keys_footer">Парольная фраза кешируется на %1$d мин. (совместно с автозаполнением), затем удаляется.</string>
+    <string name="settings_other_apps_site_title">Все приложения NorseHorse Pony</string>
+    <string name="settings_session_footer">Сразу блокирует приложение и удаляет кешированную парольную фразу ключа. В любом случае приложение блокируется автоматически после %1$d мин. бездействия.</string>
+    <string name="settings_session_header">Сеанс</string>
+    <string name="settings_unlock">Разблокировать</string>
+    <string name="settings_unlocked_some">Часть ключей разблокирована; ещё заблокировано: %1$d.</string>
+    <string name="store_list_add">Добавить запись</string>
+    <string name="store_list_lock_now">Заблокировать сейчас</string>
+    <string name="store_list_more">Ещё</string>
+    <string name="store_list_settings">Настройки</string>
+    <string name="store_list_sync">Синхронизация</string>
+    <string name="sync_conflict_title">Конфликт синхронизации: %1$s</string>
+    <string name="sync_done">Готово</string>
+    <string name="sync_remote_label">Удалённый репозиторий</string>
 </resources>

@@ -158,7 +158,7 @@
     <string name="generator_use">Utiliser le mot de passe</string>
     <string name="init_store_confirm">Initialiser</string>
     <string name="init_store_empty">Importez d\'abord un fichier de clé dans Réglages.</string>
-    <string name="init_store_footer">Écrit les empreintes des clés sélectionnées dans le .gpg-id du coffre — le même fichier que crée pass init. Chaque entrée enregistrée ensuite est chiffrée pour toutes ces clés.</string>
+    <string name="init_store_footer">Écrit les empreintes des clés sélectionnées dans le .gpg-id du coffre, le même fichier que crée pass init. Chaque entrée enregistrée ensuite est chiffrée pour toutes ces clés.</string>
     <string name="init_store_header">Chiffrer les nouvelles entrées pour</string>
     <string name="init_store_title">Initialiser le coffre</string>
     <string name="lock_reason">Déverrouillez votre coffre de mots de passe</string>
@@ -346,13 +346,13 @@
     <string name="sync_actions_header">Actions</string>
     <string name="sync_behind_remote">En retard sur le distant</string>
     <string name="sync_clone_button">Cloner (remplace le coffre actuel)</string>
-    <string name="sync_clone_footer">Le clone arrive d\'abord dans une zone temporaire — un clonage échoué laisse le coffre actuel intact. En cas de succès, il remplace le coffre actuel pour ce format. Déchiffrer les entrées clonées nécessite toujours la clé correspondante : fichier d\'identités pour passage, clé OpenPGP importée pour pass.</string>
+    <string name="sync_clone_footer">Le clone arrive d\'abord dans une zone temporaire, donc un clonage échoué laisse le coffre actuel intact. En cas de succès, il remplace le coffre actuel pour ce format. Déchiffrer les entrées clonées nécessite toujours la clé correspondante : fichier d\'identités pour passage, clé OpenPGP importée pour pass.</string>
     <string name="sync_clone_header">Cloner un coffre existant</string>
     <string name="sync_conflict_body">Cette entrée a été modifiée sur cet appareil et sur un autre.</string>
     <string name="sync_conflict_keep_both">Garder les deux</string>
     <string name="sync_conflict_keep_local">Garder la version de cet appareil</string>
     <string name="sync_conflict_keep_remote">Garder l\'autre version</string>
-    <string name="sync_no_repository">Aucun dépôt git — clonez un coffre ou utilisez le mode local uniquement.</string>
+    <string name="sync_no_repository">Aucun dépôt git. Clonez un coffre ou continuez à l\'utiliser en local uniquement.</string>
     <string name="sync_now">Synchroniser maintenant</string>
     <string name="sync_publish">Publier</string>
     <string name="sync_publish_footer">Committe le coffre actuel et le pousse vers un dépôt distant vide. Les distants SSH utilisent la clé SSH configurée dans Clé SSH et hôtes de confiance.</string>
@@ -393,7 +393,7 @@ Vous pouvez la changer à tout moment dans Réglages.</string>
     <string name="xc_entry">Entrée</string>
     <string name="xc_file_error">Erreur de fichier : %1$s</string>
     <string name="xc_fill_passwords_anywhere">Remplissez vos mots de passe partout</string>
-    <string name="xc_get_started">Commencer</string>
+    <string name="xc_get_started">OK</string>
     <string name="xc_git_error">Erreur git : %1$s</string>
     <string name="xc_import_failed_for">Échec de l\'importation de %1$s : %2$s</string>
     <plurals name="xc_imported_lld_key_files">
@@ -438,7 +438,7 @@ Après déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le r
         <item quantity="one">%1$d entrée rechiffrée.</item>
         <item quantity="other">%1$d entrées rechiffrées.</item>
     </plurals>
-    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Changer les clés d\'un coffre actif passe par le flux de rechiffrement — à venir avec l\'aperçu par sous-arborescence.</string>
+    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Pour changer les clés d\'un coffre en cours d\'utilisation, utilisez Rechiffrer le coffre.</string>
     <plurals name="xc_resolved_lld_conflicts">
         <item quantity="one">%1$d conflit résolu.</item>
         <item quantity="other">%1$d conflits résolus.</item>
@@ -446,10 +446,10 @@ Après déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le r
     <string name="xc_results">Résultats</string>
     <string name="xc_saved_that_s_your_first_pass">Enregistrée. C\'est votre première entrée.</string>
     <string name="xc_self_destructing_encrypted_messages">Messages chiffrés à autodestruction</string>
-    <string name="xc_simple_modern_file_encryption_age">Chiffrement de fichiers simple et moderne (age)</string>
+    <string name="xc_simple_modern_file_encryption_age">Chiffrement de fichiers avec age</string>
     <string name="xc_site">Site</string>
     <string name="xc_skip">Ignorer</string>
-    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Le coffre a déjà un .gpg-id — le changement de clés arrivera avec le flux de rechiffrement.</string>
+    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Ce coffre a déjà un .gpg-id. Pour changer ses clés, utilisez Rechiffrer le coffre.</string>
     <string name="xc_store_cloned">Coffre cloné.</string>
     <string name="xc_store_format">Format du coffre</string>
     <string name="xc_store_unavailable">Coffre indisponible</string>
@@ -459,7 +459,7 @@ Après déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le r
         <item quantity="one">La phrase secrète est mise en cache pendant %1$d minute (partagée avec le remplissage automatique), puis effacée.</item>
         <item quantity="other">La phrase secrète est mise en cache pendant %1$d minutes (partagée avec le remplissage automatique), puis effacée.</item>
     </plurals>
-    <string name="xc_the_remote_has_new_changes_sync_before_pushing">Le distant a de nouvelles modifications — synchronisez avant de pousser.</string>
+    <string name="xc_the_remote_has_new_changes_sync_before_pushing">Le distant a de nouvelles modifications. Synchronisez avant de pousser.</string>
     <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Ce site a demandé un type de clé d\'accès que PassPony ne peut pas créer.</string>
     <string name="xc_turn_on_autofill">Activer le remplissage automatique</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Activez le remplissage automatique et vos entrées apparaîtront dans la barre QuickType lors de la connexion.
@@ -480,7 +480,66 @@ Vous pouvez le gérer à tout moment dans les Réglages iOS, sous Remplissage au
         <item quantity="one">Vous avez déjà %1$d entrée</item>
         <item quantity="other">Vous avez déjà %1$d entrées</item>
     </plurals>
-    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">Vos mots de passe, dans un coffre qui vous appartient.
-
-PassPony parle le même format que les outils en ligne de commande pass et passage : des fichiers simples, chiffrés avec vos clés, synchronisés avec git.</string>
+    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">PassPony parle le même format que les outils en ligne de commande pass et passage : des fichiers simples, chiffrés avec vos clés, synchronisés avec git.</string>
+    <string name="init_store_already_exists">Ce coffre a déjà un .gpg-id. Pour changer ses clés, utilisez Rechiffrer le coffre.</string>
+    <string name="lock_screen_tagline">Déverrouillez pour ouvrir votre coffre de mots de passe.</string>
+    <string name="chrome_autofill_help_body">Chrome possède son propre réglage « Autofill Services », qui prend le pas sur le réglage Android par défaut que vous venez de choisir. Pour que PassPony remplisse les identifiants dans Chrome : ouvrez le menu ⋮ de Chrome → Paramètres → « Autofill Services », choisissez « Autofill using another service », puis fermez complètement Chrome et rouvrez-le (il ne suffit pas de passer à une autre app puis d\'y revenir). Cela ne concerne que Chrome. Les autres apps et navigateurs utilisent déjà le réglage Android.</string>
+    <string name="settings_other_apps_vaultpony">Conteneurs chiffrés compatibles VeraCrypt sur votre appareil</string>
+    <string name="settings_gpgid_footer_set">Pour changer les clés pour lesquelles ce coffre chiffre, utilisez Rechiffrer le coffre ci-dessous.</string>
+    <string name="lock_screen_failed">Impossible de déverrouiller PassPony. Réessayez.</string>
+    <string name="store_list_no_match">Aucune entrée ne correspond à « %1$s ».</string>
+    <string name="store_list_open_failed">Impossible d\'ouvrir le coffre</string>
+    <string name="autofill_picker_empty">Votre coffre n\'a encore aucune entrée. Ajoutez-en une d\'abord dans PassPony.</string>
+    <string name="action_back">Retour</string>
+    <string name="action_cancel">Annuler</string>
+    <string name="autofill_pick_failed">Impossible de remplir cette entrée.</string>
+    <string name="autofill_picker_search_hint">Rechercher des entrées</string>
+    <string name="autofill_picker_title">Remplir depuis PassPony</string>
+    <string name="autofill_save_not_supported">L\'enregistrement de nouvelles entrées depuis le remplissage automatique n\'est pas encore pris en charge.</string>
+    <string name="autofill_search_dataset_label">Rechercher dans PassPony</string>
+    <string name="autofill_unlock_reason">Déverrouillez PassPony pour remplir ce mot de passe</string>
+    <string name="chrome_autofill_help_close">Compris</string>
+    <string name="chrome_autofill_help_open_chrome">Ouvrir Chrome</string>
+    <string name="chrome_autofill_help_title">Encore une étape pour Chrome</string>
+    <string name="edit_entry_title">Modifier %1$s</string>
+    <string name="entry_detail_binary_password">•binaire•</string>
+    <string name="entry_detail_hide">Masquer le mot de passe</string>
+    <string name="entry_detail_more">Plus d\'options</string>
+    <string name="entry_detail_reveal">Afficher le mot de passe</string>
+    <string name="error_git_other">Erreur git : %1$s</string>
+    <string name="error_non_fast_forward">Le distant a de nouvelles modifications. Synchronisez avant de pousser.</string>
+    <string name="error_store_crypto">Erreur de chiffrement : %1$s</string>
+    <string name="error_store_io">Erreur de fichier : %1$s</string>
+    <string name="error_unknown">Un problème est survenu. Réessayez.</string>
+    <string name="lock_screen_authenticating">Authentification…</string>
+    <string name="move_entry_title">Déplacer / renommer</string>
+    <string name="onboarding_autofill_body">Activez le remplissage automatique et vos entrées apparaîtront directement dans les suggestions du clavier lors de la connexion.\n\nVous pouvez le gérer à tout moment dans les Paramètres, sous Mots de passe et remplissage automatique.</string>
+    <plurals name="onboarding_biometric_body">
+        <item quantity="one">PassPony se verrouille derrière votre empreinte digitale, votre visage ou le code PIN de l\'appareil.\n\nAprès déverrouillage, il reste ouvert pendant %1$d minute (partagé avec le remplissage automatique), puis se verrouille à nouveau.</item>
+        <item quantity="other">PassPony se verrouille derrière votre empreinte digitale, votre visage ou le code PIN de l\'appareil.\n\nAprès déverrouillage, il reste ouvert pendant %1$d minutes (partagé avec le remplissage automatique), puis se verrouille à nouveau.</item>
+    </plurals>
+    <string name="reencrypt_will_rewrite">%1$d entrées seront réécrites</string>
+    <string name="settings_autofill_chrome_help_link">Chrome ne propose pas PassPony ?</string>
+    <string name="settings_autofill_footer">Permet aux autres apps et navigateurs de demander à PassPony de remplir les identifiants. Rien n\'est déchiffré tant que vous n\'avez pas choisi une entrée.</string>
+    <string name="settings_autofill_row_title">Définir PassPony comme service de remplissage automatique…</string>
+    <string name="settings_diagnostics_core">Cœur</string>
+    <string name="settings_diagnostics_row_title">Diagnostic</string>
+    <string name="settings_import_failed">Échec de l\'importation de %1$s : %2$s</string>
+    <string name="settings_import_success">%1$d fichiers de clé importés.</string>
+    <string name="settings_key_delete">Supprimer la clé</string>
+    <string name="settings_lock_now">Verrouiller maintenant</string>
+    <string name="settings_locked_keys_footer">La phrase secrète est mise en cache pendant %1$d minutes (partagée avec le remplissage automatique), puis effacée.</string>
+    <string name="settings_other_apps_site_title">Toutes les apps Pony de NorseHorse</string>
+    <string name="settings_session_footer">Verrouille immédiatement et efface la phrase secrète de clé mise en cache. Dans tous les cas, verrouillage automatique après %1$d minutes d\'inactivité.</string>
+    <string name="settings_session_header">Session</string>
+    <string name="settings_unlock">Déverrouiller</string>
+    <string name="settings_unlocked_some">Certaines clés ont été déverrouillées ; %1$d restent verrouillées.</string>
+    <string name="store_list_add">Ajouter une entrée</string>
+    <string name="store_list_lock_now">Verrouiller maintenant</string>
+    <string name="store_list_more">Plus</string>
+    <string name="store_list_settings">Réglages</string>
+    <string name="store_list_sync">Synchronisation</string>
+    <string name="sync_conflict_title">Conflit de synchronisation : %1$s</string>
+    <string name="sync_done">OK</string>
+    <string name="sync_remote_label">Distant</string>
 </resources>

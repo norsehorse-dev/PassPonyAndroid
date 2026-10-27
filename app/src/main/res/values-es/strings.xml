@@ -346,13 +346,13 @@
     <string name="sync_actions_header">Acciones</string>
     <string name="sync_behind_remote">Detrás del remoto</string>
     <string name="sync_clone_button">Clonar (reemplaza el almacén actual)</string>
-    <string name="sync_clone_footer">El clon llega primero a un área temporal: un clonado fallido no toca el almacén actual. Si tiene éxito, reemplaza el almacén actual de este formato. Descifrar las entradas clonadas sigue necesitando la clave correspondiente: el archivo de identidades para passage, la clave OpenPGP importada para pass.</string>
+    <string name="sync_clone_footer">El clon llega primero a un área temporal, así que un clonado fallido no toca el almacén actual. Si tiene éxito, reemplaza el almacén actual de este formato. Descifrar las entradas clonadas sigue necesitando la clave correspondiente: el archivo de identidades para passage, la clave OpenPGP importada para pass.</string>
     <string name="sync_clone_header">Clonar almacén existente</string>
     <string name="sync_conflict_body">Esta entrada cambió en este dispositivo y en otro.</string>
     <string name="sync_conflict_keep_both">Conservar ambas</string>
     <string name="sync_conflict_keep_local">Conservar la versión de este dispositivo</string>
     <string name="sync_conflict_keep_remote">Conservar la otra versión</string>
-    <string name="sync_no_repository">No hay repositorio git: clona un almacén o usa el modo solo local.</string>
+    <string name="sync_no_repository">No hay repositorio git. Clona un almacén o sigue usándolo solo en local.</string>
     <string name="sync_now">Sincronizar ahora</string>
     <string name="sync_publish">Publicar</string>
     <string name="sync_publish_footer">Confirma el almacén actual y lo envía a un remoto vacío. Los remotos SSH usan la clave SSH configurada en Clave SSH y servidores de confianza.</string>
@@ -393,7 +393,7 @@ Puedes cambiarlo en cualquier momento en Ajustes.</string>
     <string name="xc_entry">Entrada</string>
     <string name="xc_file_error">Error de archivo: %1$s</string>
     <string name="xc_fill_passwords_anywhere">Rellena contraseñas en cualquier lugar</string>
-    <string name="xc_get_started">Comenzar</string>
+    <string name="xc_get_started">Listo</string>
     <string name="xc_git_error">Error de git: %1$s</string>
     <string name="xc_import_failed_for">Error al importar %1$s: %2$s</string>
     <plurals name="xc_imported_lld_key_files">
@@ -438,7 +438,7 @@ Después de desbloquear, permanece abierto durante %1$d minutos (compartido con 
         <item quantity="one">Se volvió a cifrar %1$d entrada.</item>
         <item quantity="other">Se volvieron a cifrar %1$d entradas.</item>
     </plurals>
-    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Cambiar las claves de un almacén en uso es el flujo de recifrado; llegará con la vista previa por subárbol.</string>
+    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Para cambiar las claves de un almacén en uso, usa Volver a cifrar el almacén.</string>
     <plurals name="xc_resolved_lld_conflicts">
         <item quantity="one">Se resolvió %1$d conflicto.</item>
         <item quantity="other">Se resolvieron %1$d conflictos.</item>
@@ -446,10 +446,10 @@ Después de desbloquear, permanece abierto durante %1$d minutos (compartido con 
     <string name="xc_results">Resultados</string>
     <string name="xc_saved_that_s_your_first_pass">Guardada. Esa es tu primera entrada.</string>
     <string name="xc_self_destructing_encrypted_messages">Mensajes cifrados que se autodestruyen</string>
-    <string name="xc_simple_modern_file_encryption_age">Cifrado de archivos simple y moderno (age)</string>
+    <string name="xc_simple_modern_file_encryption_age">Cifrado de archivos con age</string>
     <string name="xc_site">Sitio</string>
     <string name="xc_skip">Omitir</string>
-    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">El almacén ya tiene un .gpg-id; el cambio de claves llegará con el flujo de recifrado.</string>
+    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Este almacén ya tiene un .gpg-id. Para cambiar sus claves, usa Volver a cifrar el almacén.</string>
     <string name="xc_store_cloned">Almacén clonado.</string>
     <string name="xc_store_format">Formato del almacén</string>
     <string name="xc_store_unavailable">Almacén no disponible</string>
@@ -459,7 +459,7 @@ Después de desbloquear, permanece abierto durante %1$d minutos (compartido con 
         <item quantity="one">La frase de contraseña se guarda en caché durante %1$d minuto (compartida con el autorrelleno) y luego se borra.</item>
         <item quantity="other">La frase de contraseña se guarda en caché durante %1$d minutos (compartida con el autorrelleno) y luego se borra.</item>
     </plurals>
-    <string name="xc_the_remote_has_new_changes_sync_before_pushing">El remoto tiene cambios nuevos: sincroniza antes de hacer push.</string>
+    <string name="xc_the_remote_has_new_changes_sync_before_pushing">El remoto tiene cambios nuevos. Sincroniza antes de hacer push.</string>
     <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Este sitio pidió un tipo de llave de acceso que PassPony no puede crear.</string>
     <string name="xc_turn_on_autofill">Activar el autorrelleno</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Activa el autorrelleno y tus entradas aparecerán en la barra QuickType al iniciar sesión.
@@ -480,7 +480,66 @@ Puedes gestionarlo en cualquier momento en los Ajustes de iOS, en Autorrelleno y
         <item quantity="one">Ya tienes %1$d entrada</item>
         <item quantity="other">Ya tienes %1$d entradas</item>
     </plurals>
-    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">Tus contraseñas, en un almacén que te pertenece.
-
-PassPony usa el mismo formato que las herramientas de línea de comandos pass y passage: archivos simples, cifrados con tus claves y sincronizados con git.</string>
+    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">PassPony usa el mismo formato que las herramientas de línea de comandos pass y passage: archivos simples, cifrados con tus claves y sincronizados con git.</string>
+    <string name="init_store_already_exists">Este almacén ya tiene un .gpg-id. Para cambiar sus claves, usa Volver a cifrar el almacén.</string>
+    <string name="lock_screen_tagline">Desbloquea para abrir tu almacén de contraseñas.</string>
+    <string name="chrome_autofill_help_body">Chrome tiene su propio ajuste de servicios de autorrelleno, que anula el predeterminado de Android que acabas de elegir. Para que PassPony rellene inicios de sesión en Chrome: abre el menú ⋮ de Chrome → \"Settings\" → \"Autofill Services\", elige \"Autofill using another service\" y luego cierra Chrome por completo y vuelve a abrirlo (no basta con cambiar a otra app y volver). Esto solo afecta a Chrome. Las demás apps y navegadores ya usan el ajuste de Android.</string>
+    <string name="settings_other_apps_vaultpony">Bóvedas cifradas compatibles con VeraCrypt en tu dispositivo</string>
+    <string name="settings_gpgid_footer_set">Para cambiar las claves para las que cifra este almacén, usa Volver a cifrar el almacén más abajo.</string>
+    <string name="lock_screen_failed">No se pudo desbloquear PassPony. Inténtalo de nuevo.</string>
+    <string name="store_list_no_match">Ninguna entrada coincide con «%1$s».</string>
+    <string name="store_list_open_failed">No se pudo abrir el almacén</string>
+    <string name="autofill_picker_empty">Tu almacén aún no tiene entradas. Añade una en PassPony primero.</string>
+    <string name="action_back">Atrás</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="autofill_pick_failed">No se pudo rellenar esa entrada.</string>
+    <string name="autofill_picker_search_hint">Buscar entradas</string>
+    <string name="autofill_picker_title">Rellenar desde PassPony</string>
+    <string name="autofill_save_not_supported">Aún no se pueden guardar entradas nuevas desde el autorrelleno.</string>
+    <string name="autofill_search_dataset_label">Buscar en PassPony</string>
+    <string name="autofill_unlock_reason">Desbloquea PassPony para rellenar esta contraseña</string>
+    <string name="chrome_autofill_help_close">Entendido</string>
+    <string name="chrome_autofill_help_open_chrome">Abrir Chrome</string>
+    <string name="chrome_autofill_help_title">Un paso más para Chrome</string>
+    <string name="edit_entry_title">Editar %1$s</string>
+    <string name="entry_detail_binary_password">•binario•</string>
+    <string name="entry_detail_hide">Ocultar contraseña</string>
+    <string name="entry_detail_more">Más opciones</string>
+    <string name="entry_detail_reveal">Mostrar contraseña</string>
+    <string name="error_git_other">Error de Git: %1$s</string>
+    <string name="error_non_fast_forward">El remoto tiene cambios nuevos. Sincroniza antes de hacer push.</string>
+    <string name="error_store_crypto">Error de cifrado: %1$s</string>
+    <string name="error_store_io">Error de archivo: %1$s</string>
+    <string name="error_unknown">Algo salió mal. Inténtalo de nuevo.</string>
+    <string name="lock_screen_authenticating">Autenticando…</string>
+    <string name="move_entry_title">Mover / renombrar</string>
+    <string name="onboarding_autofill_body">Activa el autorrelleno y tus entradas aparecerán en las sugerencias del teclado al iniciar sesión.\n\nPuedes gestionarlo en cualquier momento en Ajustes, en Contraseñas y autorrelleno.</string>
+    <plurals name="onboarding_biometric_body">
+        <item quantity="one">PassPony se bloquea con tu huella dactilar, tu rostro o el PIN del dispositivo.\n\nDespués de desbloquear, permanece abierto durante %1$d minuto (compartido con el autorrelleno) y luego se vuelve a bloquear.</item>
+        <item quantity="other">PassPony se bloquea con tu huella dactilar, tu rostro o el PIN del dispositivo.\n\nDespués de desbloquear, permanece abierto durante %1$d minutos (compartido con el autorrelleno) y luego se vuelve a bloquear.</item>
+    </plurals>
+    <string name="reencrypt_will_rewrite">Se reescribirán %1$d entradas</string>
+    <string name="settings_autofill_chrome_help_link">¿Chrome no ofrece PassPony?</string>
+    <string name="settings_autofill_footer">Permite que otras apps y navegadores pidan a PassPony que rellene inicios de sesión. No se descifra nada hasta que eliges una entrada.</string>
+    <string name="settings_autofill_row_title">Establecer PassPony como servicio de autorrelleno…</string>
+    <string name="settings_diagnostics_core">Núcleo</string>
+    <string name="settings_diagnostics_row_title">Diagnóstico</string>
+    <string name="settings_import_failed">Error al importar %1$s: %2$s</string>
+    <string name="settings_import_success">Se importaron %1$d archivos de clave.</string>
+    <string name="settings_key_delete">Eliminar clave</string>
+    <string name="settings_lock_now">Bloquear ahora</string>
+    <string name="settings_locked_keys_footer">La frase de contraseña se guarda en caché durante %1$d minutos (compartida con el autorrelleno) y luego se borra.</string>
+    <string name="settings_other_apps_site_title">Todas las apps Pony de NorseHorse</string>
+    <string name="settings_session_footer">Bloquea al instante y borra la frase de contraseña de la clave guardada en caché. En cualquier caso, se bloquea automáticamente tras %1$d minutos de inactividad.</string>
+    <string name="settings_session_header">Sesión</string>
+    <string name="settings_unlock">Desbloquear</string>
+    <string name="settings_unlocked_some">Se desbloquearon algunas claves; %1$d siguen bloqueadas.</string>
+    <string name="store_list_add">Añadir entrada</string>
+    <string name="store_list_lock_now">Bloquear ahora</string>
+    <string name="store_list_more">Más</string>
+    <string name="store_list_settings">Ajustes</string>
+    <string name="store_list_sync">Sincronizar</string>
+    <string name="sync_conflict_title">Conflicto de sincronización: %1$s</string>
+    <string name="sync_done">Listo</string>
+    <string name="sync_remote_label">Remoto</string>
 </resources>

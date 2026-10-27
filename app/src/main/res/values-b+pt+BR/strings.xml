@@ -158,7 +158,7 @@
     <string name="generator_use">Usar senha</string>
     <string name="init_store_confirm">Inicializar</string>
     <string name="init_store_empty">Importe primeiro um arquivo de chave em Ajustes.</string>
-    <string name="init_store_footer">Grava as impressões digitais das chaves selecionadas no .gpg-id do cofre — o mesmo arquivo que o pass init cria. Toda entrada salva depois é criptografada para todas elas.</string>
+    <string name="init_store_footer">Grava as impressões digitais das chaves selecionadas no .gpg-id do cofre, o mesmo arquivo que o pass init cria. Toda entrada salva depois é criptografada para todas elas.</string>
     <string name="init_store_header">Criptografar novas entradas para</string>
     <string name="init_store_title">Inicializar cofre</string>
     <string name="lock_reason">Desbloqueie seu cofre de senhas</string>
@@ -346,13 +346,13 @@
     <string name="sync_actions_header">Ações</string>
     <string name="sync_behind_remote">Atrás do remoto</string>
     <string name="sync_clone_button">Clonar (substitui o cofre atual)</string>
-    <string name="sync_clone_footer">O clone chega primeiro a uma área temporária — um clone com falha deixa o cofre atual intacto. Em caso de sucesso, ele substitui o cofre atual deste formato. Descriptografar as entradas clonadas ainda exige a chave correspondente: arquivo de identidades para passage, chave OpenPGP importada para pass.</string>
+    <string name="sync_clone_footer">O clone chega primeiro a uma área temporária, então um clone com falha deixa o cofre atual intacto. Em caso de sucesso, ele substitui o cofre atual deste formato. Descriptografar as entradas clonadas ainda exige a chave correspondente: arquivo de identidades para passage, chave OpenPGP importada para pass.</string>
     <string name="sync_clone_header">Clonar cofre existente</string>
     <string name="sync_conflict_body">Esta entrada foi alterada neste aparelho e em outro.</string>
     <string name="sync_conflict_keep_both">Manter ambas</string>
     <string name="sync_conflict_keep_local">Manter a versão deste aparelho</string>
     <string name="sync_conflict_keep_remote">Manter a outra versão</string>
-    <string name="sync_no_repository">Nenhum repositório git — clone um cofre ou use o modo somente local.</string>
+    <string name="sync_no_repository">Nenhum repositório git. Clone um cofre ou continue usando este somente no modo local.</string>
     <string name="sync_now">Sincronizar agora</string>
     <string name="sync_publish">Publicar</string>
     <string name="sync_publish_footer">Faz commit do cofre atual e o envia para um remoto vazio. Remotos SSH usam a chave SSH configurada em Chave SSH e hosts confiáveis.</string>
@@ -393,7 +393,7 @@ Você pode mudar a qualquer momento em Ajustes.</string>
     <string name="xc_entry">Entrada</string>
     <string name="xc_file_error">Erro de arquivo: %1$s</string>
     <string name="xc_fill_passwords_anywhere">Preencha senhas em qualquer lugar</string>
-    <string name="xc_get_started">Começar</string>
+    <string name="xc_get_started">OK</string>
     <string name="xc_git_error">Erro do git: %1$s</string>
     <string name="xc_import_failed_for">Falha ao importar %1$s: %2$s</string>
     <plurals name="xc_imported_lld_key_files">
@@ -438,7 +438,7 @@ Depois de desbloquear, ele permanece aberto por %1$d minutos (compartilhado com 
         <item quantity="one">%1$d entrada recriptografada.</item>
         <item quantity="other">%1$d entradas recriptografadas.</item>
     </plurals>
-    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Trocar as chaves de um cofre em uso é o fluxo de recriptografia — chegará com a pré-visualização por subárvore.</string>
+    <string name="xc_re_keying_a_live_store_is_the_re_encrypt_flow_co">Para trocar as chaves de um cofre em uso, use Recriptografar cofre.</string>
     <plurals name="xc_resolved_lld_conflicts">
         <item quantity="one">%1$d conflito resolvido.</item>
         <item quantity="other">%1$d conflitos resolvidos.</item>
@@ -446,10 +446,10 @@ Depois de desbloquear, ele permanece aberto por %1$d minutos (compartilhado com 
     <string name="xc_results">Resultados</string>
     <string name="xc_saved_that_s_your_first_pass">Salva. Essa é sua primeira entrada.</string>
     <string name="xc_self_destructing_encrypted_messages">Mensagens criptografadas que se autodestroem</string>
-    <string name="xc_simple_modern_file_encryption_age">Criptografia de arquivos simples e moderna (age)</string>
+    <string name="xc_simple_modern_file_encryption_age">Criptografia de arquivos com age</string>
     <string name="xc_site">Site</string>
     <string name="xc_skip">Pular</string>
-    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">O cofre já tem um .gpg-id — a troca de chaves chegará com o fluxo de recriptografia.</string>
+    <string name="xc_store_already_has_a_gpg_id_re_keying_comes_with">Este cofre já tem um .gpg-id. Para trocar as chaves dele, use Recriptografar cofre.</string>
     <string name="xc_store_cloned">Cofre clonado.</string>
     <string name="xc_store_format">Formato do cofre</string>
     <string name="xc_store_unavailable">Cofre indisponível</string>
@@ -459,7 +459,7 @@ Depois de desbloquear, ele permanece aberto por %1$d minutos (compartilhado com 
         <item quantity="one">A frase secreta fica em cache por %1$d minuto (compartilhada com o preenchimento automático) e depois é apagada.</item>
         <item quantity="other">A frase secreta fica em cache por %1$d minutos (compartilhada com o preenchimento automático) e depois é apagada.</item>
     </plurals>
-    <string name="xc_the_remote_has_new_changes_sync_before_pushing">O remoto tem novas alterações — sincronize antes de fazer push.</string>
+    <string name="xc_the_remote_has_new_changes_sync_before_pushing">O remoto tem novas alterações. Sincronize antes de fazer push.</string>
     <string name="xc_this_site_asked_for_a_kind_of_passkey_passpony_c">Este site pediu um tipo de chave de acesso que o PassPony não consegue criar.</string>
     <string name="xc_turn_on_autofill">Ativar o preenchimento automático</string>
     <string name="xc_turn_on_autofill_and_your_passes_appear_right_in">Ative o preenchimento automático e suas entradas aparecerão na barra QuickType ao fazer login.
@@ -480,7 +480,66 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
         <item quantity="one">Você já tem %1$d entrada</item>
         <item quantity="other">Você já tem %1$d entradas</item>
     </plurals>
-    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">Suas senhas, em um cofre que pertence a você.
-
-O PassPony fala o mesmo formato das ferramentas de linha de comando pass e passage: arquivos simples, criptografados com suas chaves, sincronizados com git.</string>
+    <string name="xc_your_passwords_in_a_store_you_own_passpony_speak">O PassPony fala o mesmo formato das ferramentas de linha de comando pass e passage: arquivos simples, criptografados com suas chaves, sincronizados com git.</string>
+    <string name="init_store_already_exists">Este cofre já tem um .gpg-id. Para trocar as chaves dele, use Recriptografar cofre.</string>
+    <string name="lock_screen_tagline">Desbloqueie para abrir seu cofre de senhas.</string>
+    <string name="chrome_autofill_help_body">O Chrome tem a própria configuração \"Autofill Services\", que substitui o padrão do Android que você acabou de escolher. Para o PassPony preencher logins no Chrome: abra o menu ⋮ do Chrome → Configurações → \"Autofill Services\", mude para \"Autofill using another service\" e depois feche o Chrome por completo e abra de novo (não basta sair dele e voltar). Isso afeta só o Chrome. Outros apps e navegadores já usam a configuração do Android.</string>
+    <string name="settings_other_apps_vaultpony">Contêineres criptografados compatíveis com VeraCrypt no seu dispositivo</string>
+    <string name="settings_gpgid_footer_set">Para mudar as chaves para as quais este cofre criptografa, use Recriptografar cofre abaixo.</string>
+    <string name="lock_screen_failed">Não foi possível desbloquear o PassPony. Tente novamente.</string>
+    <string name="store_list_no_match">Nenhuma entrada corresponde a “%1$s”.</string>
+    <string name="store_list_open_failed">Não foi possível abrir o cofre</string>
+    <string name="autofill_picker_empty">Seu cofre ainda não tem entradas. Adicione uma no PassPony primeiro.</string>
+    <string name="action_back">Voltar</string>
+    <string name="action_cancel">Cancelar</string>
+    <string name="autofill_pick_failed">Não foi possível preencher essa entrada.</string>
+    <string name="autofill_picker_search_hint">Buscar entradas</string>
+    <string name="autofill_picker_title">Preencher com o PassPony</string>
+    <string name="autofill_save_not_supported">Ainda não é possível salvar novas entradas pelo preenchimento automático.</string>
+    <string name="autofill_search_dataset_label">Buscar no PassPony</string>
+    <string name="autofill_unlock_reason">Desbloqueie o PassPony para preencher esta senha</string>
+    <string name="chrome_autofill_help_close">Entendi</string>
+    <string name="chrome_autofill_help_open_chrome">Abrir o Chrome</string>
+    <string name="chrome_autofill_help_title">Mais um passo para o Chrome</string>
+    <string name="edit_entry_title">Editar %1$s</string>
+    <string name="entry_detail_binary_password">•binário•</string>
+    <string name="entry_detail_hide">Ocultar senha</string>
+    <string name="entry_detail_more">Mais opções</string>
+    <string name="entry_detail_reveal">Mostrar senha</string>
+    <string name="error_git_other">Erro do git: %1$s</string>
+    <string name="error_non_fast_forward">O remoto tem novas alterações. Sincronize antes de fazer push.</string>
+    <string name="error_store_crypto">Erro de criptografia: %1$s</string>
+    <string name="error_store_io">Erro de arquivo: %1$s</string>
+    <string name="error_unknown">Algo deu errado. Tente novamente.</string>
+    <string name="lock_screen_authenticating">Autenticando…</string>
+    <string name="move_entry_title">Mover / renomear</string>
+    <string name="onboarding_autofill_body">Ative o preenchimento automático e suas entradas aparecerão direto nas sugestões do teclado ao fazer login.\n\nVocê pode gerenciar isso a qualquer momento nas Configurações, em Senhas e preenchimento automático.</string>
+    <plurals name="onboarding_biometric_body">
+        <item quantity="one">O PassPony fica bloqueado por sua impressão digital, rosto ou PIN do dispositivo.\n\nDepois de desbloquear, ele permanece aberto por %1$d minuto (compartilhado com o preenchimento automático) e depois bloqueia novamente.</item>
+        <item quantity="other">O PassPony fica bloqueado por sua impressão digital, rosto ou PIN do dispositivo.\n\nDepois de desbloquear, ele permanece aberto por %1$d minutos (compartilhado com o preenchimento automático) e depois bloqueia novamente.</item>
+    </plurals>
+    <string name="reencrypt_will_rewrite">%1$d entradas serão reescritas</string>
+    <string name="settings_autofill_chrome_help_link">O Chrome não oferece o PassPony?</string>
+    <string name="settings_autofill_footer">Permite que outros apps e navegadores peçam ao PassPony para preencher logins. Nada é descriptografado até você escolher uma entrada.</string>
+    <string name="settings_autofill_row_title">Definir o PassPony como serviço de preenchimento automático…</string>
+    <string name="settings_diagnostics_core">Núcleo</string>
+    <string name="settings_diagnostics_row_title">Diagnóstico</string>
+    <string name="settings_import_failed">Falha ao importar %1$s: %2$s</string>
+    <string name="settings_import_success">%1$d arquivos de chave importados.</string>
+    <string name="settings_key_delete">Excluir chave</string>
+    <string name="settings_lock_now">Bloquear agora</string>
+    <string name="settings_locked_keys_footer">A frase secreta fica em cache por %1$d minutos (compartilhada com o preenchimento automático) e depois é apagada.</string>
+    <string name="settings_other_apps_site_title">Todos os apps Pony da NorseHorse</string>
+    <string name="settings_session_footer">Bloqueia imediatamente e apaga a frase secreta da chave em cache. De qualquer forma, bloqueia automaticamente após %1$d minutos de inatividade.</string>
+    <string name="settings_session_header">Sessão</string>
+    <string name="settings_unlock">Desbloquear</string>
+    <string name="settings_unlocked_some">Algumas chaves desbloqueadas; %1$d ainda bloqueadas.</string>
+    <string name="store_list_add">Adicionar entrada</string>
+    <string name="store_list_lock_now">Bloquear agora</string>
+    <string name="store_list_more">Mais</string>
+    <string name="store_list_settings">Ajustes</string>
+    <string name="store_list_sync">Sincronizar</string>
+    <string name="sync_conflict_title">Conflito de sincronização: %1$s</string>
+    <string name="sync_done">OK</string>
+    <string name="sync_remote_label">Remoto</string>
 </resources>
