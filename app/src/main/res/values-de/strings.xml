@@ -542,4 +542,6 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
     <string name="sync_conflict_title">Sync-Konflikt: %1$s</string>
     <string name="sync_done">Fertig</string>
     <string name="sync_remote_label">Remote</string>
+    <string name="settings_other_apps_scrubpony">Metadaten aus Fotos entfernen</string>
+    <string name="settings_other_apps_tappony">Webhooks über NFC-Tags</string>
 </resources>

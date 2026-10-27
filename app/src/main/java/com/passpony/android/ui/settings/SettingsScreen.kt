@@ -625,6 +625,8 @@ private val OTHER_APPS = listOf(
     OtherApp("BurnPony", R.string.xc_self_destructing_encrypted_messages, "https://burnpony.app"),
     OtherApp("RelayPony", R.string.xc_encrypted_file_transfer, "https://relaypony.app"),
     OtherApp("VaultPony", R.string.settings_other_apps_vaultpony, "https://vaultpony.app"),
+    OtherApp("ScrubPony", R.string.settings_other_apps_scrubpony, "https://scrubpony.app"),
+    OtherApp("TapPony", R.string.settings_other_apps_tappony, "https://tappony.app"),
 )
 
 @Composable

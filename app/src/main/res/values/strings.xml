@@ -121,6 +121,8 @@
     <string name="settings_other_apps_site_subtitle" translatable="false">pony.norsehor.se</string>
     <string name="settings_other_apps_footer">Other apps from the same developer.</string>
     <string name="settings_other_apps_vaultpony">VeraCrypt-compatible encrypted vaults on your device</string>
+    <string name="settings_other_apps_scrubpony">Strip metadata from photos</string>
+    <string name="settings_other_apps_tappony">Webhooks from NFC tags</string>
     <string name="settings_diagnostics_header">Diagnostics</string>
     <string name="settings_diagnostics_store_path">Store path</string>
     <string name="settings_diagnostics_format">Format</string>

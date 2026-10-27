@@ -523,4 +523,6 @@
     <string name="sync_conflict_title">同步冲突：%1$s</string>
     <string name="sync_done">完成</string>
     <string name="sync_remote_label">远程</string>
+    <string name="settings_other_apps_scrubpony">清除照片中的元数据</string>
+    <string name="settings_other_apps_tappony">通过 NFC 标签触发 Webhook</string>
 </resources>

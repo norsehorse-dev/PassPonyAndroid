@@ -580,4 +580,6 @@
     <string name="sync_conflict_title">Конфликт синхронизации: %1$s</string>
     <string name="sync_done">Готово</string>
     <string name="sync_remote_label">Удалённый репозиторий</string>
+    <string name="settings_other_apps_scrubpony">Удаление метаданных из фотографий</string>
+    <string name="settings_other_apps_tappony">Вебхуки по NFC-меткам</string>
 </resources>

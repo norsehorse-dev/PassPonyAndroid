@@ -542,4 +542,6 @@ Puedes gestionarlo en cualquier momento en los Ajustes de iOS, en Autorrelleno y
     <string name="sync_conflict_title">Conflicto de sincronización: %1$s</string>
     <string name="sync_done">Listo</string>
     <string name="sync_remote_label">Remoto</string>
+    <string name="settings_other_apps_scrubpony">Eliminar metadatos de las fotos</string>
+    <string name="settings_other_apps_tappony">Webhooks desde etiquetas NFC</string>
 </resources>

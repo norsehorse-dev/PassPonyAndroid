@@ -542,4 +542,6 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
     <string name="sync_conflict_title">Conflito de sincronização: %1$s</string>
     <string name="sync_done">OK</string>
     <string name="sync_remote_label">Remoto</string>
+    <string name="settings_other_apps_scrubpony">Remoção de metadados de fotos</string>
+    <string name="settings_other_apps_tappony">Webhooks a partir de tags NFC</string>
 </resources>
