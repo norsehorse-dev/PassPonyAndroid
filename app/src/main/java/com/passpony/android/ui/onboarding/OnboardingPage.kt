@@ -7,9 +7,7 @@ import android.provider.Settings
 import android.view.autofill.AutofillManager
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -17,11 +15,12 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Check
@@ -42,11 +41,9 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.clip
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
@@ -58,6 +55,8 @@ import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
+import com.passpony.android.ui.theme.ChoiceField
+import com.passpony.android.ui.theme.ListDivider
 import com.passpony.android.ui.edit.NewEntryContent
 import com.passpony.android.ui.edit.PasswordGenerator
 import com.passpony.android.ui.settings.LanguageManager
@@ -83,19 +82,18 @@ fun OnboardingPage(slide: OnboardingSlide, appViewModel: AppViewModel, onAdvance
     Column(
         modifier = Modifier
             .fillMaxSize()
+            .imePadding()
             .verticalScroll(rememberScrollState())
             .padding(horizontal = 24.dp, vertical = 16.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Box(
-            modifier = Modifier
-                .size(120.dp)
-                .clip(CircleShape)
-                .background(slide.tint.copy(alpha = 0.15f)),
-            contentAlignment = Alignment.Center
-        ) {
-            Icon(slide.icon, contentDescription = null, tint = slide.tint, modifier = Modifier.size(56.dp))
-        }
+        Spacer(Modifier.height(16.dp))
+        Icon(
+            slide.icon,
+            contentDescription = null,
+            tint = MaterialTheme.colorScheme.primary,
+            modifier = Modifier.size(48.dp)
+        )
         Spacer(Modifier.height(24.dp))
         Text(
             stringResource(slide.titleRes),
@@ -118,9 +116,9 @@ fun OnboardingPage(slide: OnboardingSlide, appViewModel: AppViewModel, onAdvance
         if (body != null) {
             Text(
                 body,
-                style = MaterialTheme.typography.bodyMedium,
+                style = MaterialTheme.typography.bodyLarge,
                 textAlign = TextAlign.Center,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(24.dp))
         }
@@ -154,8 +152,9 @@ private fun LanguageAction() {
             Row(
                 modifier = Modifier
                     .fillMaxWidth()
+                    .heightIn(min = 48.dp)
                     .clickable { LanguageManager.apply(tag) }
-                    .padding(vertical = 10.dp),
+                    .padding(vertical = 12.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Box(modifier = Modifier.width(32.dp), contentAlignment = Alignment.Center) {
@@ -163,39 +162,39 @@ private fun LanguageAction() {
                         Icon(Icons.Filled.Check, contentDescription = null, tint = MaterialTheme.colorScheme.primary)
                     }
                 }
-                Text(name)
+                Text(if (tag.isEmpty()) stringResource(R.string.xc_system) else name)
             }
+            ListDivider()
         }
     }
 }
 
-/** Slide 3: really switches the store format and reopens, live -- same
- * TextButton-pair/bold-when-selected pattern as Settings' FormatSection. */
+/** Slide 3: really switches the store format and reopens, live. Same
+ * dropdown as Settings' format choice: the translated format names are
+ * too long for a pair of buttons side by side. */
 @Composable
 private fun FormatAction(appViewModel: AppViewModel) {
     val scope = rememberCoroutineScope()
     var format by remember { mutableStateOf(appViewModel.format) }
-    Row(horizontalArrangement = Arrangement.Center) {
-        TextButton(onClick = {
-            format = StoreFormat.PASSAGE
-            scope.launch { appViewModel.switchFormat(StoreFormat.PASSAGE) }
-        }) {
-            Text(
-                stringResource(R.string.settings_format_passage),
-                fontWeight = if (format == StoreFormat.PASSAGE) FontWeight.Bold else FontWeight.Normal
-            )
+    ChoiceField(
+        label = stringResource(R.string.xc_store_format),
+        selected = format,
+        options = listOf(StoreFormat.PASSAGE, StoreFormat.PASS),
+        optionLabel = { formatLabel(it) },
+        onSelect = { chosen ->
+            format = chosen
+            scope.launch { appViewModel.switchFormat(chosen) }
         }
-        TextButton(onClick = {
-            format = StoreFormat.PASS
-            scope.launch { appViewModel.switchFormat(StoreFormat.PASS) }
-        }) {
-            Text(
-                stringResource(R.string.settings_format_pass),
-                fontWeight = if (format == StoreFormat.PASS) FontWeight.Bold else FontWeight.Normal
-            )
-        }
-    }
+    )
 }
+
+@Composable
+private fun formatLabel(format: StoreFormat): String = stringResource(
+    when (format) {
+        StoreFormat.PASSAGE -> R.string.settings_format_passage
+        StoreFormat.PASS -> R.string.settings_format_pass
+    }
+)
 
 /** Slide 4: clone (P09's flow) or import OpenPGP key files (P10's SAF
  * flow), reused rather than reimplemented. Once the store has entries
@@ -224,7 +223,7 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
                 File(keyDir, name).writeBytes(bytes)
                 imported++
             } catch (e: Exception) {
-                importMessage = context.getString(R.string.settings_import_failed, name, e.message ?: "")
+                importMessage = context.getString(R.string.settings_import_failed, name, context.getString(R.string.backup_restore_unreadable))
             }
         }
         if (imported > 0) {
@@ -264,7 +263,7 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
             Text(stringResource(R.string.backup_restore_button))
         }
         importMessage?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
     }
 
@@ -335,7 +334,7 @@ private fun OnboardingCloneDialog(appViewModel: AppViewModel, onCloned: () -> Un
                 Text(
                     stringResource(R.string.sync_clone_footer),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
                 )
                 error?.let {

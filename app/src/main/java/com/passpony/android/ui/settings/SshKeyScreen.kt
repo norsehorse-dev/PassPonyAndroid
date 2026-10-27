@@ -5,9 +5,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
@@ -44,6 +46,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.SecureFlagPolicy
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.crypto.SshKeyStore
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.util.Clipboard
@@ -144,6 +147,8 @@ fun SshKeyScreen(onDone: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -182,11 +187,7 @@ fun SshKeyScreen(onDone: () -> Unit) {
                     }
                 }
                 else -> {
-                    Text(
-                        stringResource(R.string.ssh_public_key_header),
-                        style = MaterialTheme.typography.labelMedium,
-                        color = MaterialTheme.colorScheme.secondary
-                    )
+                    SectionHeader(stringResource(R.string.ssh_public_key_header))
                     SelectionContainer {
                         Text(
                             key,
@@ -195,7 +196,7 @@ fun SshKeyScreen(onDone: () -> Unit) {
                         )
                     }
                     details?.let {
-                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+                        Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
                     }
                     Text(
                         stringResource(R.string.ssh_public_key_help),
@@ -207,7 +208,10 @@ fun SshKeyScreen(onDone: () -> Unit) {
                             // The public key is not a secret, but the plain
                             // copy still clears itself like every other copy.
                             Clipboard.copyEphemeral(context, key)
-                            message = context.getString(R.string.ssh_public_copied)
+                            // Android 13+ shows its own clipboard confirmation.
+                            if (android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU) {
+                                message = context.getString(R.string.ssh_public_copied)
+                            }
                         }) { Text(stringResource(R.string.ssh_copy_public)) }
                     }
                     DeleteButton(enabled = !busy) { confirmDelete = true }
@@ -220,11 +224,7 @@ fun SshKeyScreen(onDone: () -> Unit) {
             }
 
             Spacer(Modifier.height(24.dp))
-            Text(
-                stringResource(R.string.ssh_hosts_header),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            SectionHeader(stringResource(R.string.ssh_hosts_header))
             if (hosts.isEmpty()) {
                 Text(
                     stringResource(R.string.ssh_hosts_none),
@@ -295,14 +295,14 @@ private fun DeleteButton(enabled: Boolean, onClick: () -> Unit) {
 private fun TrustedHostRow(host: KnownHost, onForget: () -> Unit) {
     Row(
         verticalAlignment = Alignment.CenterVertically,
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp)
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
     ) {
         Column(modifier = Modifier.weight(1f)) {
             Text(host.host, style = MaterialTheme.typography.bodyMedium)
             Text(
                 "${host.key.keyType} · ${host.key.fingerprint}",
                 style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
         }
         TextButton(onClick = onForget) { Text(stringResource(R.string.ssh_host_forget)) }

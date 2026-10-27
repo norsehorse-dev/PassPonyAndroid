@@ -5,9 +5,11 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -154,26 +156,28 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
             Text(
                 stringResource(if (backedUp) R.string.backup_status_done else R.string.backup_status_needed),
                 style = MaterialTheme.typography.bodyMedium,
-                color = if (backedUp) MaterialTheme.colorScheme.secondary else MaterialTheme.colorScheme.error
+                color = if (backedUp) MaterialTheme.colorScheme.onSurfaceVariant else MaterialTheme.colorScheme.error
             )
             Spacer(Modifier.height(8.dp))
             Text(
                 stringResource(R.string.backup_sync_is_not_backup),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(16.dp))
             Text(stringResource(R.string.backup_encrypted_header), style = MaterialTheme.typography.titleMedium)
             Text(
                 stringResource(R.string.backup_encrypted_body),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(8.dp))
 
@@ -281,7 +285,7 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 Text(
                     stringResource(R.string.backup_plain_body),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(onClick = { showPlainWarning = true }) { Text(stringResource(R.string.backup_plain_export)) }
             }
@@ -291,7 +295,7 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             Text(
                 stringResource(R.string.backup_restore_body),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             TextButton(onClick = launchRestore) { Text(stringResource(R.string.backup_restore_button)) }
 

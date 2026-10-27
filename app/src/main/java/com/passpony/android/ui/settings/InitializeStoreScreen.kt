@@ -32,6 +32,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
@@ -109,18 +110,14 @@ fun InitializeStoreScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
-            Text(
-                stringResource(R.string.init_store_header),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            SectionHeader(stringResource(R.string.init_store_header))
             Spacer(Modifier.height(8.dp))
 
             if (keys.isEmpty()) {
                 Text(
                     stringResource(R.string.init_store_empty),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             for (key in keys) {
@@ -137,7 +134,7 @@ fun InitializeStoreScreen(
                         Text(
                             KeySummary.summaryLine(key),
                             style = MaterialTheme.typography.bodySmall,
-                            color = MaterialTheme.colorScheme.secondary
+                            color = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     }
                     if (selected.contains(key.file)) {
@@ -150,7 +147,7 @@ fun InitializeStoreScreen(
             Text(
                 stringResource(R.string.init_store_footer),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             error?.let {

@@ -10,9 +10,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.rememberScrollState
@@ -50,6 +52,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.scan.QrScannerDialog
@@ -199,6 +202,8 @@ fun AuthenticatorImportScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -249,25 +254,21 @@ fun AuthenticatorImportScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                         Text(
                             stringResource(R.string.otp_import_all_scanned),
                             style = MaterialTheme.typography.bodyMedium,
-                            modifier = Modifier.padding(start = 6.dp)
+                            modifier = Modifier.padding(start = 8.dp)
                         )
                     }
                 } else {
                     Text(
                         stringResource(R.string.otp_import_progress, scannedCount, totalCount),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }
 
             if (accounts.isNotEmpty()) {
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.otp_import_accounts_header),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                SectionHeader(stringResource(R.string.otp_import_accounts_header))
                 accounts.forEachIndexed { i, account ->
                     Row(verticalAlignment = Alignment.CenterVertically) {
                         Checkbox(checked = selected[i], onCheckedChange = { selected[i] = it })
@@ -299,11 +300,7 @@ fun AuthenticatorImportScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
 
             if (skippedLines.isNotEmpty()) {
                 Spacer(Modifier.height(8.dp))
-                Text(
-                    stringResource(R.string.otp_import_skipped_header),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                SectionHeader(stringResource(R.string.otp_import_skipped_header))
                 for (line in skippedLines) {
                     Text(line, style = MaterialTheme.typography.bodySmall)
                 }

@@ -3,9 +3,11 @@ package com.passpony.android.ui.edit
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -35,6 +37,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.components.entryOtpSummaryLine
 import com.passpony.android.ui.components.otpSummaryLine
 import com.passpony.android.ui.AppViewModel
@@ -216,6 +219,8 @@ fun EditEntryScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -233,7 +238,7 @@ fun EditEntryScreen(
                 Text(
                     stringResource(R.string.otp_only_caption),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             } else {
                 Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
@@ -255,11 +260,7 @@ fun EditEntryScreen(
             }
             if (fieldKeys.isNotEmpty()) {
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.entry_detail_fields),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                SectionHeader(stringResource(R.string.entry_detail_fields))
                 // Field key labels are literal on-disk field names (from
                 // entryFields(), whatever this entry's own bytes contain)
                 // -- not localized, same reasoning as AddEntryScreen's
@@ -287,11 +288,7 @@ fun EditEntryScreen(
             )
 
             Spacer(Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.edit_entry_add_field),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            SectionHeader(stringResource(R.string.edit_entry_add_field))
             OutlinedTextField(
                 value = newKey,
                 onValueChange = { newKey = it },
@@ -326,11 +323,7 @@ private fun OtpauthSection(
     onKeepCurrent: () -> Unit,
     onDeleteEntry: () -> Unit,
 ) {
-    Text(
-        stringResource(R.string.entry_detail_totp),
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.secondary
-    )
+    SectionHeader(stringResource(R.string.entry_detail_totp))
     Spacer(Modifier.height(4.dp))
     when (edit) {
         is OtpauthEdit.Set -> {
@@ -338,7 +331,7 @@ private fun OtpauthSection(
             Text(
                 stringResource(if (original == null) R.string.otp_added_on_save else R.string.otp_replaces_on_save),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row {
                 TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_change)) }
@@ -352,7 +345,7 @@ private fun OtpauthSection(
             Text(
                 stringResource(R.string.otp_removed_on_save),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             TextButton(onClick = onKeepCurrent) { Text(stringResource(R.string.otp_undo_remove)) }
         }
@@ -361,7 +354,7 @@ private fun OtpauthSection(
                 Text(
                     stringResource(R.string.otp_none),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 TextButton(onClick = onAddOrReplace) { Text(stringResource(R.string.otp_add)) }
             } else {
@@ -379,7 +372,7 @@ private fun OtpauthSection(
                     Text(
                         stringResource(R.string.otp_only_delete_hint),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

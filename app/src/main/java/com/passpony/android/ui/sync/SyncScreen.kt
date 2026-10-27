@@ -4,9 +4,11 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
@@ -14,6 +16,10 @@ import androidx.compose.material3.AlertDialog
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -33,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.AppViewModel
 import uniffi.pass_ffi.ConflictChoice
 import uniffi.pass_ffi.SyncStatus
@@ -92,7 +99,9 @@ fun SyncScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.sync_title)) },
                 navigationIcon = {
-                    TextButton(onClick = onDone) { Text(stringResource(R.string.sync_done)) }
+                    IconButton(onClick = onDone) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
                 }
             )
         }
@@ -101,6 +110,8 @@ fun SyncScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -110,7 +121,7 @@ fun SyncScreen(
             Text(
                 stringResource(R.string.backup_sync_is_not_backup),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 8.dp)
             )
             Spacer(Modifier.height(16.dp))
@@ -208,11 +219,6 @@ fun SyncScreen(
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-}
-
-@Composable
 private fun LabeledRow(label: String, value: String) {
     Row(
         modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
@@ -222,7 +228,7 @@ private fun LabeledRow(label: String, value: String) {
         Text(
             value,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
@@ -260,7 +266,7 @@ private fun PublishSection(url: String, onUrlChange: (String) -> Unit, busy: Boo
     Text(
         stringResource(R.string.sync_publish_footer),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -284,7 +290,7 @@ private fun CloneSection(url: String, onUrlChange: (String) -> Unit, busy: Boole
     Text(
         stringResource(R.string.sync_clone_footer),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -297,7 +303,7 @@ private fun RemoteSection(
     onUpdate: () -> Unit
 ) {
     SectionHeader(stringResource(R.string.sync_remote_header))
-    LabeledRow(stringResource(R.string.sync_remote_current), SyncMessages.redacted(currentUrl ?: "—"))
+    LabeledRow(stringResource(R.string.sync_remote_current), currentUrl?.let { SyncMessages.redacted(it) } ?: stringResource(R.string.sync_remote_none))
     OutlinedTextField(
         value = newUrl,
         onValueChange = onNewUrlChange,
@@ -348,7 +354,7 @@ private fun DeviceKeyDialog(
                 Text(
                     stringResource(R.string.device_key_help),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
         },

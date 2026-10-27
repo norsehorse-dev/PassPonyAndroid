@@ -175,13 +175,14 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             Text(
                 stringResource(R.string.diagnostics_footer),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(16.dp))
             Row(modifier = Modifier.fillMaxWidth()) {
                 Button(onClick = {
                     copyPlain(context, report.render())
-                    copied = true
+                    // Android 13+ shows its own clipboard confirmation.
+                    copied = android.os.Build.VERSION.SDK_INT < android.os.Build.VERSION_CODES.TIRAMISU
                 }) { Text(stringResource(R.string.diagnostics_copy)) }
                 Spacer(Modifier.width(12.dp))
                 OutlinedButton(onClick = { share(context, report.render()) }) {
@@ -199,14 +200,14 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
 @Composable
 private fun DiagnosticRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 6.dp),
+        modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp),
         horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(label, modifier = Modifier.padding(end = 16.dp))
         Text(
             value,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             textAlign = TextAlign.End
         )
     }

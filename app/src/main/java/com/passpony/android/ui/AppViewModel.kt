@@ -89,6 +89,17 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     private val _lastError = MutableStateFlow<String?>(null)
     val lastError: StateFlow<String?> = _lastError.asStateFlow()
 
+    /**
+     * UI state for the store list: false until the first entry read
+     * after an open, so the list shows "loading" instead of "no entries".
+     */
+    private val _storeLoaded = MutableStateFlow(false)
+    val storeLoaded: StateFlow<Boolean> = _storeLoaded.asStateFlow()
+
+    /** Why the store couldn't be opened, for the store list's error state. */
+    private val _openError = MutableStateFlow<String?>(null)
+    val openError: StateFlow<String?> = _openError.asStateFlow()
+
     private val _syncStatus = MutableStateFlow<SyncStatus?>(null)
 
     /**
@@ -165,10 +176,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 seedDemoStore(opened)
             }
 
+            _openError.value = null
             refresh()
             rebuildPasskeyIndex()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
+            _openError.value = e.ponyMessage(context)
+            _storeLoaded.value = true
         }
     }
 
@@ -213,12 +227,16 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val current = store ?: return
         try {
             _entries.value = current.entries()
+            _storeLoaded.value = true
             // status() can throw GitException (e.g. a genuinely broken
             // repo); that's a Sync-screen concern, not a reason to
             // surface an error here or drop the freshly-read entries.
             _syncStatus.value = runCatching { git?.status() }.getOrNull()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
+            // Couldn't list the store: show it as an error, not "loading".
+            if (!_storeLoaded.value) _openError.value = e.ponyMessage(context)
+            _storeLoaded.value = true
         }
     }
 

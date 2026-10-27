@@ -105,7 +105,7 @@ class PasskeyCreateActivity : FragmentActivity() {
                                 Text(
                                     options.userName,
                                     style = MaterialTheme.typography.bodySmall,
-                                    color = MaterialTheme.colorScheme.secondary
+                                    color = MaterialTheme.colorScheme.onSurfaceVariant
                                 )
                             }
                             OutlinedTextField(
@@ -119,7 +119,7 @@ class PasskeyCreateActivity : FragmentActivity() {
                             Text(
                                 stringResource(R.string.passkey_create_entry_help),
                                 style = MaterialTheme.typography.bodySmall,
-                                color = MaterialTheme.colorScheme.secondary,
+                                color = MaterialTheme.colorScheme.onSurfaceVariant,
                                 modifier = Modifier.padding(top = 4.dp)
                             )
                             error?.let {

@@ -1,7 +1,6 @@
 package com.passpony.android.ui
 
 import androidx.compose.foundation.clickable
-import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
@@ -23,12 +22,10 @@ import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Sync
 import androidx.compose.material.icons.filled.VpnKey
 import androidx.compose.material.icons.filled.Warning
-import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
-import androidx.compose.material3.ElevatedCard
 import androidx.compose.material3.ExperimentalMaterial3Api
-import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -46,7 +43,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.pluralStringResource
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.navigation.NavHostController
@@ -55,6 +54,10 @@ import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.KeyBackupState
 import com.passpony.android.ui.edit.DeleteEntryDialog
+import com.passpony.android.ui.theme.Callout
+import com.passpony.android.ui.theme.ListDivider
+import com.passpony.android.ui.theme.MetaText
+import com.passpony.android.ui.theme.statusWarn
 import uniffi.pass_ffi.EntryRef
 import uniffi.pass_ffi.StoreFormat
 
@@ -67,6 +70,8 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
     val visibleEntries by viewModel.visibleEntries.collectAsState()
     val searchText by viewModel.searchText.collectAsState()
     val syncStatus by viewModel.syncStatus.collectAsState()
+    val storeLoaded by viewModel.storeLoaded.collectAsState()
+    val openError by viewModel.openError.collectAsState()
     var pendingDelete by remember { mutableStateOf<String?>(null) }
 
     Scaffold(
@@ -134,7 +139,14 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                 UnpushedBanner((syncStatus?.ahead ?: 0u).toInt())
             }
 
-            if (visibleEntries.isEmpty()) {
+            val error = openError
+            if (error != null) {
+                ErrorState(error)
+            } else if (!storeLoaded) {
+                LoadingState()
+            } else if (visibleEntries.isEmpty() && searchText.isNotEmpty()) {
+                NoMatchState(searchText)
+            } else if (visibleEntries.isEmpty()) {
                 EmptyState()
             } else if (searchText.isEmpty()) {
                 LazyColumn(contentPadding = PaddingValues(bottom = 24.dp)) {
@@ -250,45 +262,51 @@ private fun LazyListScope.browseLevel(
 
 @Composable
 private fun BackupBanner(onClick: () -> Unit) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = CardDefaults.elevatedCardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().clickable(onClick = onClick).padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(Icons.Filled.Warning, contentDescription = null, tint = MaterialTheme.colorScheme.onErrorContainer)
-            Column {
-                Text(
-                    stringResource(R.string.store_list_backup_banner_title),
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    style = MaterialTheme.typography.bodyMedium
-                )
-                Text(
-                    stringResource(R.string.store_list_backup_banner_body),
-                    color = MaterialTheme.colorScheme.onErrorContainer,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
-        }
-    }
+    Callout(
+        title = stringResource(R.string.store_list_backup_banner_title),
+        detail = stringResource(R.string.store_list_backup_banner_body),
+        icon = Icons.Filled.Warning,
+        iconTint = MaterialTheme.colorScheme.statusWarn,
+        onClick = onClick,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+    )
 }
 
 @Composable
 private fun UnpushedBanner(ahead: Int) {
-    ElevatedCard(
-        modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 4.dp),
-        colors = CardDefaults.elevatedCardColors()
-    ) {
-        Row(
-            modifier = Modifier.fillMaxWidth().padding(12.dp),
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.spacedBy(8.dp)
-        ) {
-            Icon(Icons.Filled.ArrowUpward, contentDescription = null)
-            Text(stringResource(R.string.store_list_unpushed, ahead))
+    Callout(
+        title = pluralStringResource(R.plurals.xc_lld_unpushed_changes, ahead, ahead),
+        icon = Icons.Filled.ArrowUpward,
+        iconTint = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+    )
+}
+
+@Composable
+private fun LoadingState() {
+    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        CircularProgressIndicator()
+    }
+}
+
+@Composable
+private fun NoMatchState(query: String) {
+    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Text(
+            stringResource(R.string.store_list_no_match, query),
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
+    }
+}
+
+@Composable
+private fun ErrorState(message: String) {
+    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(R.string.store_list_open_failed), style = MaterialTheme.typography.titleMedium)
+            MetaText(message, modifier = Modifier.padding(top = 4.dp))
         }
     }
 }
@@ -298,9 +316,9 @@ private fun EmptyState() {
     Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
         Column(horizontalAlignment = Alignment.CenterHorizontally) {
             Text(stringResource(R.string.store_list_no_entries), style = MaterialTheme.typography.titleMedium)
-            Text(
+            MetaText(
                 stringResource(R.string.store_list_no_entries_hint),
-                style = MaterialTheme.typography.bodyMedium
+                modifier = Modifier.padding(top = 4.dp)
             )
         }
     }
@@ -318,9 +336,13 @@ private fun FolderRow(name: String, count: Int, onClick: () -> Unit) {
         ) {
             Icon(Icons.Filled.Folder, contentDescription = null, modifier = Modifier.padding(end = 12.dp))
             Text(name, modifier = Modifier.weight(1f))
-            Text(count.toString(), style = MaterialTheme.typography.bodySmall)
+            Text(
+                count.toString(),
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
+            )
         }
-        HorizontalDivider()
+        ListDivider()
     }
 }
 
@@ -346,13 +368,17 @@ private fun EntryRow(
             Column(modifier = Modifier.weight(1f)) {
                 Text(leaf)
                 if (showFolder && folder.isNotEmpty()) {
-                    Text(folder, style = MaterialTheme.typography.bodySmall)
+                    Text(
+                        folder,
+                        style = MaterialTheme.typography.bodyMedium,
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
                 }
             }
             IconButton(onClick = onDeleteRequest) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.store_list_delete_entry))
             }
         }
-        HorizontalDivider()
+        ListDivider()
     }
 }

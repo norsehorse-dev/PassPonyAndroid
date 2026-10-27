@@ -3,9 +3,11 @@ package com.passpony.android.ui.edit
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -33,6 +35,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.components.otpSummaryLine
 import com.passpony.android.ui.AppViewModel
 
@@ -106,6 +109,8 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
@@ -142,11 +147,7 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                 }
             }
             Spacer(Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.add_entry_fields_optional),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            SectionHeader(stringResource(R.string.add_entry_fields_optional))
             OutlinedTextField(
                 value = username,
                 onValueChange = { username = it },
@@ -163,11 +164,7 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
             )
 
             Spacer(Modifier.height(16.dp))
-            Text(
-                stringResource(R.string.add_entry_otp_optional),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
-            )
+            SectionHeader(stringResource(R.string.add_entry_otp_optional))
             val pendingUri = otpauth
             if (pendingUri == null) {
                 TextButton(onClick = { showOtpSheet = true }) { Text(stringResource(R.string.otp_add)) }

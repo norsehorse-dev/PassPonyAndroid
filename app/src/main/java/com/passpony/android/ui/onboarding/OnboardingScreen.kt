@@ -131,12 +131,12 @@ private fun PageIndicator(count: Int, current: Int) {
             val selected = i == current
             Box(
                 modifier = Modifier
-                    .padding(end = 6.dp)
+                    .padding(end = 8.dp)
                     .size(if (selected) 10.dp else 8.dp)
                     .clip(CircleShape)
                     .background(
                         if (selected) MaterialTheme.colorScheme.primary
-                        else MaterialTheme.colorScheme.secondary.copy(alpha = 0.3f)
+                        else MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.3f)
                     )
             )
         }

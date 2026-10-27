@@ -45,7 +45,7 @@ fun HostKeyTrustDialog(
                 Text(
                     key.keyType,
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
                 Text(
                     stringResource(R.string.ssh_host_check),

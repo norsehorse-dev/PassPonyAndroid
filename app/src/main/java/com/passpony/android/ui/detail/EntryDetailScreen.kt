@@ -51,6 +51,7 @@ import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.Routes
 import com.passpony.android.store.ponyMessage
@@ -309,7 +310,7 @@ private fun PasskeysSection(
                 modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                Icon(Icons.Filled.Key, contentDescription = null, tint = MaterialTheme.colorScheme.secondary)
+                Icon(Icons.Filled.Key, contentDescription = null, tint = MaterialTheme.colorScheme.onSurfaceVariant)
                 Text(
                     passkeyLabel(context, passkey),
                     modifier = Modifier.weight(1f).padding(start = 12.dp)
@@ -369,7 +370,7 @@ private fun TotpSection(content: ByteArray, caption: String?) {
             Text(
                 caption,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -399,7 +400,7 @@ private fun HotpSection(
     Column(modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)) {
         SectionHeader(stringResource(R.string.entry_detail_totp))
         entryOtpSummaryLine(content)?.let {
-            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+            Text(it, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
         }
         code?.let { shown ->
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
@@ -438,14 +439,14 @@ private fun HotpSection(
         Text(
             stringResource(R.string.otp_hotp_next_code_footer),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
         error?.let { Text(it, color = MaterialTheme.colorScheme.error, style = MaterialTheme.typography.bodySmall) }
         if (caption != null) {
             Text(
                 caption,
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
         }
@@ -453,12 +454,3 @@ private fun HotpSection(
     }
 }
 
-@Composable
-private fun SectionHeader(text: String) {
-    Text(
-        text,
-        style = MaterialTheme.typography.labelMedium,
-        color = MaterialTheme.colorScheme.secondary,
-        modifier = Modifier.padding(bottom = 4.dp)
-    )
-}

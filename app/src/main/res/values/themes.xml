@@ -6,7 +6,7 @@
       first Compose frame draws.
     -->
     <style name="Theme.PassPony" parent="Theme.AppCompat.DayNight.NoActionBar">
-        <item name="android:windowBackground">@android:color/white</item>
+        <item name="android:windowBackground">#FBF8F6</item>
     </style>
 
     <!--

@@ -14,6 +14,10 @@ import androidx.compose.material3.DropdownMenu
 import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.LinearProgressIndicator
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
@@ -32,6 +36,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
 import kotlinx.coroutines.launch
@@ -74,7 +79,7 @@ fun ReencryptScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
         scope.launch {
             try {
                 val rewritten = appViewModel.reencryptNow(subpath)
-                message = context.getString(R.string.reencrypt_success, rewritten.size)
+                message = context.resources.getQuantityString(R.plurals.xc_re_encrypted_lld_entries, rewritten.size, rewritten.size)
                 targets = null
             } catch (e: Exception) {
                 message = e.ponyMessage(context)
@@ -89,7 +94,9 @@ fun ReencryptScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             TopAppBar(
                 title = { Text(stringResource(R.string.reencrypt_title)) },
                 navigationIcon = {
-                    TextButton(onClick = onDone) { Text(stringResource(R.string.reencrypt_done)) }
+                    IconButton(onClick = onDone) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
                 }
             )
         }
@@ -133,7 +140,7 @@ fun ReencryptScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             Text(
                 stringResource(R.string.reencrypt_footer),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
 
             targets?.let { list ->
@@ -180,7 +187,3 @@ private fun folderPrefixes(entries: List<EntryRef>): List<String> {
     return out.toList()
 }
 
-@Composable
-private fun SectionHeader(text: String) {
-    Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-}

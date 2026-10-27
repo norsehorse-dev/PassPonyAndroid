@@ -13,6 +13,7 @@ import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.navigationBarsPadding
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.KeyboardOptions
@@ -52,6 +53,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.core.content.ContextCompat
 import com.passpony.android.R
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.components.TotpRing
 import com.passpony.android.ui.components.otpSummaryLine
@@ -176,9 +178,12 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // Nav bar first: it consumes those insets, so imePadding
+                // then adds only the keyboard's extra height.
+                .navigationBarsPadding()
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
-                .navigationBarsPadding()
         ) {
             Text(stringResource(R.string.otp_sheet_title), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(8.dp))
@@ -209,7 +214,7 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
                     Text(
                         stringResource(R.string.otp_paste_help),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
                 TAB_KEY -> {
@@ -251,7 +256,7 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
                         Text(stringResource(R.string.otp_key_advanced))
                     }
                     if (advanced) {
-                        Text(stringResource(R.string.otp_key_algorithm), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.otp_key_algorithm), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                             val options = listOf(TotpAlgorithm.SHA1, TotpAlgorithm.SHA256, TotpAlgorithm.SHA512)
                             options.forEachIndexed { index, option ->
@@ -263,7 +268,7 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
                             }
                         }
                         Spacer(Modifier.height(8.dp))
-                        Text(stringResource(R.string.otp_key_digits), style = MaterialTheme.typography.labelMedium)
+                        Text(stringResource(R.string.otp_key_digits), style = MaterialTheme.typography.bodyMedium, color = MaterialTheme.colorScheme.onSurfaceVariant)
                         SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth()) {
                             val options = listOf(6, 8)
                             options.forEachIndexed { index, option ->
@@ -318,11 +323,7 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
             }
             if (summary != null && candidateUri != null) {
                 Spacer(Modifier.height(16.dp))
-                Text(
-                    stringResource(R.string.otp_preview),
-                    style = MaterialTheme.typography.labelMedium,
-                    color = MaterialTheme.colorScheme.secondary
-                )
+                SectionHeader(stringResource(R.string.otp_preview))
                 Text(summary, style = MaterialTheme.typography.bodyMedium)
                 if (isTotp) {
                     // A one-line entry whose first line is the URI is the shape
@@ -334,7 +335,7 @@ fun TotpSetupSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
                     Text(
                         stringResource(R.string.otp_hotp_preview_note),
                         style = MaterialTheme.typography.bodySmall,
-                        color = MaterialTheme.colorScheme.secondary
+                        color = MaterialTheme.colorScheme.onSurfaceVariant
                     )
                 }
             }

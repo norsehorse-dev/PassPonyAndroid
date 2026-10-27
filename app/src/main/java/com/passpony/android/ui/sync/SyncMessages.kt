@@ -1,5 +1,7 @@
 package com.passpony.android.ui.sync
 
+import android.content.res.Resources
+import com.passpony.android.R
 import uniffi.pass_ffi.SyncOutcome
 
 /**
@@ -30,7 +32,29 @@ object SyncMessages {
         return url.substring(0, afterScheme) + "•••@" + url.substring(at + 1)
     }
 
-    /** Port of SyncView.describe(_:). */
+    /**
+     * The localized outcome the Sync screen shows, from string resources
+     * (plurals where a count appears). [describe] below stays as the
+     * English reference the unit tests pin.
+     */
+    fun describe(resources: Resources, outcome: SyncOutcome): String = when (outcome) {
+        is SyncOutcome.UpToDate -> resources.getString(R.string.xc_already_up_to_date)
+        is SyncOutcome.FastForwarded -> resources.getString(R.string.xc_pulled_changes_from_remote)
+        is SyncOutcome.Rebased -> {
+            val n = outcome.replayed.toInt()
+            resources.getQuantityString(R.plurals.xc_merged_cleanly_lld_local_changes_replayed, n, n)
+        }
+        is SyncOutcome.ResolvedConflicts -> {
+            val n = outcome.resolved.size
+            var text = resources.getQuantityString(R.plurals.xc_resolved_lld_conflicts, n, n)
+            if (outcome.keptBoth.isNotEmpty()) {
+                text += " " + resources.getString(R.string.xc_kept_both_for, outcome.keptBoth.joinToString(", "))
+            }
+            text
+        }
+    }
+
+    /** Port of SyncView.describe(_:). English; the unit tests' reference. */
     fun describe(outcome: SyncOutcome): String = when (outcome) {
         is SyncOutcome.UpToDate -> "Already up to date."
         is SyncOutcome.FastForwarded -> "Pulled changes from remote."

@@ -5,6 +5,7 @@ import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.navigationBarsPadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
@@ -20,11 +21,7 @@ import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedTextField
-import androidx.compose.material3.SegmentedButton
-import androidx.compose.material3.SegmentedButtonDefaults
-import androidx.compose.material3.SingleChoiceSegmentedButtonRow
 import androidx.compose.material3.Slider
-import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.material3.TextButton
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -45,6 +42,8 @@ import androidx.compose.ui.unit.dp
 import com.passpony.android.R
 import com.passpony.android.store.GeneratorPrefs
 import com.passpony.android.store.GeneratorSettings
+import com.passpony.android.ui.theme.ChoiceField
+import com.passpony.android.ui.theme.ToggleRow
 import com.passpony.android.ui.util.SecureScreenEffect
 import kotlinx.coroutines.launch
 import uniffi.pass_ffi.SymbolSet
@@ -88,9 +87,12 @@ fun GeneratorSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
         Column(
             modifier = Modifier
                 .fillMaxWidth()
+                // Nav bar first: it consumes those insets, so imePadding
+                // then adds only the keyboard's extra height.
+                .navigationBarsPadding()
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(horizontal = 16.dp)
-                .navigationBarsPadding()
         ) {
             Text(stringResource(R.string.generator_sheet_title), style = MaterialTheme.typography.titleLarge)
             Spacer(Modifier.height(16.dp))
@@ -98,8 +100,8 @@ fun GeneratorSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
             // Preview first, so a change to anything below is visible at once.
             Text(
                 stringResource(R.string.generator_preview),
-                style = MaterialTheme.typography.labelMedium,
-                color = MaterialTheme.colorScheme.secondary
+                style = MaterialTheme.typography.bodyMedium,
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
                 Text(
@@ -159,7 +161,7 @@ fun GeneratorSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
             Text(
                 stringResource(R.string.generator_length_hint, GeneratorSettings.MIN_LENGTH, GeneratorSettings.MAX_LENGTH),
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary
+                color = MaterialTheme.colorScheme.onSurfaceVariant
             )
             Spacer(Modifier.height(8.dp))
 
@@ -180,17 +182,14 @@ fun GeneratorSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
             )
             Spacer(Modifier.height(8.dp))
 
-            Text(stringResource(R.string.generator_symbols), style = MaterialTheme.typography.bodyLarge)
-            SingleChoiceSegmentedButtonRow(modifier = Modifier.fillMaxWidth().padding(top = 4.dp)) {
-                val options = GeneratorSettings.Symbols.entries
-                options.forEachIndexed { index, option ->
-                    SegmentedButton(
-                        selected = settings.symbols == option,
-                        onClick = { settings = settings.copy(symbols = option) },
-                        shape = SegmentedButtonDefaults.itemShape(index = index, count = options.size)
-                    ) { Text(symbolsLabel(option)) }
-                }
-            }
+            ChoiceField(
+                label = stringResource(R.string.generator_symbols),
+                selected = settings.symbols,
+                options = GeneratorSettings.Symbols.entries,
+                optionLabel = { symbolsLabel(it) },
+                onSelect = { settings = settings.copy(symbols = it) },
+                modifier = Modifier.padding(top = 4.dp)
+            )
             Text(
                 when (settings.symbols) {
                     GeneratorSettings.Symbols.NONE -> stringResource(R.string.generator_symbols_none_hint)
@@ -198,7 +197,7 @@ fun GeneratorSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
                     GeneratorSettings.Symbols.FULL -> stringResource(R.string.generator_symbols_full_hint)
                 },
                 style = MaterialTheme.typography.bodySmall,
-                color = MaterialTheme.colorScheme.secondary,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
                 modifier = Modifier.padding(top = 4.dp)
             )
 
@@ -228,13 +227,7 @@ fun GeneratorSheet(onDismiss: () -> Unit, onUse: (String) -> Unit) {
 
 @Composable
 private fun ClassSwitch(label: String, checked: Boolean, onChange: (Boolean) -> Unit) {
-    Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 2.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Text(label, style = MaterialTheme.typography.bodyLarge, modifier = Modifier.weight(1f))
-        Switch(checked = checked, onCheckedChange = onChange)
-    }
+    ToggleRow(label = label, checked = checked, onChange = onChange)
 }
 
 @Composable

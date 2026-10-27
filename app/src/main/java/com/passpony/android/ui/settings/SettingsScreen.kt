@@ -8,13 +8,15 @@ import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
-import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.consumeWindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
+import androidx.compose.foundation.layout.heightIn
+import androidx.compose.foundation.layout.imePadding
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
@@ -23,11 +25,10 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.ButtonDefaults
-import androidx.compose.material3.DropdownMenu
-import androidx.compose.material3.DropdownMenuItem
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material.icons.automirrored.filled.ArrowBack
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
@@ -44,9 +45,9 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import androidx.annotation.StringRes
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
@@ -59,6 +60,9 @@ import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.ui.AppViewModel
+import com.passpony.android.ui.theme.ChoiceField
+import com.passpony.android.ui.theme.ListDivider
+import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.util.SecureScreenEffect
 import com.passpony.android.ui.util.safDisplayName
 import java.io.File
@@ -141,7 +145,7 @@ fun SettingsScreen(
                 File(keyDir, name).writeBytes(bytes)
                 imported++
             } catch (e: Exception) {
-                message = context.getString(R.string.settings_import_failed, name, e.message ?: "")
+                message = context.getString(R.string.settings_import_failed, name, context.getString(R.string.backup_restore_unreadable))
             }
         }
         if (imported > 0) {
@@ -161,7 +165,9 @@ fun SettingsScreen(
             TopAppBar(
                 title = { Text(stringResource(R.string.settings_title)) },
                 navigationIcon = {
-                    TextButton(onClick = onDone) { Text(stringResource(R.string.settings_done)) }
+                    IconButton(onClick = onDone) {
+                        Icon(Icons.AutoMirrored.Filled.ArrowBack, contentDescription = stringResource(R.string.action_back))
+                    }
                 }
             )
         }
@@ -170,12 +176,14 @@ fun SettingsScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(innerPadding)
+                .consumeWindowInsets(innerPadding)
+                .imePadding()
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
             SessionSection(onLock = onLock)
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             FormatSection(
                 format = format,
                 onSelect = { newFormat ->
@@ -185,7 +193,7 @@ fun SettingsScreen(
             )
 
             if (format == StoreFormat.PASS) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
                 OpenPgpKeysSection(
                     keyFiles = keyFiles,
                     onImport = { keyImportLauncher.launch(arrayOf("*/*")) },
@@ -197,7 +205,7 @@ fun SettingsScreen(
                 )
 
                 if (lockedKeys.isNotEmpty()) {
-                    Spacer(Modifier.height(16.dp))
+                    Spacer(Modifier.height(24.dp))
                     LockedKeysSection(
                         lockedKeys = lockedKeys,
                         passphrase = keyPassphrase,
@@ -228,7 +236,7 @@ fun SettingsScreen(
                     )
                 }
 
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
                 GpgIdSection(
                     gpgIdLines = gpgIdLines,
                     hasKeys = keyFiles.isNotEmpty(),
@@ -237,7 +245,7 @@ fun SettingsScreen(
             }
 
             if (format == StoreFormat.PASSAGE) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
                 AgeKeysSection(
                     present = agePresent,
                     hints = ageHints,
@@ -246,24 +254,24 @@ fun SettingsScreen(
                 )
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             BackupRow(onOpen = onBackup)
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             SshKeyRow(onOpen = onSshKey)
 
             if (android.os.Build.VERSION.SDK_INT >= android.os.Build.VERSION_CODES.UPSIDE_DOWN_CAKE) {
-                Spacer(Modifier.height(16.dp))
+                Spacer(Modifier.height(24.dp))
                 PasskeysSection(context)
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             MaintenanceSection(onReencrypt = onReencrypt)
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             AutofillSection(context)
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             LanguageSection(
                 onSelect = { tag -> LanguageManager.apply(tag) }
             )
@@ -278,17 +286,17 @@ fun SettingsScreen(
                 Text(stringResource(R.string.settings_tour_replay))
             }
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             AboutSection(context)
 
             // 1.1 (P20): Diagnostics is its own screen, reached from here,
             // which makes the support page's "Settings, then Diagnostics"
             // literally true; the inline section this replaced sat below
             // the app list where nobody found it (issue #2).
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             DiagnosticsRow(onOpen = onDiagnostics)
 
-            Spacer(Modifier.height(16.dp))
+            Spacer(Modifier.height(24.dp))
             OtherAppsSection(context)
 
 
@@ -331,25 +339,22 @@ private fun openChrome(context: Context) {
 }
 
 @Composable
-private fun SectionHeader(text: String) {
-    Text(text, style = MaterialTheme.typography.labelMedium, color = MaterialTheme.colorScheme.secondary)
-}
-
-@Composable
 private fun LabeledRow(label: String, value: String) {
     Row(
-        modifier = Modifier.fillMaxWidth().padding(vertical = 4.dp),
-        horizontalArrangement = Arrangement.SpaceBetween
+        modifier = Modifier.fillMaxWidth().heightIn(min = 48.dp).padding(vertical = 8.dp),
+        horizontalArrangement = Arrangement.SpaceBetween,
+        verticalAlignment = Alignment.CenterVertically
     ) {
         Text(label)
         Text(
             value,
             style = MaterialTheme.typography.bodyMedium,
-            color = MaterialTheme.colorScheme.secondary,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
             maxLines = 1,
             overflow = TextOverflow.Ellipsis
         )
     }
+    ListDivider()
 }
 
 @Composable
@@ -364,30 +369,32 @@ private fun SessionSection(onLock: () -> Unit) {
     Text(
         stringResource(R.string.settings_session_footer, (UnlockGate.GRACE_PERIOD_MILLIS / 60000L).toInt()),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
 @Composable
 private fun FormatSection(format: StoreFormat, onSelect: (StoreFormat) -> Unit) {
-    Row {
-        TextButton(onClick = { onSelect(StoreFormat.PASSAGE) }) {
-            Text(
-                stringResource(R.string.settings_format_passage),
-                fontWeight = if (format == StoreFormat.PASSAGE) FontWeight.Bold else FontWeight.Normal
+    SectionHeader(stringResource(R.string.xc_store_format))
+    ChoiceField(
+        label = null,
+        selected = format,
+        options = listOf(StoreFormat.PASSAGE, StoreFormat.PASS),
+        optionLabel = {
+            stringResource(
+                when (it) {
+                    StoreFormat.PASSAGE -> R.string.settings_format_passage
+                    StoreFormat.PASS -> R.string.settings_format_pass
+                }
             )
-        }
-        TextButton(onClick = { onSelect(StoreFormat.PASS) }) {
-            Text(
-                stringResource(R.string.settings_format_pass),
-                fontWeight = if (format == StoreFormat.PASS) FontWeight.Bold else FontWeight.Normal
-            )
-        }
-    }
+        },
+        onSelect = onSelect
+    )
     Text(
         stringResource(R.string.settings_format_footer),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant,
+        modifier = Modifier.padding(top = 4.dp)
     )
 }
 
@@ -402,7 +409,7 @@ private fun OpenPgpKeysSection(
         Text(
             stringResource(R.string.settings_pgp_keys_empty),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
     for (key in keyFiles) {
@@ -416,13 +423,14 @@ private fun OpenPgpKeysSection(
                 Text(
                     KeySummary.summaryLine(key),
                     style = MaterialTheme.typography.bodySmall,
-                    color = MaterialTheme.colorScheme.secondary
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
             IconButton(onClick = { onDelete(key.file) }) {
                 Icon(Icons.Filled.Delete, contentDescription = stringResource(R.string.settings_key_delete))
             }
         }
+        ListDivider()
     }
     TextButton(onClick = onImport) {
         Text(stringResource(R.string.settings_pgp_import))
@@ -440,14 +448,14 @@ private fun AgeKeysSection(
     Text(
         stringResource(if (present) R.string.settings_age_present else R.string.settings_age_missing),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     for (hint in hints) {
         Text(
             hint,
             style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            color = MaterialTheme.colorScheme.secondary,
-            modifier = Modifier.padding(top = 2.dp)
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
     TextButton(onClick = onImport) {
@@ -457,7 +465,7 @@ private fun AgeKeysSection(
         Text(
             it,
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -471,7 +479,7 @@ private fun LockedKeysSection(
 ) {
     SectionHeader(stringResource(R.string.settings_locked_keys_header))
     for (file in lockedKeys) {
-        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 2.dp)) {
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.padding(vertical = 4.dp)) {
             Icon(Icons.Filled.Lock, contentDescription = null, tint = MaterialTheme.colorScheme.error)
             Spacer(Modifier.width(8.dp))
             Text(file)
@@ -491,7 +499,7 @@ private fun LockedKeysSection(
     Text(
         stringResource(R.string.settings_locked_keys_footer, (UnlockGate.GRACE_PERIOD_MILLIS / 60000L).toInt()),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -505,7 +513,7 @@ private fun GpgIdSection(gpgIdLines: List<String>, hasKeys: Boolean, onInitializ
         Text(
             stringResource(R.string.settings_gpgid_footer_empty),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     } else {
         for (line in gpgIdLines) {
@@ -514,7 +522,7 @@ private fun GpgIdSection(gpgIdLines: List<String>, hasKeys: Boolean, onInitializ
         Text(
             stringResource(R.string.settings_gpgid_footer_set),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -538,7 +546,7 @@ private fun AutofillSection(context: Context) {
     Text(
         stringResource(R.string.settings_autofill_footer),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     TextButton(onClick = { showChromeHelp = true }) {
         Text(stringResource(R.string.settings_autofill_chrome_help_link))
@@ -557,27 +565,18 @@ private fun AutofillSection(context: Context) {
 
 @Composable
 private fun LanguageSection(onSelect: (String) -> Unit) {
-    var expanded by remember { mutableStateOf(false) }
     val currentTag = LanguageManager.currentTag()
-    val currentName = LanguageManager.supported.firstOrNull { it.first == currentTag }?.second
-        ?: LanguageManager.supported.first().second
+    val selected = LanguageManager.supported.firstOrNull { it.first == currentTag }
+        ?: LanguageManager.supported.first()
     SectionHeader(stringResource(R.string.settings_language))
-    Box {
-        TextButton(onClick = { expanded = true }) {
-            Text(currentName)
-        }
-        DropdownMenu(expanded = expanded, onDismissRequest = { expanded = false }) {
-            for ((tag, name) in LanguageManager.supported) {
-                DropdownMenuItem(
-                    text = { Text(name) },
-                    onClick = {
-                        expanded = false
-                        onSelect(tag)
-                    }
-                )
-            }
-        }
-    }
+    ChoiceField(
+        label = null,
+        selected = selected,
+        options = LanguageManager.supported,
+        // "System" is the one name that needs translating.
+        optionLabel = { if (it.first.isEmpty()) stringResource(R.string.xc_system) else it.second },
+        onSelect = { onSelect(it.first) }
+    )
 }
 
 @Composable
@@ -606,24 +605,26 @@ private fun LinkRow(title: String, subtitle: String, url: String, context: Conte
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clickable { openUrl(context, url) }
-            .padding(vertical = 6.dp)
+            .padding(vertical = 8.dp)
     ) {
         Text(title)
-        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.secondary)
+        Text(subtitle, style = MaterialTheme.typography.bodySmall, color = MaterialTheme.colorScheme.onSurfaceVariant)
     }
+    ListDivider()
 }
 
-private data class OtherApp(val name: String, val tagline: String, val url: String)
+private data class OtherApp(val name: String, @StringRes val tagline: Int, val url: String)
 
 private val OTHER_APPS = listOf(
-    OtherApp("PGPony", "OpenPGP messages, files, and keys", "https://pgpony.app"),
-    OtherApp("AgePony", "Simple, modern file encryption (age)", "https://agepony.com"),
-    OtherApp("QuorumPony", "Quorum key backup & recovery", "https://quorumpony.com"),
-    OtherApp("CarrierPony", "PGP chat and encrypted files", "https://carrierpony.com"),
-    OtherApp("BurnPony", "Self-destructing encrypted messages", "https://burnpony.app"),
-    OtherApp("RelayPony", "Encrypted file transfer", "https://relaypony.app"),
-    OtherApp("VaultPony", "VeraCrypt compatible encrypted vaults, entirely on your device", "https://vaultpony.app"),
+    OtherApp("PGPony", R.string.xc_openpgp_messages_files_and_keys, "https://pgpony.app"),
+    OtherApp("AgePony", R.string.xc_simple_modern_file_encryption_age, "https://agepony.com"),
+    OtherApp("QuorumPony", R.string.xc_quorum_key_backup_recovery, "https://quorumpony.com"),
+    OtherApp("CarrierPony", R.string.xc_pgp_chat_and_encrypted_files, "https://carrierpony.com"),
+    OtherApp("BurnPony", R.string.xc_self_destructing_encrypted_messages, "https://burnpony.app"),
+    OtherApp("RelayPony", R.string.xc_encrypted_file_transfer, "https://relaypony.app"),
+    OtherApp("VaultPony", R.string.settings_other_apps_vaultpony, "https://vaultpony.app"),
 )
 
 @Composable
@@ -636,12 +637,12 @@ private fun OtherAppsSection(context: Context) {
         context = context
     )
     for (app in OTHER_APPS) {
-        LinkRow(title = app.name, subtitle = app.tagline, url = app.url, context = context)
+        LinkRow(title = app.name, subtitle = stringResource(app.tagline), url = app.url, context = context)
     }
     Text(
         stringResource(R.string.settings_other_apps_footer),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
 }
 
@@ -660,7 +661,7 @@ private fun PasskeysSection(context: Context) {
     Text(
         stringResource(R.string.settings_passkeys_body),
         style = MaterialTheme.typography.bodySmall,
-        color = MaterialTheme.colorScheme.secondary
+        color = MaterialTheme.colorScheme.onSurfaceVariant
     )
     TextButton(onClick = {
         runCatching {
@@ -677,14 +678,15 @@ private fun SshKeyRow(onOpen: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clickable(onClick = onOpen)
-            .padding(vertical = 6.dp)
+            .padding(vertical = 8.dp)
     ) {
         Text(stringResource(R.string.ssh_manage))
         Text(
             stringResource(R.string.settings_ssh_row_subtitle),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -695,14 +697,15 @@ private fun BackupRow(onOpen: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clickable(onClick = onOpen)
-            .padding(vertical = 6.dp)
+            .padding(vertical = 8.dp)
     ) {
         Text(stringResource(R.string.settings_backup_row_title))
         Text(
             stringResource(R.string.settings_backup_row_subtitle),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }
@@ -713,14 +716,15 @@ private fun DiagnosticsRow(onOpen: () -> Unit) {
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .heightIn(min = 48.dp)
             .clickable(onClick = onOpen)
-            .padding(vertical = 6.dp)
+            .padding(vertical = 8.dp)
     ) {
         Text(stringResource(R.string.settings_diagnostics_row_title))
         Text(
             stringResource(R.string.settings_diagnostics_row_subtitle),
             style = MaterialTheme.typography.bodySmall,
-            color = MaterialTheme.colorScheme.secondary
+            color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
 }

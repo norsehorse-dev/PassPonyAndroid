@@ -9,12 +9,14 @@ import android.view.autofill.AutofillManager
 import android.view.autofill.AutofillValue
 import androidx.activity.compose.setContent
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.ListItem
 import androidx.compose.material3.MaterialTheme
@@ -29,13 +31,16 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.fragment.app.FragmentActivity
 import com.passpony.android.R
 import com.passpony.android.store.ponyMessage
+import com.passpony.android.ui.theme.ListDivider
 import com.passpony.android.ui.theme.PassPonyTheme
 import com.passpony.android.ui.util.SecureScreenEffect
 import uniffi.pass_ffi.EntryRef
@@ -116,12 +121,15 @@ private fun AutofillPickerScreen(
     var entries by remember { mutableStateOf(emptyList<EntryRef>()) }
     var search by remember { mutableStateOf("") }
     var error by remember { mutableStateOf<String?>(null) }
+    var loaded by remember { mutableStateOf(false) }
 
     LaunchedEffect(Unit) {
         try {
             entries = AutofillCredential.entries(context)
         } catch (e: Exception) {
             error = e.ponyMessage(context)
+        } finally {
+            loaded = true
         }
     }
 
@@ -157,16 +165,41 @@ private fun AutofillPickerScreen(
                 )
             }
 
-            LazyColumn {
-                items(filtered, key = { it.name }) { entry ->
-                    ListItem(
-                        headlineContent = { Text(entry.name) },
-                        modifier = Modifier.fillMaxWidth().clickable {
-                            onPick(entry.name) { error = context.getString(R.string.autofill_pick_failed) }
-                        }
-                    )
+            when {
+                !loaded -> Box(
+                    modifier = Modifier.fillMaxSize().padding(24.dp),
+                    contentAlignment = Alignment.Center
+                ) { CircularProgressIndicator() }
+                filtered.isEmpty() && search.isNotEmpty() -> PickerNotice(
+                    stringResource(R.string.store_list_no_match, search)
+                )
+                entries.isEmpty() && error == null -> PickerNotice(
+                    stringResource(R.string.autofill_picker_empty)
+                )
+                else -> LazyColumn {
+                    items(filtered, key = { it.name }) { entry ->
+                        ListItem(
+                            headlineContent = { Text(entry.name) },
+                            modifier = Modifier.fillMaxWidth().clickable {
+                                onPick(entry.name) { error = context.getString(R.string.autofill_pick_failed) }
+                            }
+                        )
+                        ListDivider()
+                    }
                 }
             }
         }
+    }
+}
+
+@Composable
+private fun PickerNotice(text: String) {
+    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Text(
+            text,
+            style = MaterialTheme.typography.bodyLarge,
+            color = MaterialTheme.colorScheme.onSurfaceVariant,
+            textAlign = TextAlign.Center
+        )
     }
 }

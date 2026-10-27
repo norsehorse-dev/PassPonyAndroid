@@ -64,7 +64,7 @@ class SyncViewModel(application: Application) : AndroidViewModel(application) {
 
     fun syncNow(appViewModel: AppViewModel) = run {
         val outcome = appViewModel.syncNow(resolver)
-        message = SyncMessages.describe(outcome)
+        message = SyncMessages.describe(context.resources, outcome)
     }
 
     fun updateRemote(appViewModel: AppViewModel, url: String) = run {

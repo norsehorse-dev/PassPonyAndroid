@@ -14,14 +14,11 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.safeDrawingPadding
 import androidx.compose.foundation.layout.size
-import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.rememberScrollState
-import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material3.Button
-import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
@@ -35,10 +32,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
-import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.sp
 import androidx.fragment.app.FragmentActivity
 import androidx.lifecycle.Lifecycle
 import androidx.lifecycle.LifecycleEventObserver
@@ -73,6 +68,8 @@ fun LockScreen(onUnlock: () -> Unit) {
     var errorMessage by remember { mutableStateOf<String?>(null) }
     var isAuthenticating by remember { mutableStateOf(false) }
     val reason = stringResource(R.string.lock_reason)
+    // Shown instead of raw exception text when the prompt itself fails.
+    val fallbackError = stringResource(R.string.lock_screen_failed)
 
     val lifecycleOwner = LocalLifecycleOwner.current
     DisposableEffect(lifecycleOwner, activity, reason) {
@@ -81,6 +78,7 @@ fun LockScreen(onUnlock: () -> Unit) {
             triggerAuthenticate(
                 activity = activity,
                 reason = reason,
+                fallbackError = fallbackError,
                 onStart = { isAuthenticating = true; errorMessage = null },
                 onSuccess = { isAuthenticating = false; onUnlock() },
                 onError = { message -> isAuthenticating = false; errorMessage = message }
@@ -115,70 +113,50 @@ fun LockScreen(onUnlock: () -> Unit) {
             horizontalAlignment = Alignment.CenterHorizontally,
             verticalArrangement = Arrangement.Center
         ) {
-            Box(
-                modifier = Modifier
-                    .size(120.dp)
-                    .background(
-                        color = MaterialTheme.colorScheme.primary.copy(alpha = 0.12f),
-                        shape = RoundedCornerShape(32.dp)
-                    ),
-                contentAlignment = Alignment.Center
-            ) {
-                Icon(
-                    imageVector = Icons.Filled.Lock,
-                    contentDescription = null,
-                    tint = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.size(64.dp)
-                )
-            }
+            Icon(
+                imageVector = Icons.Filled.Lock,
+                contentDescription = null,
+                tint = MaterialTheme.colorScheme.primary,
+                modifier = Modifier.size(48.dp)
+            )
 
-            Spacer(Modifier.height(32.dp))
+            Spacer(Modifier.height(24.dp))
 
             Text(
                 stringResource(R.string.app_name),
-                fontSize = 32.sp,
-                fontWeight = FontWeight.Bold,
+                style = MaterialTheme.typography.headlineMedium,
                 color = MaterialTheme.colorScheme.onBackground
             )
-            Spacer(Modifier.height(6.dp))
+            Spacer(Modifier.height(8.dp))
             Text(
                 stringResource(R.string.lock_screen_tagline),
-                style = MaterialTheme.typography.bodyMedium,
-                color = MaterialTheme.colorScheme.onSurfaceVariant
+                style = MaterialTheme.typography.bodyLarge,
+                color = MaterialTheme.colorScheme.onSurfaceVariant,
+                textAlign = TextAlign.Center
             )
 
-            Spacer(Modifier.height(48.dp))
+            Spacer(Modifier.height(32.dp))
 
             Button(
                 onClick = {
                     triggerAuthenticate(
                         activity = activity,
                         reason = reason,
+                        fallbackError = fallbackError,
                         onStart = { isAuthenticating = true; errorMessage = null },
                         onSuccess = { isAuthenticating = false; onUnlock() },
                         onError = { message -> isAuthenticating = false; errorMessage = message }
                     )
                 },
                 enabled = !isAuthenticating && activity != null,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(56.dp),
-                shape = RoundedCornerShape(16.dp),
-                colors = ButtonDefaults.buttonColors(
-                    containerColor = MaterialTheme.colorScheme.primary,
-                    contentColor = MaterialTheme.colorScheme.onPrimary
-                )
+                modifier = Modifier.fillMaxWidth()
             ) {
-                Icon(Icons.Filled.Lock, contentDescription = null, modifier = Modifier.size(20.dp))
-                Spacer(Modifier.width(10.dp))
                 Text(
                     if (isAuthenticating) {
                         stringResource(R.string.lock_screen_authenticating)
                     } else {
                         stringResource(R.string.lock_screen_unlock_button)
-                    },
-                    style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.SemiBold
+                    }
                 )
             }
 
@@ -205,12 +183,13 @@ fun LockScreen(onUnlock: () -> Unit) {
 private fun triggerAuthenticate(
     activity: FragmentActivity?,
     reason: String,
+    fallbackError: String,
     onStart: () -> Unit,
     onSuccess: () -> Unit,
     onError: (String?) -> Unit,
 ) {
     if (activity == null) {
-        onError("Activity context unavailable.")
+        onError(fallbackError)
         return
     }
     onStart()
@@ -226,7 +205,15 @@ private fun triggerAuthenticate(
             val isDismissal = errorCode == BiometricPrompt.ERROR_USER_CANCELED ||
                 errorCode == BiometricPrompt.ERROR_NEGATIVE_BUTTON ||
                 errorCode == BiometricPrompt.ERROR_CANCELED
-            onError(if (isDismissal) null else message)
+            // errorCode -1 is UnlockGate's own catch around the prompt; its
+            // message is raw exception text, so show the generic one.
+            onError(
+                when {
+                    isDismissal -> null
+                    errorCode == -1 -> fallbackError
+                    else -> message
+                }
+            )
         }
     )
 }
