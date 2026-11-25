@@ -8,10 +8,14 @@ your keys, git sync. Kotlin and Jetpack Compose over the shared Rust core
 same core that backs [PassPony iOS](https://github.com/norsehorse-dev/passpony).
 
 Built packet by packet against the plan in `PLAN.md` and `docs/plan/`; see
-that directory for how each feature below landed. The v1 feature set below
-is implemented and CI-green; release engineering (packaging, storefront
-listings, the signed release flow) is the packet in progress now -- see
-`docs/plan/P16-release.md` and `docs/RELEASE_CHECKLIST.md`.
+that directory for how each feature below landed.
+
+Released on [F-Droid](https://f-droid.org/packages/com.passpony.android/)
+and as a signed APK on
+[GitHub releases](https://github.com/norsehorse-dev/PassPonyAndroid/releases/latest).
+Both come from the same reproducible build; see `docs/REPRODUCIBLE.md` and
+`docs/RELEASE_CHECKLIST.md` for the release process. Android 8.0 or later,
+arm64-v8a and x86_64.
 
 - Browse, search, and edit entries in pass (OpenPGP) and passage (age)
   stores. Each format keeps its own store; switching never touches the
@@ -35,9 +39,14 @@ listings, the signed release flow) is the packet in progress now -- see
   PassPonyCore's `docs/BACKUP.md`), a plain identities export, and
   restore. A banner says so until the generated age identity is backed up.
 - Ephemeral, local-only clipboard that clears after 45 seconds.
-- Git sync: clone, publish, push, and per-entry conflict resolution.
+- Git sync over HTTPS or SSH: clone, publish, push, and per-entry
+  conflict resolution. The SSH key is made in the app or imported.
   Commit messages match the pass CLI format, so a store stays
   interoperable with desktop pass and passage users.
+- Passkeys on Android 14 and later: save and use them in your browser.
+  They live in your entries and sync like everything else.
+- Phones sharing a passage store add their own key when they sync, and
+  you approve each new one before entries are re-encrypted to it.
 - System Autofill service. Only entry names are indexed; nothing decrypts
   until you fill.
 - Biometric unlock with a 5-minute grace window shared with autofill.
@@ -125,10 +134,8 @@ thing on QuorumPony's own pure-JVM core module.)
 passage stores run on a Rust age engine (the `age-engine` feature of
 PassPonyCore's pass-ffi), reached through the generated FFI bindings. pass
 stores run on PGPonyCore-Kotlin over BouncyCastle: Cv25519 v4, X25519/Ed25519
-v6, and RSA keys, all in software. Unlike PassPony iOS (which has no
-software RSA path and waits on a smartcard implementation), Android opens
-RSA-keyed pass stores today, since BouncyCastle provides RSA natively as a
-deliberate capability difference, not an oversight. The recipient-resolution
+v6, and RSA keys, all in software. PassPony iOS has had software RSA
+since 2.1.0, so both phones open RSA-keyed pass stores. The recipient-resolution
 rule (fingerprint or 16-hex key ID, `.gpg-id` per entry) is the same rule
 PassPony iOS uses. A passphrase-protected pass secret key is cached for 5
 minutes after entry, sealed with an Android Keystore AES-GCM key
