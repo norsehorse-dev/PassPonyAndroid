@@ -582,6 +582,8 @@
     <string name="sync_remote_label">Удалённый репозиторий</string>
     <string name="settings_other_apps_scrubpony">Удаление метаданных из фотографий</string>
     <string name="settings_other_apps_tappony">Вебхуки по NFC-меткам</string>
+    <string name="settings_other_apps_hashpony">Проверка и сравнение хешей файлов</string>
+    <string name="settings_other_apps_stegpony">Скрытие сообщений в фотографиях и тексте</string>
     <string name="error_mixed_recipients">В этом хранилище используются постквантовые ключи, но в нём также указан ключ устройства со старой версией PassPony, поэтому сохранить в него ничего нельзя. Выполните синхронизацию и уберите этот ключ или обновите PassPony на другом устройстве.</string>
     <string name="settings_age_key_copied">Открытый ключ скопирован.</string>
     <string name="store_keys_label">Ключи хранилища</string>

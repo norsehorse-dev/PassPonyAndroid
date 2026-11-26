@@ -525,6 +525,8 @@
     <string name="sync_remote_label">远程</string>
     <string name="settings_other_apps_scrubpony">清除照片中的元数据</string>
     <string name="settings_other_apps_tappony">通过 NFC 标签触发 Webhook</string>
+    <string name="settings_other_apps_hashpony">校验和比较文件哈希</string>
+    <string name="settings_other_apps_stegpony">在照片和文字中隐藏信息</string>
     <string name="error_mixed_recipients">此密码库使用后量子密钥，但其中还列有一台运行旧版 PassPony 的设备的密钥，因此无法向其中保存任何内容。请先同步，然后移除该密钥，或在另一台设备上更新 PassPony。</string>
     <string name="settings_age_key_copied">公钥已复制。</string>
     <string name="store_keys_label">密码库密钥</string>

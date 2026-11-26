@@ -544,6 +544,8 @@ Vous pouvez le gérer à tout moment dans les Réglages iOS, sous Remplissage au
     <string name="sync_remote_label">Distant</string>
     <string name="settings_other_apps_scrubpony">Supprimer les métadonnées des photos</string>
     <string name="settings_other_apps_tappony">Webhooks depuis des étiquettes NFC</string>
+    <string name="settings_other_apps_hashpony">Vérifier et comparer les empreintes de fichiers</string>
+    <string name="settings_other_apps_stegpony">Cacher des messages dans des photos et du texte</string>
     <string name="error_mixed_recipients">Ce coffre utilise des clés post-quantiques, mais il contient aussi la clé d\'un appareil équipé d\'une version plus ancienne de PassPony. Rien ne peut donc y être enregistré. Synchronisez, puis retirez cette clé, ou mettez PassPony à jour sur l\'autre appareil.</string>
     <string name="settings_age_key_copied">Clé publique copiée.</string>
     <string name="store_keys_label">Clés du coffre</string>

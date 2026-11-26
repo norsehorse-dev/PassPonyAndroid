@@ -544,6 +544,8 @@ Puedes gestionarlo en cualquier momento en los Ajustes de iOS, en Autorrelleno y
     <string name="sync_remote_label">Remoto</string>
     <string name="settings_other_apps_scrubpony">Eliminar metadatos de las fotos</string>
     <string name="settings_other_apps_tappony">Webhooks desde etiquetas NFC</string>
+    <string name="settings_other_apps_hashpony">Comprobar y comparar hashes de archivos</string>
+    <string name="settings_other_apps_stegpony">Ocultar mensajes en fotos y texto</string>
     <string name="error_mixed_recipients">Este almacén usa claves poscuánticas, pero también incluye la clave de un dispositivo con una versión anterior de PassPony, así que no se puede guardar nada en él. Sincroniza y luego quita esa clave, o actualiza PassPony en el otro dispositivo.</string>
     <string name="settings_age_key_copied">Clave pública copiada.</string>
     <string name="store_keys_label">Claves del almacén</string>

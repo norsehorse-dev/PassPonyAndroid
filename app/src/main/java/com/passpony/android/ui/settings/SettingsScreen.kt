@@ -628,6 +628,8 @@ private val OTHER_APPS = listOf(
     OtherApp("VaultPony", R.string.settings_other_apps_vaultpony, "https://vaultpony.app"),
     OtherApp("ScrubPony", R.string.settings_other_apps_scrubpony, "https://scrubpony.app"),
     OtherApp("TapPony", R.string.settings_other_apps_tappony, "https://tappony.app"),
+    OtherApp("HashPony", R.string.settings_other_apps_hashpony, "https://hashpony.app"),
+    OtherApp("StegPony", R.string.settings_other_apps_stegpony, "https://stegpony.app"),
 )
 
 @Composable

@@ -544,6 +544,8 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
     <string name="sync_remote_label">Remote</string>
     <string name="settings_other_apps_scrubpony">Metadaten aus Fotos entfernen</string>
     <string name="settings_other_apps_tappony">Webhooks über NFC-Tags</string>
+    <string name="settings_other_apps_hashpony">Datei-Hashes prüfen und vergleichen</string>
+    <string name="settings_other_apps_stegpony">Nachrichten in Fotos und Text verstecken</string>
     <string name="error_mixed_recipients">Dieser Speicher verwendet Post-Quanten-Schlüssel, enthält aber auch den Schlüssel eines Geräts mit einer älteren PassPony-Version. Deshalb kann nichts darin gesichert werden. Synchronisiere und entferne dann diesen Schlüssel, oder aktualisiere PassPony auf dem anderen Gerät.</string>
     <string name="settings_age_key_copied">Öffentlicher Schlüssel kopiert.</string>
     <string name="store_keys_label">Schlüssel des Speichers</string>

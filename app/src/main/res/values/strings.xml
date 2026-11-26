@@ -124,6 +124,8 @@
     <string name="settings_other_apps_vaultpony">VeraCrypt-compatible encrypted vaults on your device</string>
     <string name="settings_other_apps_scrubpony">Strip metadata from photos</string>
     <string name="settings_other_apps_tappony">Webhooks from NFC tags</string>
+    <string name="settings_other_apps_hashpony">Check and compare file hashes</string>
+    <string name="settings_other_apps_stegpony">Hide messages in photos and text</string>
     <string name="settings_diagnostics_header">Diagnostics</string>
     <string name="settings_diagnostics_store_path">Store path</string>
     <string name="settings_diagnostics_format">Format</string>

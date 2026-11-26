@@ -544,6 +544,8 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
     <string name="sync_remote_label">Remoto</string>
     <string name="settings_other_apps_scrubpony">Remoção de metadados de fotos</string>
     <string name="settings_other_apps_tappony">Webhooks a partir de tags NFC</string>
+    <string name="settings_other_apps_hashpony">Verificar e comparar hashes de arquivos</string>
+    <string name="settings_other_apps_stegpony">Ocultar mensagens em fotos e texto</string>
     <string name="error_mixed_recipients">Este cofre usa chaves pós-quânticas, mas também lista a chave de um dispositivo com uma versão mais antiga do PassPony, então nada pode ser salvo nele. Sincronize e depois remova essa chave, ou atualize o PassPony no outro dispositivo.</string>
     <string name="settings_age_key_copied">Chave pública copiada.</string>
     <string name="store_keys_label">Chaves do cofre</string>
