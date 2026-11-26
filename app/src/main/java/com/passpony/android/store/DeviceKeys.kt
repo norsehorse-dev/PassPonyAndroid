@@ -195,6 +195,63 @@ object DeviceKeys {
     }
 
     /**
+     * Folders with their own `.age-recipients` that lists a classic key.
+     * Entries under one are encrypted to that file, not the root one, so
+     * moving the store would leave them classic. The move is refused
+     * while any exist; the person edits or removes those files first.
+     */
+    fun classicFolders(context: Context): List<String> {
+        val root = StorePaths.storeRoot(context, StoreFormat.PASSAGE)
+        return root.walkTopDown()
+            .onEnter { it.name != ".git" }
+            .filter { it.isFile && it.name == RECIPIENTS_FILE && it.parentFile != root }
+            .filter { file ->
+                val type = runCatching { recipientsKeyType(file.readText(Charsets.UTF_8)) }.getOrNull()
+                type == StoreKeyType.CLASSIC || type == StoreKeyType.MIXED
+            }
+            .mapNotNull { it.parentFile?.relativeTo(root)?.path }
+            .sorted()
+            .toList()
+    }
+
+    /**
+     * 3.0: move a classic passage store to post-quantum keys. The root
+     * `.age-recipients` becomes this device's post-quantum key alone,
+     * every entry this device can read is saved again to it, and both go
+     * into one commit. Other devices are dropped from the file on
+     * purpose: each lists its own post-quantum key at its next sync and
+     * is asked about here like any new device.
+     *
+     * Safe to run again. A store whose file is already post-quantum
+     * keeps its file, so a second run only saves the entries again; that
+     * is how an interrupted move, or entries another device saved in
+     * between, get finished. History is not rewritten.
+     *
+     * The caller makes sure this device has a post-quantum identity, that
+     * its engine was loaded after that identity was made, and that
+     * [classicFolders] is empty.
+     */
+    fun moveToPostQuantum(
+        context: Context,
+        store: PassStoreInterface,
+        engine: CryptoBackend,
+        git: GitSyncInterface?,
+    ): ReencryptReport {
+        val own = AgeIdentityStore.recipients(context, postQuantum = true)
+        check(own.isNotEmpty()) { "no post-quantum identity" }
+        val format = StoreFormat.PASSAGE
+        val type = listedType(store)
+        if (type == StoreKeyType.CLASSIC || type == StoreKeyType.EMPTY) {
+            store.setRootRecipients(recipientsAdd("", own).text)
+        }
+        val report = store.reencryptReadable("", engine)
+        val files = listOf(RECIPIENTS_FILE) + report.rewritten.map { StorePaths.entryFileName(it, format) }
+        runCatching { git?.commitPaths(files, commitMessageReencrypt("")) }
+        markSeen(context, format, own)
+        return report
+    }
+
+    /**
      * The person recognized [key]: re-encrypt every entry this device can
      * read to the current recipients, which include it, and commit.
      * Entries this device cannot read are left for a device that can.

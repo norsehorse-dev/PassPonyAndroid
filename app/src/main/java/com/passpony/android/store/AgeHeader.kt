@@ -40,14 +40,32 @@ object AgeHeader {
             .onEnter { it.name != ".git" }
             .firstOrNull { it.isFile && it.name.endsWith(".age") }
             ?: return null
-        val head = runCatching {
-            entry.inputStream().use { input ->
-                val buffer = ByteArray(MAX_HEADER)
-                val read = input.read(buffer)
-                if (read <= 0) ByteArray(0) else buffer.copyOf(read)
-            }
-        }.getOrNull() ?: return null
+        val head = head(entry) ?: return null
         if (stanzaTypes(head).isEmpty()) return null
         return isPostQuantum(head)
     }
+
+    /**
+     * How many `.age` entries under [root] have no post-quantum stanza.
+     * In a post-quantum store these are entries a move to post-quantum
+     * keys has not reached: it was interrupted, this device could not
+     * read them, or another device saved them before it updated. A file
+     * that is not a binary age file is not counted.
+     */
+    fun classicEntries(root: File): Int =
+        root.walkTopDown()
+            .onEnter { it.name != ".git" }
+            .filter { it.isFile && it.name.endsWith(".age") }
+            .count { file ->
+                val head = head(file) ?: return@count false
+                stanzaTypes(head).isNotEmpty() && !isPostQuantum(head)
+            }
+
+    private fun head(file: File): ByteArray? = runCatching {
+        file.inputStream().use { input ->
+            val buffer = ByteArray(MAX_HEADER)
+            val read = input.read(buffer)
+            if (read <= 0) ByteArray(0) else buffer.copyOf(read)
+        }
+    }.getOrNull()
 }

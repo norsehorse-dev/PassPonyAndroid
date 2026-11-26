@@ -15,6 +15,7 @@ import com.passpony.android.ui.otp.AuthenticatorImportScreen
 import com.passpony.android.ui.settings.BackupScreen
 import com.passpony.android.ui.settings.DiagnosticsScreen
 import com.passpony.android.ui.settings.InitializeStoreScreen
+import com.passpony.android.ui.settings.MovePostQuantumScreen
 import com.passpony.android.ui.settings.ReencryptScreen
 import com.passpony.android.ui.settings.SettingsScreen
 import com.passpony.android.ui.settings.SshKeyScreen
@@ -34,6 +35,7 @@ object Routes {
     const val SETTINGS = "settings"
     const val INITIALIZE_STORE = "settings/initialize_store"
     const val REENCRYPT = "settings/reencrypt"
+    const val MOVE_POST_QUANTUM = "settings/post_quantum"
     const val DIAGNOSTICS = "settings/diagnostics"
     const val BACKUP = "settings/backup"
     const val SSH_KEY = "settings/ssh"
@@ -121,6 +123,7 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
                 onDone = { navController.popBackStack() },
                 onInitializeStore = { navController.navigate(Routes.INITIALIZE_STORE) },
                 onReencrypt = { navController.navigate(Routes.REENCRYPT) },
+                onMovePostQuantum = { navController.navigate(Routes.MOVE_POST_QUANTUM) },
                 onDiagnostics = { navController.navigate(Routes.DIAGNOSTICS) },
                 onBackup = { navController.navigate(Routes.BACKUP) },
                 onSshKey = { navController.navigate(Routes.SSH_KEY) },
@@ -137,6 +140,13 @@ fun PassPonyNavGraph(onLock: () -> Unit, onRestartOnboarding: () -> Unit) {
         }
         composable(Routes.REENCRYPT) {
             ReencryptScreen(appViewModel, onDone = { navController.popBackStack() })
+        }
+        composable(Routes.MOVE_POST_QUANTUM) {
+            MovePostQuantumScreen(
+                appViewModel,
+                onDone = { navController.popBackStack() },
+                onBackup = { navController.navigate(Routes.BACKUP) },
+            )
         }
         composable(Routes.DIAGNOSTICS) {
             DiagnosticsScreen(appViewModel, onDone = { navController.popBackStack() })

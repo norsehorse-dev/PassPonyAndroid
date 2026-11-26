@@ -146,6 +146,42 @@
     <string name="store_keys_post_quantum">Post-quantum</string>
     <string name="store_keys_classic">Classic</string>
     <string name="store_keys_fixed">Store keys: %1$s</string>
+    <string name="settings_move_pq">Move to post-quantum keys…</string>
+    <string name="settings_move_pq_finish">Finish moving to post-quantum keys…</string>
+    <string name="move_pq_title">Post-quantum keys</string>
+    <string name="move_pq_intro">This saves every entry again with a post-quantum key, which also protects against future quantum computers. It can\'t be undone from the app.</string>
+    <string name="move_pq_before_header">Before you start</string>
+    <string name="move_pq_warn_devices">Every other device that opens this store needs PassPony 3.0 or later.</string>
+    <string name="move_pq_warn_locked">Your other devices can\'t read the store afterwards. Each one has to sync, and then you approve its new key on this device.</string>
+    <string name="move_pq_warn_tools">On a computer, passage needs age 1.3 or later.</string>
+    <string name="move_pq_warn_history">Older copies of your entries stay in the git history, protected only by the classic key.</string>
+    <string name="move_pq_steps_header">On this device</string>
+    <string name="move_pq_step_key">This device needs a post-quantum key first. Making one doesn\'t change the store.</string>
+    <string name="move_pq_key_button">Create key</string>
+    <string name="move_pq_step_backup">Back up your keys now. The new key isn\'t in any backup you made before, and without it nothing can open the store once it has moved.</string>
+    <string name="move_pq_backup_button">Back up keys…</string>
+    <string name="move_pq_step_ready">This device has a post-quantum key and your keys are backed up.</string>
+    <string name="move_pq_blocked_folders">These folders have their own recipients file with classic keys. Change or remove those files first.</string>
+    <string name="move_pq_button">Move this store</string>
+    <string name="move_pq_working">Saving entries again. Keep PassPony open.</string>
+    <string name="move_pq_done_header">Moved</string>
+    <plurals name="move_pq_done">
+        <item quantity="one">%1$d entry now uses post-quantum keys.</item>
+        <item quantity="other">%1$d entries now use post-quantum keys.</item>
+    </plurals>
+    <plurals name="move_pq_skipped">
+        <item quantity="one">%1$d entry couldn\'t be read by this device and was left as it is.</item>
+        <item quantity="other">%1$d entries couldn\'t be read by this device and were left as they are.</item>
+    </plurals>
+    <string name="move_pq_done_history">The old copies are still in the git history. Change your most important passwords so those copies stop mattering.</string>
+    <string name="move_pq_done_devices">Sync your other devices next. Each one asks to be approved here before it can read the store.</string>
+    <plurals name="move_pq_left">
+        <item quantity="one">%1$d entry still uses classic keys.</item>
+        <item quantity="other">%1$d entries still use classic keys.</item>
+    </plurals>
+    <string name="move_pq_finish_body">This happens when the move was interrupted or another device saved an entry before it updated. Finishing saves every entry this device can read again.</string>
+    <string name="move_pq_finish_button">Finish moving</string>
+    <string name="move_pq_none_left">Every entry uses post-quantum keys.</string>
     <string name="store_keys_choice_footer">Post-quantum keys also protect against future quantum computers. Every device and tool that opens this store needs PassPony 3.0 or age 1.3 or later. Pick classic if one of yours is older. This can only be chosen while the store is empty.</string>
     <string name="key_fingerprint">Fingerprint: %1$s</string>
     <string name="settings_age_import_failed">That file has no usable age identity.</string>

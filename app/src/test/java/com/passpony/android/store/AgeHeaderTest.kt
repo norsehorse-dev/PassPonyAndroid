@@ -51,4 +51,22 @@ class AgeHeaderTest {
         File(root, "web/site.age").writeBytes(ageFile("mlkem768x25519"))
         assertEquals(true, AgeHeader.sniffStore(root))
     }
+
+    @Test
+    fun countsTheEntriesStillOnClassicKeys() {
+        val root = tmp.newFolder("moving")
+        assertEquals(0, AgeHeader.classicEntries(root))
+        File(root, ".git").mkdirs()
+        File(root, ".git/trap.age").writeBytes(ageFile("X25519"))
+        File(root, "web").mkdirs()
+        File(root, "web/old.age").writeBytes(ageFile("X25519"))
+        File(root, "web/tag.age").writeBytes(ageFile("p256tag"))
+        File(root, "web/new.age").writeBytes(ageFile("mlkem768x25519"))
+        File(root, "web/notes.age").writeText("not an age file")
+        File(root, ".age-recipients").writeText("age1pq1example\n")
+        assertEquals(2, AgeHeader.classicEntries(root))
+        File(root, "web/old.age").writeBytes(ageFile("mlkem768x25519"))
+        File(root, "web/tag.age").writeBytes(ageFile("mlkem768p256tag"))
+        assertEquals(0, AgeHeader.classicEntries(root))
+    }
 }

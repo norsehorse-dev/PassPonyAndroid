@@ -11,6 +11,7 @@ import com.passpony.android.crypto.SshKeyStore
 import com.passpony.android.passkey.PasskeyIndex
 import com.passpony.android.store.KeyBackupState
 import java.io.File
+import com.passpony.android.store.AgeHeader
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
 import com.passpony.android.store.DeviceKeys
@@ -434,6 +435,58 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             reloadAgeEngine()
         }
         refresh()
+    }
+
+    /** 3.0: true when this device has a post-quantum age identity. */
+    fun hasPostQuantumKey(): Boolean =
+        AgeIdentityStore.recipients(context, postQuantum = true).isNotEmpty()
+
+    /**
+     * 3.0: give this device a post-quantum identity ahead of moving the
+     * store, so the keys backup made before the move already holds it.
+     * The store itself is not touched.
+     */
+    suspend fun createPostQuantumKey() {
+        withContext(Dispatchers.IO) {
+            AgeIdentityStore.ensureIdentity(context, postQuantum = true)
+            reloadAgeEngine()
+        }
+    }
+
+    /** 3.0: folders that stop a move; see [DeviceKeys.classicFolders]. */
+    suspend fun postQuantumBlockers(): List<String> = withContext(Dispatchers.IO) {
+        if (format != StoreFormat.PASSAGE) emptyList()
+        else runCatching { DeviceKeys.classicFolders(context) }.getOrDefault(emptyList())
+    }
+
+    /** 3.0: entries not yet on post-quantum keys; see [AgeHeader.classicEntries]. */
+    suspend fun classicEntryCount(): Int = withContext(Dispatchers.IO) {
+        if (format != StoreFormat.PASSAGE) 0
+        else runCatching {
+            AgeHeader.classicEntries(StorePaths.storeRoot(context, StoreFormat.PASSAGE))
+        }.getOrDefault(0)
+    }
+
+    /**
+     * 3.0: move the open passage store to post-quantum keys, or finish a
+     * move; see [DeviceKeys.moveToPostQuantum]. Pushes when it can; a
+     * failed push leaves the commit for the next Push.
+     */
+    suspend fun moveToPostQuantum(): ReencryptReport {
+        val current = store ?: throw StoreException.NoStore()
+        if (format != StoreFormat.PASSAGE) throw StoreException.NoStore()
+        val report = withContext(Dispatchers.IO) {
+            reloadAgeEngine()
+            val r = DeviceKeys.moveToPostQuantum(context, current, engine, git)
+            runCatching {
+                git?.setSsh(SshKeyStore.config(context))
+                git?.push()
+            }
+            _pendingDeviceKeys.value = DeviceKeys.pending(context, format, current)
+            r
+        }
+        refresh()
+        return report
     }
 
     /** True for a pending key that can only be removed; see [DeviceKeys.outdated]. */

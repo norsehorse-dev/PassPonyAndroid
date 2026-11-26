@@ -6,9 +6,11 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.produceState
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalClipboardManager
@@ -31,7 +33,11 @@ import kotlinx.coroutines.launch
  * store.
  */
 @Composable
-fun StoreKeysChoice(appViewModel: AppViewModel, modifier: Modifier = Modifier) {
+fun StoreKeysChoice(
+    appViewModel: AppViewModel,
+    modifier: Modifier = Modifier,
+    onMove: (() -> Unit)? = null,
+) {
     val keys by appViewModel.storeKeys.collectAsState()
     val current = keys ?: return
     val scope = rememberCoroutineScope()
@@ -62,6 +68,18 @@ fun StoreKeysChoice(appViewModel: AppViewModel, modifier: Modifier = Modifier) {
                     color = MaterialTheme.colorScheme.error,
                     modifier = Modifier.padding(top = 4.dp)
                 )
+            }
+            if (onMove != null) {
+                if (!current.postQuantum) {
+                    TextButton(onClick = onMove) { Text(stringResource(R.string.settings_move_pq)) }
+                } else {
+                    // A move that did not reach every entry; see MovePostQuantumScreen.
+                    val entries by appViewModel.entries.collectAsState()
+                    val left by produceState(0, current, entries) { value = appViewModel.classicEntryCount() }
+                    if (left > 0) {
+                        TextButton(onClick = onMove) { Text(stringResource(R.string.settings_move_pq_finish)) }
+                    }
+                }
             }
         }
     }

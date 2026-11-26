@@ -86,6 +86,7 @@ fun SettingsScreen(
     onDone: () -> Unit,
     onInitializeStore: () -> Unit,
     onReencrypt: () -> Unit,
+    onMovePostQuantum: () -> Unit,
     onDiagnostics: () -> Unit,
     onBackup: () -> Unit,
     onSshKey: () -> Unit,
@@ -258,7 +259,7 @@ fun SettingsScreen(
                     onImport = launchAgeImport
                 )
                 Spacer(Modifier.height(16.dp))
-                StoreKeysChoice(appViewModel)
+                StoreKeysChoice(appViewModel, onMove = onMovePostQuantum)
             }
 
             Spacer(Modifier.height(24.dp))
