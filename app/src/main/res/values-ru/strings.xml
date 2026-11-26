@@ -582,4 +582,17 @@
     <string name="sync_remote_label">Удалённый репозиторий</string>
     <string name="settings_other_apps_scrubpony">Удаление метаданных из фотографий</string>
     <string name="settings_other_apps_tappony">Вебхуки по NFC-меткам</string>
+    <string name="error_mixed_recipients">В этом хранилище используются постквантовые ключи, но в нём также указан ключ устройства со старой версией PassPony, поэтому сохранить в него ничего нельзя. Выполните синхронизацию и уберите этот ключ или обновите PassPony на другом устройстве.</string>
+    <string name="settings_age_key_copied">Открытый ключ скопирован.</string>
+    <string name="store_keys_label">Ключи хранилища</string>
+    <string name="store_keys_post_quantum">Постквантовый</string>
+    <string name="store_keys_classic">Классический</string>
+    <string name="store_keys_fixed">Ключи хранилища: %1$s</string>
+    <string name="store_keys_choice_footer">Постквантовые ключи защищают и от будущих квантовых компьютеров. Каждому устройству и каждой программе, которые открывают это хранилище, нужен PassPony 3.0 или age 1.3 либо более новые версии. Выберите классический вариант, если что-то из ваших устройств или программ старее. Выбрать можно, только пока хранилище пустое.</string>
+    <string name="key_fingerprint">Отпечаток: %1$s</string>
+    <string name="device_key_outdated_title">Устройству нужно обновление</string>
+    <string name="device_key_outdated_body">Этот ключ добавило устройство с версией PassPony старше 3.0:</string>
+    <string name="device_key_outdated_help">В этом хранилище используются постквантовые ключи, с которыми старые версии работать не умеют, и пока этот ключ указан в списке, сохранить сюда ничего нельзя. Уберите его, затем обновите PassPony на том устройстве и синхронизируйте его снова.</string>
+    <string name="diagnostics_keys_passage_counts">классических: %1$d, постквантовых: %2$d</string>
+    <string name="backup_saved_post_quantum">Резервная копия сохранена. В ней есть постквантовый ключ, поэтому она открывается в PassPony 3.0 и новее, но не в более старых версиях.</string>
 </resources>

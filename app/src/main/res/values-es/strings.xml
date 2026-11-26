@@ -544,4 +544,17 @@ Puedes gestionarlo en cualquier momento en los Ajustes de iOS, en Autorrelleno y
     <string name="sync_remote_label">Remoto</string>
     <string name="settings_other_apps_scrubpony">Eliminar metadatos de las fotos</string>
     <string name="settings_other_apps_tappony">Webhooks desde etiquetas NFC</string>
+    <string name="error_mixed_recipients">Este almacén usa claves poscuánticas, pero también incluye la clave de un dispositivo con una versión anterior de PassPony, así que no se puede guardar nada en él. Sincroniza y luego quita esa clave, o actualiza PassPony en el otro dispositivo.</string>
+    <string name="settings_age_key_copied">Clave pública copiada.</string>
+    <string name="store_keys_label">Claves del almacén</string>
+    <string name="store_keys_post_quantum">Poscuántico</string>
+    <string name="store_keys_classic">Clásico</string>
+    <string name="store_keys_fixed">Claves del almacén: %1$s</string>
+    <string name="store_keys_choice_footer">Las claves poscuánticas también protegen frente a futuros ordenadores cuánticos. Todos los dispositivos y herramientas que abran este almacén necesitan PassPony 3.0 o age 1.3, o versiones posteriores. Elige el tipo clásico si alguno de los tuyos es más antiguo. Solo se puede elegir mientras el almacén está vacío.</string>
+    <string name="key_fingerprint">Huella: %1$s</string>
+    <string name="device_key_outdated_title">Un dispositivo necesita actualizarse</string>
+    <string name="device_key_outdated_body">Esta clave la añadió un dispositivo con una versión de PassPony anterior a la 3.0:</string>
+    <string name="device_key_outdated_help">Este almacén usa claves poscuánticas, que las versiones anteriores no pueden usar, y no se puede guardar nada aquí mientras esta clave figure en la lista. Quítala, luego actualiza PassPony en ese dispositivo y vuelve a sincronizarlo.</string>
+    <string name="diagnostics_keys_passage_counts">%1$d clásicas, %2$d poscuánticas</string>
+    <string name="backup_saved_post_quantum">Copia de seguridad guardada. Contiene una clave poscuántica, así que se abre con PassPony 3.0 o posterior, no con versiones anteriores.</string>
 </resources>

@@ -525,4 +525,17 @@
     <string name="sync_remote_label">远程</string>
     <string name="settings_other_apps_scrubpony">清除照片中的元数据</string>
     <string name="settings_other_apps_tappony">通过 NFC 标签触发 Webhook</string>
+    <string name="error_mixed_recipients">此密码库使用后量子密钥，但其中还列有一台运行旧版 PassPony 的设备的密钥，因此无法向其中保存任何内容。请先同步，然后移除该密钥，或在另一台设备上更新 PassPony。</string>
+    <string name="settings_age_key_copied">公钥已复制。</string>
+    <string name="store_keys_label">密码库密钥</string>
+    <string name="store_keys_post_quantum">后量子</string>
+    <string name="store_keys_classic">经典</string>
+    <string name="store_keys_fixed">密码库密钥：%1$s</string>
+    <string name="store_keys_choice_footer">后量子密钥还能抵御未来的量子计算机。打开此密码库的每台设备和每个工具都需要 PassPony 3.0 或 age 1.3 及以上版本。如果你有较旧的设备或工具，请选择“经典”。只有在密码库为空时才能选择。</string>
+    <string name="key_fingerprint">指纹：%1$s</string>
+    <string name="device_key_outdated_title">有设备需要更新</string>
+    <string name="device_key_outdated_body">此密钥由一台运行 3.0 之前版本 PassPony 的设备添加：</string>
+    <string name="device_key_outdated_help">此密码库使用后量子密钥，旧版本无法使用这种密钥；只要此密钥仍在列表中，就无法在这里保存任何内容。请将其移除，然后在那台设备上更新 PassPony 并重新同步。</string>
+    <string name="diagnostics_keys_passage_counts">经典 %1$d 个，后量子 %2$d 个</string>
+    <string name="backup_saved_post_quantum">备份已保存。其中包含后量子密钥，因此只能在 PassPony 3.0 或更高版本中打开，旧版本无法打开。</string>
 </resources>

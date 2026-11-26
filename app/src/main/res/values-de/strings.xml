@@ -544,4 +544,17 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
     <string name="sync_remote_label">Remote</string>
     <string name="settings_other_apps_scrubpony">Metadaten aus Fotos entfernen</string>
     <string name="settings_other_apps_tappony">Webhooks über NFC-Tags</string>
+    <string name="error_mixed_recipients">Dieser Speicher verwendet Post-Quanten-Schlüssel, enthält aber auch den Schlüssel eines Geräts mit einer älteren PassPony-Version. Deshalb kann nichts darin gesichert werden. Synchronisiere und entferne dann diesen Schlüssel, oder aktualisiere PassPony auf dem anderen Gerät.</string>
+    <string name="settings_age_key_copied">Öffentlicher Schlüssel kopiert.</string>
+    <string name="store_keys_label">Schlüssel des Speichers</string>
+    <string name="store_keys_post_quantum">Post-Quanten</string>
+    <string name="store_keys_classic">Klassisch</string>
+    <string name="store_keys_fixed">Schlüssel des Speichers: %1$s</string>
+    <string name="store_keys_choice_footer">Post-Quanten-Schlüssel schützen auch vor künftigen Quantencomputern. Jedes Gerät und jedes Programm, das diesen Speicher öffnet, braucht PassPony 3.0 oder age 1.3 oder neuer. Wähle „Klassisch“, wenn eines davon älter ist. Das lässt sich nur wählen, solange der Speicher leer ist.</string>
+    <string name="key_fingerprint">Fingerabdruck: %1$s</string>
+    <string name="device_key_outdated_title">Ein Gerät braucht ein Update</string>
+    <string name="device_key_outdated_body">Dieser Schlüssel wurde von einem Gerät mit einer PassPony-Version vor 3.0 hinzugefügt:</string>
+    <string name="device_key_outdated_help">Dieser Speicher verwendet Post-Quanten-Schlüssel, mit denen ältere Versionen nicht umgehen können, und solange dieser Schlüssel eingetragen ist, kann hier nichts gesichert werden. Entferne ihn, aktualisiere dann PassPony auf dem Gerät und synchronisiere es erneut.</string>
+    <string name="diagnostics_keys_passage_counts">%1$d klassisch, %2$d Post-Quanten</string>
+    <string name="backup_saved_post_quantum">Backup gespeichert. Es enthält einen Post-Quanten-Schlüssel und lässt sich deshalb nur mit PassPony 3.0 oder neuer öffnen, nicht mit älteren Versionen.</string>
 </resources>

@@ -544,4 +544,17 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
     <string name="sync_remote_label">Remoto</string>
     <string name="settings_other_apps_scrubpony">Remoção de metadados de fotos</string>
     <string name="settings_other_apps_tappony">Webhooks a partir de tags NFC</string>
+    <string name="error_mixed_recipients">Este cofre usa chaves pós-quânticas, mas também lista a chave de um dispositivo com uma versão mais antiga do PassPony, então nada pode ser salvo nele. Sincronize e depois remova essa chave, ou atualize o PassPony no outro dispositivo.</string>
+    <string name="settings_age_key_copied">Chave pública copiada.</string>
+    <string name="store_keys_label">Chaves do cofre</string>
+    <string name="store_keys_post_quantum">Pós-quântico</string>
+    <string name="store_keys_classic">Clássico</string>
+    <string name="store_keys_fixed">Chaves do cofre: %1$s</string>
+    <string name="store_keys_choice_footer">As chaves pós-quânticas também protegem contra futuros computadores quânticos. Todo dispositivo e toda ferramenta que abrir este cofre precisa do PassPony 3.0 ou do age 1.3, ou de versões mais recentes. Escolha o tipo clássico se algum dos seus for mais antigo. Isso só pode ser escolhido enquanto o cofre estiver vazio.</string>
+    <string name="key_fingerprint">Impressão digital: %1$s</string>
+    <string name="device_key_outdated_title">Um dispositivo precisa ser atualizado</string>
+    <string name="device_key_outdated_body">Esta chave foi adicionada por um dispositivo com uma versão do PassPony anterior à 3.0:</string>
+    <string name="device_key_outdated_help">Este cofre usa chaves pós-quânticas, que as versões mais antigas não conseguem usar, e nada pode ser salvo aqui enquanto esta chave estiver na lista. Remova-a, depois atualize o PassPony nesse dispositivo e sincronize-o de novo.</string>
+    <string name="diagnostics_keys_passage_counts">%1$d clássicas, %2$d pós-quânticas</string>
+    <string name="backup_saved_post_quantum">Backup salvo. Ele contém uma chave pós-quântica, então abre no PassPony 3.0 ou mais recente, não em versões mais antigas.</string>
 </resources>

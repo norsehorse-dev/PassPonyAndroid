@@ -544,4 +544,17 @@ Vous pouvez le gérer à tout moment dans les Réglages iOS, sous Remplissage au
     <string name="sync_remote_label">Distant</string>
     <string name="settings_other_apps_scrubpony">Supprimer les métadonnées des photos</string>
     <string name="settings_other_apps_tappony">Webhooks depuis des étiquettes NFC</string>
+    <string name="error_mixed_recipients">Ce coffre utilise des clés post-quantiques, mais il contient aussi la clé d\'un appareil équipé d\'une version plus ancienne de PassPony. Rien ne peut donc y être enregistré. Synchronisez, puis retirez cette clé, ou mettez PassPony à jour sur l\'autre appareil.</string>
+    <string name="settings_age_key_copied">Clé publique copiée.</string>
+    <string name="store_keys_label">Clés du coffre</string>
+    <string name="store_keys_post_quantum">Post-quantique</string>
+    <string name="store_keys_classic">Classique</string>
+    <string name="store_keys_fixed">Clés du coffre : %1$s</string>
+    <string name="store_keys_choice_footer">Les clés post-quantiques protègent aussi contre les futurs ordinateurs quantiques. Chaque appareil et chaque outil qui ouvre ce coffre doit disposer de PassPony 3.0 ou d\'age 1.3, ou d\'une version ultérieure. Choisissez « Classique » si l\'un des vôtres est plus ancien. Ce choix n\'est possible que tant que le coffre est vide.</string>
+    <string name="key_fingerprint">Empreinte : %1$s</string>
+    <string name="device_key_outdated_title">Un appareil doit être mis à jour</string>
+    <string name="device_key_outdated_body">Cette clé a été ajoutée par un appareil équipé d\'une version de PassPony antérieure à la 3.0 :</string>
+    <string name="device_key_outdated_help">Ce coffre utilise des clés post-quantiques, que les versions plus anciennes ne peuvent pas utiliser, et rien ne peut y être enregistré tant que cette clé figure dans la liste. Retirez-la, puis mettez PassPony à jour sur cet appareil et synchronisez-le de nouveau.</string>
+    <string name="diagnostics_keys_passage_counts">%1$d classiques, %2$d post-quantiques</string>
+    <string name="backup_saved_post_quantum">Sauvegarde enregistrée. Elle contient une clé post-quantique et s\'ouvre donc avec PassPony 3.0 ou une version ultérieure, pas avec les versions plus anciennes.</string>
 </resources>
