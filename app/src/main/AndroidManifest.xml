@@ -46,11 +46,16 @@
           API 26-32 compat shim still forces a real recreate regardless of
           this attribute, since that path isn't a real Configuration
           change at all.
+
+          screenLayout (same fix as PGPony Android 4.8.0): the first
+          switch away from the system language after a cold start also
+          reports a screenLayout change, and without it listed here that
+          one switch still recreated the activity with a black flash.
         -->
         <activity
             android:name=".MainActivity"
             android:exported="true"
-            android:configChanges="locale|layoutDirection"
+            android:configChanges="locale|layoutDirection|screenLayout"
             android:theme="@style/Theme.PassPony">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />
