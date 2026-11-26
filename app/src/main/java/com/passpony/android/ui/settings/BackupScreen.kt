@@ -110,7 +110,14 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 }
                 appViewModel.markKeysBackedUp()
                 step = BackupStep.Idle
-                context.getString(R.string.backup_saved)
+                // 3.0: a backup holding a post-quantum identity is format
+                // version 2, which older versions refuse. Say so here, so
+                // nobody finds out while restoring on an old install.
+                if (AgeIdentityStore.hasPostQuantum(context)) {
+                    context.getString(R.string.backup_saved_post_quantum)
+                } else {
+                    context.getString(R.string.backup_saved)
+                }
             } catch (e: Exception) {
                 context.getString(R.string.backup_save_failed, e.ponyMessage(context))
             } finally {

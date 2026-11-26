@@ -60,6 +60,17 @@ object AgeIdentityStore {
         return if (postQuantum) ageIdentitiesPqRecipients(text) else ageIdentitiesRecipients(text)
     }
 
+    /**
+     * True when the identities file holds a post-quantum identity, by
+     * the same prefix rule the core uses to pick the backup format
+     * version: a backup of such a file is version 2 and only opens in
+     * PassPony 3.0 or later.
+     */
+    fun hasPostQuantum(context: Context): Boolean {
+        val text = exportText(context) ?: return false
+        return identitiesDescribe(text).any { it.postQuantum }
+    }
+
     /** One of this device's public keys, for display. */
     data class PublicKey(val key: String, val postQuantum: Boolean)
 

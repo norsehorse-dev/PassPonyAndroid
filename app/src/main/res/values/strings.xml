@@ -500,6 +500,7 @@ You can manage this anytime in iOS Settings under AutoFill &amp; Passwords.</str
     <string name="backup_show_code_again">Show the code again</string>
     <string name="backup_choose_location">Choose where to save the backup.</string>
     <string name="backup_saved">Backup saved.</string>
+    <string name="backup_saved_post_quantum">Backup saved. It holds a post-quantum key, so it opens in PassPony 3.0 or later, not in older versions.</string>
     <string name="backup_save_failed">Couldn\'t save: %1$s</string>
     <string name="backup_plain_header">Plain export</string>
     <string name="backup_plain_body">Your age identities file as plain text, the same file the passage and age tools read.</string>
