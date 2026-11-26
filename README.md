@@ -34,6 +34,15 @@ arm64-v8a and x86_64.
   binary or armored); the passphrase is asked for on import and the file
   is decrypted on the device. Imported identities are added to the ones
   already here, never replacing them.
+- Post-quantum passage stores (3.0): a new store uses age's hybrid
+  ML-KEM-768 + X25519 keys (`age1pq1...`) by default, with classic keys
+  as a choice while the store is empty. A store is one kind or the other,
+  and both kinds work with PassPony for iOS and with age 1.3 or later on
+  a desktop.
+- Move an existing classic passage store to post-quantum keys from
+  Settings (3.0). Every entry is saved again in one commit. Git history
+  is not rewritten, so older copies stay protected by the classic key
+  only.
 - Keys backup: an encrypted `.passpony` backup of every key on the
   device, locked with a generated recovery code (a plain age file; see
   PassPonyCore's `docs/BACKUP.md`), a plain identities export, and
@@ -131,8 +140,9 @@ thing on QuorumPony's own pure-JVM core module.)
 
 ## Crypto
 
-passage stores run on a Rust age engine (the `age-engine` feature of
-PassPonyCore's pass-ffi), reached through the generated FFI bindings. pass
+passage stores run on a Rust age engine (the `age-pq` feature of
+PassPonyCore's pass-ffi, which adds post-quantum `age1pq1...` keys to the
+classic engine), reached through the generated FFI bindings. pass
 stores run on PGPonyCore-Kotlin over BouncyCastle: Cv25519 v4, X25519/Ed25519
 v6, and RSA keys, all in software. PassPony iOS has had software RSA
 since 2.1.0, so both phones open RSA-keyed pass stores. The recipient-resolution
@@ -166,10 +176,35 @@ re-encrypting the existing entries to it, or removing it
 (`store/DeviceKeys.kt`). Secret keys never leave a device. pass stores'
 `.gpg-id` is left alone.
 
+A store's keys are post-quantum or classic, never both, because age will
+not encrypt one file to both kinds (3.0). PassPony reads the kind from
+`.age-recipients`, or from the entries when there is no such file. A
+classic key that shows up in a post-quantum store came from a device on
+an older version: nothing can be saved while it is listed, so PassPony
+asks about it on every sync and offers only to remove it. Where two keys
+have to be compared by eye, a post-quantum key (1,959 characters) is shown
+with a fingerprint, the first 16 bytes of SHA-256 over the key as written,
+which is the same on iOS and from `sha256sum`.
+
+Moving a classic store (3.0, `ui/settings/MovePostQuantumScreen.kt`)
+waits for two things on the device: a post-quantum key, and a keys backup
+made after that key existed. It then writes `.age-recipients` with this
+device's post-quantum key alone, saves every entry it can read again, and
+commits both together. Other devices list their own post-quantum key at
+their next sync and are approved like any new device. A folder with its
+own `.age-recipients` that lists a classic key stops the move. If a move
+is interrupted, or another device saves an entry before it updates,
+Settings offers to finish, which saves the entries again. What post-quantum
+keys do not cover: the git history from before the move, entry names, and
+a pass (OpenPGP) store.
+
 ## Not yet
 
 - Smartcard decrypt (NFC and USB-C YubiKey).
 - Passkeys for native apps (browsers only in 2.0).
+- Post-quantum keys for pass (OpenPGP) stores.
+- A device key held in hardware (PassPony for iOS has one in the Secure
+  Enclave).
 - armeabi-v7a (32-bit) builds.
 
 ## License

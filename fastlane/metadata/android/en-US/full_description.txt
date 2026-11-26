@@ -10,6 +10,9 @@ Features:
 * One-time codes: scan a QR code, paste an otpauth link, or type
   the key; live codes with a countdown ring, in the same format
   pass-otp uses
+* Post-quantum keys for passage stores (age's hybrid ML-KEM-768
+  with X25519), the default for a new store, and a way to move an
+  existing store to them
 * Password generator with length and character-class options
 * An ephemeral clipboard that clears itself after 45 seconds
 * Git sync: clone, push, and per-entry conflict resolution
