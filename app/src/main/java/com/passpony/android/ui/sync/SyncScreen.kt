@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passpony.android.R
+import com.passpony.android.ui.util.KeyDisplay
 import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.AppViewModel
 import uniffi.pass_ffi.ConflictChoice
@@ -87,6 +88,7 @@ fun SyncScreen(
         if (!busy) {
             DeviceKeyDialog(
                 key = key,
+                outdated = appViewModel.isOutdatedDeviceKey(key),
                 onApprove = { syncViewModel.approveDeviceKey(appViewModel, key) },
                 onRemove = { syncViewModel.removeDeviceKey(appViewModel, key) },
                 onLater = { appViewModel.deferDeviceKeys() },
@@ -330,29 +332,44 @@ private fun ActionsSection(busy: Boolean, onSyncNow: () -> Unit, onPush: () -> U
 
 /**
  * 2.0 rc4: a key another device added to the store's `.age-recipients`.
- * Shown whole, so it can be compared with the key the other device's
- * Settings shows.
+ * A classic key is shown whole, so it can be compared with the key the
+ * other device's Settings shows. A post-quantum key is 1959 characters,
+ * so its short form and fingerprint are shown, and the other device's
+ * Settings shows the same fingerprint (3.0).
+ *
+ * [outdated]: a classic key in a post-quantum store, from a device on an
+ * older PassPony. It cannot be re-encrypted to, only removed.
  */
 @Composable
 private fun DeviceKeyDialog(
     key: String,
+    outdated: Boolean,
     onApprove: () -> Unit,
     onRemove: () -> Unit,
     onLater: () -> Unit,
 ) {
     AlertDialog(
         onDismissRequest = onLater,
-        title = { Text(stringResource(R.string.device_key_title)) },
+        title = {
+            Text(stringResource(if (outdated) R.string.device_key_outdated_title else R.string.device_key_title))
+        },
         text = {
             Column {
-                Text(stringResource(R.string.device_key_body))
+                Text(stringResource(if (outdated) R.string.device_key_outdated_body else R.string.device_key_body))
                 Text(
-                    key,
+                    KeyDisplay.short(key),
                     style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-                    modifier = Modifier.padding(vertical = 12.dp)
+                    modifier = Modifier.padding(top = 12.dp, bottom = if (KeyDisplay.isLong(key)) 4.dp else 12.dp)
                 )
+                if (KeyDisplay.isLong(key)) {
+                    Text(
+                        stringResource(R.string.key_fingerprint, KeyDisplay.fingerprint(key)),
+                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                        modifier = Modifier.padding(bottom = 12.dp)
+                    )
+                }
                 Text(
-                    stringResource(R.string.device_key_help),
+                    stringResource(if (outdated) R.string.device_key_outdated_help else R.string.device_key_help),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
@@ -364,7 +381,9 @@ private fun DeviceKeyDialog(
                     onClick = onRemove,
                     colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
                 ) { Text(stringResource(R.string.device_key_remove)) }
-                TextButton(onClick = onApprove) { Text(stringResource(R.string.reencrypt_title)) }
+                if (!outdated) {
+                    TextButton(onClick = onApprove) { Text(stringResource(R.string.reencrypt_title)) }
+                }
             }
         },
         dismissButton = {

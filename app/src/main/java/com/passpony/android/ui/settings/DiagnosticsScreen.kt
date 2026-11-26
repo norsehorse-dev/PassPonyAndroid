@@ -70,10 +70,11 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
     val context = LocalContext.current
     val entries by appViewModel.entries.collectAsState()
     val syncStatus by appViewModel.syncStatus.collectAsState()
+    val storeKeys by appViewModel.storeKeys.collectAsState()
     val format = appViewModel.format
     var copied by remember { mutableStateOf(false) }
 
-    val report = remember(entries.size, syncStatus, format) {
+    val report = remember(entries.size, syncStatus, format, storeKeys) {
         DiagnosticsReport(
             appVersion = BuildConfig.VERSION_NAME,
             versionCode = BuildConfig.VERSION_CODE,
@@ -102,7 +103,12 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             languageTag = LanguageManager.currentTag(),
             sshKey = SshKeyStore.load(context)?.algorithm,
             keys = if (format == StoreFormat.PASSAGE) {
-                DiagnosticsReport.KeyInfo.Passage(AgeIdentityStore.identitiesFile(context).exists())
+                DiagnosticsReport.KeyInfo.Passage(
+                    identitiesPresent = AgeIdentityStore.identitiesFile(context).exists(),
+                    classic = AgeIdentityStore.recipients(context, postQuantum = false).size,
+                    postQuantum = AgeIdentityStore.recipients(context, postQuantum = true).size,
+                    storePostQuantum = storeKeys?.postQuantum,
+                )
             } else {
                 DiagnosticsReport.KeyInfo.Pass(PgpKeyStore.availableKeys(context).size)
             },
@@ -161,9 +167,12 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 stringResource(R.string.diagnostics_keys),
                 when (val keys = report.keys) {
                     is DiagnosticsReport.KeyInfo.Pass -> stringResource(R.string.diagnostics_keys_pass, keys.keyFiles)
-                    is DiagnosticsReport.KeyInfo.Passage -> stringResource(
-                        if (keys.identitiesPresent) R.string.diagnostics_keys_passage_present else R.string.diagnostics_keys_passage_missing
-                    )
+                    is DiagnosticsReport.KeyInfo.Passage ->
+                        if (keys.identitiesPresent) {
+                            stringResource(R.string.diagnostics_keys_passage_counts, keys.classic, keys.postQuantum)
+                        } else {
+                            stringResource(R.string.diagnostics_keys_passage_missing)
+                        }
                 }
             )
             DiagnosticRow(

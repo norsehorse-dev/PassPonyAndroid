@@ -43,6 +43,7 @@ fun CryptoException.ponyMessage(context: Context): String = when (this) {
     is CryptoException.NoUsableKey -> context.getString(R.string.error_no_usable_key)
     is CryptoException.Cancelled -> context.getString(R.string.error_cancelled)
     is CryptoException.Unavailable -> reason
+    is CryptoException.MixedRecipients -> context.getString(R.string.error_mixed_recipients)
 }
 
 fun GitException.ponyMessage(context: Context): String = when (this) {
@@ -75,6 +76,7 @@ fun StoreException.ponyMessage(context: Context): String = when (this) {
     is StoreException.NotInStore -> context.getString(R.string.error_not_in_store)
     is StoreException.SneakyPath -> context.getString(R.string.error_invalid_path)
     is StoreException.Crypto -> context.getString(R.string.error_store_crypto, reason)
+    is StoreException.MixedRecipients -> context.getString(R.string.error_mixed_recipients)
     is StoreException.Io -> context.getString(R.string.error_store_io, reason)
 }
 

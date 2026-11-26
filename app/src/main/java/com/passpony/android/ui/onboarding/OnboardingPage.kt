@@ -54,6 +54,7 @@ import com.passpony.android.R
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.store.ponyMessage
+import com.passpony.android.ui.settings.StoreKeysChoice
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.theme.ChoiceField
 import com.passpony.android.ui.theme.ListDivider
@@ -176,16 +177,25 @@ private fun LanguageAction() {
 private fun FormatAction(appViewModel: AppViewModel) {
     val scope = rememberCoroutineScope()
     var format by remember { mutableStateOf(appViewModel.format) }
-    ChoiceField(
-        label = stringResource(R.string.xc_store_format),
-        selected = format,
-        options = listOf(StoreFormat.PASSAGE, StoreFormat.PASS),
-        optionLabel = { formatLabel(it) },
-        onSelect = { chosen ->
-            format = chosen
-            scope.launch { appViewModel.switchFormat(chosen) }
+    Column {
+        ChoiceField(
+            label = stringResource(R.string.xc_store_format),
+            selected = format,
+            options = listOf(StoreFormat.PASSAGE, StoreFormat.PASS),
+            optionLabel = { formatLabel(it) },
+            onSelect = { chosen ->
+                format = chosen
+                scope.launch { appViewModel.switchFormat(chosen) }
+            }
+        )
+        // 3.0: a new passage store is post-quantum unless the person picks
+        // classic here. Once the store has entries this only says which
+        // kind it is.
+        if (format == StoreFormat.PASSAGE) {
+            Spacer(Modifier.height(12.dp))
+            StoreKeysChoice(appViewModel)
         }
-    )
+    }
 }
 
 @Composable

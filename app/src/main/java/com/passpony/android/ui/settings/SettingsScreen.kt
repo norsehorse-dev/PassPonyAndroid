@@ -37,6 +37,7 @@ import androidx.compose.material3.TextButton
 import androidx.compose.material3.TopAppBar
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -106,7 +107,7 @@ fun SettingsScreen(
     var gpgIdLines by remember { mutableStateOf(emptyList<String>()) }
     var message by remember { mutableStateOf<String?>(null) }
     var agePresent by remember { mutableStateOf(false) }
-    var ageHints by remember { mutableStateOf(emptyList<String>()) }
+    var ageKeys by remember { mutableStateOf(emptyList<AgeIdentityStore.PublicKey>()) }
     var ageMessage by remember { mutableStateOf<String?>(null) }
 
     fun refreshKeys() {
@@ -120,16 +121,19 @@ fun SettingsScreen(
             PgpEngine.load(context)
             lockedKeys = PgpKeyStore.lockedKeyFiles
             agePresent = false
-            ageHints = emptyList()
+            ageKeys = emptyList()
         } else {
             gpgIdLines = emptyList()
             lockedKeys = emptyList()
             agePresent = AgeIdentityStore.hasIdentities(context)
-            ageHints = AgeIdentityStore.publicKeyHints(context)
+            ageKeys = AgeIdentityStore.publicKeys(context)
         }
     }
 
-    LaunchedEffect(format) { refreshKeys() }
+    // 3.0: picking the store's key kind can generate an identity, so the
+    // key list is re-read when that changes too.
+    val storeKeys by appViewModel.storeKeys.collectAsState()
+    LaunchedEffect(format, storeKeys) { refreshKeys() }
 
     val keyImportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
@@ -248,10 +252,13 @@ fun SettingsScreen(
                 Spacer(Modifier.height(24.dp))
                 AgeKeysSection(
                     present = agePresent,
-                    hints = ageHints,
+                    keys = ageKeys,
                     message = ageMessage,
+                    onCopied = { ageMessage = context.getString(R.string.settings_age_key_copied) },
                     onImport = launchAgeImport
                 )
+                Spacer(Modifier.height(16.dp))
+                StoreKeysChoice(appViewModel)
             }
 
             Spacer(Modifier.height(24.dp))
@@ -440,8 +447,9 @@ private fun OpenPgpKeysSection(
 @Composable
 private fun AgeKeysSection(
     present: Boolean,
-    hints: List<String>,
+    keys: List<AgeIdentityStore.PublicKey>,
     message: String?,
+    onCopied: () -> Unit,
     onImport: () -> Unit,
 ) {
     SectionHeader(stringResource(R.string.settings_age_keys_header))
@@ -450,14 +458,7 @@ private fun AgeKeysSection(
         style = MaterialTheme.typography.bodySmall,
         color = MaterialTheme.colorScheme.onSurfaceVariant
     )
-    for (hint in hints) {
-        Text(
-            hint,
-            style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
-            color = MaterialTheme.colorScheme.onSurfaceVariant,
-            modifier = Modifier.padding(top = 4.dp)
-        )
-    }
+    AgeKeyRows(keys = keys, onCopied = onCopied)
     TextButton(onClick = onImport) {
         Text(stringResource(R.string.settings_age_import))
     }

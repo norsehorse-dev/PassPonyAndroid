@@ -7,14 +7,17 @@ import uniffi.pass_ffi.AgeEngine
 import uniffi.pass_ffi.CryptoBackend
 import uniffi.pass_ffi.ageDecryptIdentitiesFile
 import uniffi.pass_ffi.ageGenerateIdentity
+import uniffi.pass_ffi.ageGeneratePqIdentity
+import uniffi.pass_ffi.ageIdentitiesPqRecipients
+import uniffi.pass_ffi.ageIdentitiesRecipients
 import uniffi.pass_ffi.ageIsEncryptedIdentitiesFile
 import uniffi.pass_ffi.identitiesDescribe
 import uniffi.pass_ffi.identitiesMerge
 
 /**
  * Identities live in an age identities file in this app's private files
- * dir: one AGE-SECRET-KEY-1... per line, blank lines and # comments
- * ignored. Mirrors PassPony iOS's AgeIdentityStore.swift, minus the app
+ * dir: one AGE-SECRET-KEY-1... (classic) or AGE-SECRET-KEY-PQ-1...
+ * (post-quantum, 3.0) per line, blank lines and # comments ignored. Mirrors PassPony iOS's AgeIdentityStore.swift, minus the app
  * group (Android has no equivalent) and iOS's completeFileProtection
  * (this app's private storage is already sandboxed per-UID; the
  * owner-only file mode below is the closest Android analog).
@@ -25,21 +28,62 @@ object AgeIdentityStore {
     /**
      * Loads the engine from the identities file; on first run, generates
      * one identity and persists it (owner-only permissions) so the store
-     * works out of the box. Never logs identity material, and does not
+     * works out of the box. Since 3.0 that first identity is post-quantum,
+     * which makes a fresh install's store post-quantum; an install that
+     * already has an identities file is left exactly as it was. Never logs identity material, and does not
      * keep the file text around longer than the AgeEngine construction
      * call that consumes it.
      */
     fun loadOrCreateEngine(context: Context): CryptoBackend {
         val file = identitiesFile(context)
         if (!file.exists()) {
-            val generated = ageGenerateIdentity()
-            val text = "# created by PassPony\n" +
-                "# public key: ${generated.recipientString}\n" +
-                "${generated.identityString}\n"
-            writeAtomically(file, text)
+            writeAtomically(file, newIdentityBlock(postQuantum = true))
             KeyBackupState.markChanged(context)
         }
         return AgeCryptoBackend(AgeEngine.fromIdentitiesText(file.readText(Charsets.UTF_8)))
+    }
+
+    private fun newIdentityBlock(postQuantum: Boolean): String {
+        val generated = if (postQuantum) ageGeneratePqIdentity() else ageGenerateIdentity()
+        return "# created by PassPony\n" +
+            "# public key: ${generated.recipientString}\n" +
+            "${generated.identityString}\n"
+    }
+
+    /**
+     * This device's public keys of one kind, worked out from the
+     * identities themselves (not the `# public key:` comments, which an
+     * imported file may lack). Never returns secret key material.
+     */
+    fun recipients(context: Context, postQuantum: Boolean): List<String> {
+        val text = exportText(context) ?: return emptyList()
+        return if (postQuantum) ageIdentitiesPqRecipients(text) else ageIdentitiesRecipients(text)
+    }
+
+    /** One of this device's public keys, for display. */
+    data class PublicKey(val key: String, val postQuantum: Boolean)
+
+    /** This device's public keys, classic first. Never secret material. */
+    fun publicKeys(context: Context): List<PublicKey> =
+        recipients(context, postQuantum = false).map { PublicKey(it, false) } +
+            recipients(context, postQuantum = true).map { PublicKey(it, true) }
+
+    /**
+     * Make sure the identities file holds an identity of the given kind,
+     * generating and appending one when it does not. Existing identities
+     * are never touched. Returns true when one was generated: the caller
+     * then reloads its engine, and the backup banner comes back because
+     * the last backup no longer covers every key.
+     */
+    fun ensureIdentity(context: Context, postQuantum: Boolean): Boolean {
+        if (recipients(context, postQuantum).isNotEmpty()) return false
+        val file = identitiesFile(context)
+        val existing = if (file.exists()) file.readText(Charsets.UTF_8) else ""
+        val merged = identitiesMerge(existing, newIdentityBlock(postQuantum))
+        if (merged.added == 0u) return false
+        writeAtomically(file, merged.text)
+        KeyBackupState.markChanged(context)
+        return true
     }
 
     /** True when an identities file exists in this app's storage. */

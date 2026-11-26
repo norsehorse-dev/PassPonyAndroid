@@ -35,6 +35,7 @@ import uniffi.pass_ffi.PassStore
 import uniffi.pass_ffi.ReencryptReport
 import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.StoreFormat
+import uniffi.pass_ffi.StoreKeyType
 import uniffi.pass_ffi.SyncOutcome
 import uniffi.pass_ffi.SyncStatus
 import uniffi.pass_ffi.commitMessageAdd
@@ -110,6 +111,23 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     val syncStatus: StateFlow<SyncStatus?> = _syncStatus.asStateFlow()
 
+    private val _storeKeys = MutableStateFlow<StoreKeys?>(null)
+
+    /**
+     * 3.0: what kind of age keys the open passage store uses, and whether
+     * that can still be changed. Null for a pass store or no store.
+     */
+    val storeKeys: StateFlow<StoreKeys?> = _storeKeys.asStateFlow()
+
+    /** See [storeKeys]. */
+    data class StoreKeys(
+        val postQuantum: Boolean,
+        /** A classic key sits in a post-quantum store; saving is blocked. */
+        val blocked: Boolean,
+        /** Empty store listing only this device: the kind is still a choice. */
+        val canChoose: Boolean,
+    )
+
     private val _pendingDeviceKeys = MutableStateFlow<List<String>>(emptyList())
 
     /**
@@ -176,6 +194,12 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                 seedDemoStore(opened)
             }
 
+            // 3.0: see DeviceKeys.pinPostQuantum. Best effort; a store it
+            // could not pin still opens.
+            if (format == StoreFormat.PASSAGE) {
+                runCatching { DeviceKeys.pinPostQuantum(context, opened, git) }
+            }
+
             _openError.value = null
             refresh()
             rebuildPasskeyIndex()
@@ -232,6 +256,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             // repo); that's a Sync-screen concern, not a reason to
             // surface an error here or drop the freshly-read entries.
             _syncStatus.value = runCatching { git?.status() }.getOrNull()
+            _storeKeys.value = if (format != StoreFormat.PASSAGE) null else runCatching {
+                StoreKeys(
+                    postQuantum = DeviceKeys.postQuantum(context, current),
+                    blocked = DeviceKeys.listedType(current) == StoreKeyType.MIXED,
+                    canChoose = _entries.value.isEmpty() && DeviceKeys.canChooseKind(context, current),
+                )
+            }.getOrNull()
         } catch (e: Exception) {
             _lastError.value = e.ponyMessage(context)
             // Couldn't list the store: show it as an error, not "loading".
@@ -377,9 +408,37 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
                     git?.push()
                 }
             }
+            reloadAgeEngine()
             _pendingDeviceKeys.value = DeviceKeys.pending(context, format, current)
         }
     }
+
+    /**
+     * 3.0: joining a store can generate an identity of the store's kind,
+     * so the engine is re-read from the identities file afterwards.
+     */
+    private fun reloadAgeEngine() {
+        if (format == StoreFormat.PASSAGE) engine = EngineProvider.engine(context, format)
+    }
+
+    /**
+     * 3.0: make the empty passage store post-quantum or classic. A no-op
+     * once the store has entries or lists another device's key; changing
+     * an existing store is a migration, which is its own flow.
+     */
+    suspend fun chooseStoreKeys(postQuantum: Boolean) {
+        val current = store ?: return
+        if (format != StoreFormat.PASSAGE || _storeKeys.value?.canChoose != true) return
+        withContext(Dispatchers.IO) {
+            DeviceKeys.chooseKind(context, current, git, postQuantum)
+            reloadAgeEngine()
+        }
+        refresh()
+    }
+
+    /** True for a pending key that can only be removed; see [DeviceKeys.outdated]. */
+    fun isOutdatedDeviceKey(key: String): Boolean =
+        store?.let { runCatching { DeviceKeys.outdated(it, key) }.getOrDefault(false) } ?: false
 
     /** The person recognized [key]: re-encrypt what this device can read, push. */
     suspend fun approveDeviceKey(key: String): ReencryptReport {
@@ -424,6 +483,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         withContext(Dispatchers.IO) {
             val handle = git ?: GitSync.init(StorePaths.storeRoot(context, format).absolutePath, format)
             store?.let { DeviceKeys.join(context, format, it, handle) }
+            reloadAgeEngine()
             handle.setRemote(url)
             handle.setSsh(SshKeyStore.config(context))
             handle.push()

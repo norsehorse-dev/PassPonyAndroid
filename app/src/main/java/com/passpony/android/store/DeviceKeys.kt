@@ -7,12 +7,14 @@ import uniffi.pass_ffi.GitSyncInterface
 import uniffi.pass_ffi.PassStoreInterface
 import uniffi.pass_ffi.ReencryptReport
 import uniffi.pass_ffi.StoreFormat
-import uniffi.pass_ffi.ageIdentitiesRecipients
+import uniffi.pass_ffi.StoreKeyType
 import uniffi.pass_ffi.commitMessageRecipientsAdd
 import uniffi.pass_ffi.commitMessageRecipientsRemove
 import uniffi.pass_ffi.commitMessageReencrypt
 import uniffi.pass_ffi.recipientsAdd
+import uniffi.pass_ffi.recipientIsPostQuantum
 import uniffi.pass_ffi.recipientsIn
+import uniffi.pass_ffi.recipientsKeyType
 import uniffi.pass_ffi.recipientsRemove
 
 /**
@@ -30,6 +32,13 @@ import uniffi.pass_ffi.recipientsRemove
  *   step always asks the person first ([approve] or [remove]): anyone
  *   who can push to the repo can add a key, and silently re-encrypting
  *   to it would hand them the store.
+ *
+ * 3.0: a store is post-quantum or classic, never both, because age will
+ * not encrypt one file to both kinds. [postQuantum] says which a store
+ * is, and a device only ever lists its key of that kind. A classic key
+ * in a post-quantum store comes from a device on an older PassPony;
+ * nothing can be saved while it is listed, so it is always asked about
+ * and can only be removed ([outdated]).
  *
  * Which keys this device has already been asked about is kept here, on
  * the device, per store format; never in the repo. pass (OpenPGP) stores
@@ -56,17 +65,53 @@ object DeviceKeys {
     private fun listed(store: PassStoreInterface): List<String> =
         runCatching { store.rootRecipients() }.getOrNull()?.let { recipientsIn(it) }.orEmpty()
 
-    /** This device's own `age1...` keys, from its identities file. */
+    /** This device's own public keys of both kinds, from its identities file. */
     fun ownKeys(context: Context): List<String> =
-        AgeIdentityStore.exportText(context)?.let { ageIdentitiesRecipients(it) }.orEmpty()
+        AgeIdentityStore.recipients(context, postQuantum = false) +
+            AgeIdentityStore.recipients(context, postQuantum = true)
 
     /**
-     * List this device's keys in the root `.age-recipients` and commit.
+     * What the root `.age-recipients` says about the store's keys;
+     * [StoreKeyType.EMPTY] when there is no file or it lists nothing.
+     */
+    fun listedType(store: PassStoreInterface): StoreKeyType =
+        recipientsKeyType(runCatching { store.rootRecipients() }.getOrNull() ?: "")
+
+    /**
+     * True when this passage store uses post-quantum keys. Decided, in
+     * order, by the recipients file (any post-quantum key in it makes it
+     * a post-quantum store, see [outdated]); with no file, by what the
+     * store's entries were encrypted with; and for an empty store by the
+     * keys this device has, which is what the engine would encrypt to.
+     * A store from before 3.0 always comes out classic.
+     */
+    fun postQuantum(context: Context, store: PassStoreInterface): Boolean =
+        when (listedType(store)) {
+            StoreKeyType.POST_QUANTUM, StoreKeyType.MIXED -> true
+            StoreKeyType.CLASSIC -> false
+            StoreKeyType.EMPTY ->
+                AgeHeader.sniffStore(StorePaths.storeRoot(context, StoreFormat.PASSAGE))
+                    ?: AgeIdentityStore.recipients(context, postQuantum = false).isEmpty()
+        }
+
+    /**
+     * True for a classic key listed in a post-quantum store: a device on
+     * a PassPony older than 3.0 added it. Saving fails while it is there.
+     */
+    fun outdated(store: PassStoreInterface, key: String): Boolean =
+        !recipientIsPostQuantum(key) && listed(store).any { recipientIsPostQuantum(it) }
+
+    /**
+     * List this device's keys of the store's kind in the root
+     * `.age-recipients` and commit. A device with no identity of that
+     * kind yet gets one first (the caller reloads its engine afterwards).
      * Returns true when the file changed, so the caller pushes.
      */
     fun join(context: Context, format: StoreFormat, store: PassStoreInterface, git: GitSyncInterface?): Boolean {
         if (format != StoreFormat.PASSAGE) return false
-        val own = ownKeys(context)
+        val pq = postQuantum(context, store)
+        AgeIdentityStore.ensureIdentity(context, pq)
+        val own = AgeIdentityStore.recipients(context, pq)
         if (own.isEmpty()) return false
         markSeen(context, format, own)
         val edit = recipientsAdd(store.rootRecipients() ?: "", own)
@@ -86,11 +131,67 @@ object DeviceKeys {
         markSeen(context, format, listed(store) + ownKeys(context), replace = true)
     }
 
-    /** Keys in the file this device has not been asked about yet. */
+    /**
+     * Keys in the file this device has not been asked about yet. Outdated
+     * keys come first and are asked about every time, seen or not, even
+     * this device's own: the store cannot be saved to until they are gone.
+     */
     fun pending(context: Context, format: StoreFormat, store: PassStoreInterface?): List<String> {
         if (format != StoreFormat.PASSAGE || store == null) return emptyList()
+        val all = listed(store)
+        val pq = all.any { recipientIsPostQuantum(it) }
+        val stale = if (pq) all.filterNot { recipientIsPostQuantum(it) } else emptyList()
         val known = seen(context, format) + ownKeys(context)
-        return listed(store).filterNot { it in known }
+        return stale + all.filterNot { it in known || it in stale }
+    }
+
+    /**
+     * A post-quantum store always gets a recipients file. Without one the
+     * engine encrypts to this device's classic identities as soon as it
+     * has any (after an import or a restore, say), and the store would
+     * quietly end up with entries of both kinds. Writes this device's
+     * post-quantum keys when the store is post-quantum, has no recipients
+     * listed, and the device has such a key. Never generates one, and
+     * never touches a classic store. Returns true when it wrote the file.
+     */
+    fun pinPostQuantum(context: Context, store: PassStoreInterface, git: GitSyncInterface?): Boolean {
+        if (listedType(store) != StoreKeyType.EMPTY) return false
+        if (!postQuantum(context, store)) return false
+        val own = AgeIdentityStore.recipients(context, postQuantum = true)
+        if (own.isEmpty()) return false
+        store.setRootRecipients(recipientsAdd("", own).text)
+        markSeen(context, StoreFormat.PASSAGE, own)
+        runCatching { git?.commitPaths(listOf(RECIPIENTS_FILE), commitMessageRecipientsAdd()) }
+        return true
+    }
+
+    /**
+     * True when the store's kind can still be picked: it lists no key
+     * that is not this device's own. The caller also checks that the
+     * store has no entries.
+     */
+    fun canChooseKind(context: Context, store: PassStoreInterface): Boolean {
+        val own = ownKeys(context)
+        return listed(store).all { it in own }
+    }
+
+    /**
+     * Make an empty store post-quantum or classic by writing this
+     * device's key of that kind as the only line of `.age-recipients`.
+     * Only for a store with no entries, where nothing needs re-encrypting.
+     */
+    fun chooseKind(
+        context: Context,
+        store: PassStoreInterface,
+        git: GitSyncInterface?,
+        postQuantum: Boolean,
+    ) {
+        AgeIdentityStore.ensureIdentity(context, postQuantum)
+        val own = AgeIdentityStore.recipients(context, postQuantum)
+        if (own.isEmpty()) return
+        store.setRootRecipients(recipientsAdd("", own).text)
+        markSeen(context, StoreFormat.PASSAGE, own)
+        runCatching { git?.commitPaths(listOf(RECIPIENTS_FILE), commitMessageRecipientsAdd()) }
     }
 
     /**

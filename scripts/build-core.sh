@@ -17,7 +17,7 @@ REPO="$(cd "$(dirname "${BASH_SOURCE[0]}")/.." && pwd)"
 # Kotlin already worked this way). PASSPONY_CORE still overrides it for
 # local dev against some other checkout.
 CORE="${PASSPONY_CORE:-$REPO/third_party/passponycore}"
-FEATURES="${PASS_FFI_FEATURES:-age-engine}"
+FEATURES="${PASS_FFI_FEATURES:-age-pq}"
 
 [[ -d "$CORE/crates/pass-ffi" ]] || {
   echo "PassPonyCore not found at $CORE -- if this is a fresh clone, run: git submodule update --init --recursive (or set PASSPONY_CORE to point at an existing checkout)"; exit 1; }

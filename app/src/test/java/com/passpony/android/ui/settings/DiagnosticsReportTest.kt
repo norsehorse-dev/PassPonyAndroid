@@ -86,8 +86,16 @@ class DiagnosticsReportTest {
         assertTrue(report(languageTag = "es").render().contains("Language: es"))
         assertTrue(
             report(keys = DiagnosticsReport.KeyInfo.Passage(true)).render()
-                .contains("Keys: identities file present")
+                .contains("Keys: identities file present (0 classic, 0 post-quantum)")
         )
+        val pq = report(keys = DiagnosticsReport.KeyInfo.Passage(true, 1, 2, storePostQuantum = true)).render()
+        assertTrue(pq.contains("Keys: identities file present (1 classic, 2 post-quantum)"))
+        assertTrue(pq.contains("Store keys: post-quantum"))
+        assertTrue(
+            report(keys = DiagnosticsReport.KeyInfo.Passage(true, 1, 0, storePostQuantum = false)).render()
+                .contains("Store keys: classic")
+        )
+        assertTrue(!report(keys = DiagnosticsReport.KeyInfo.Passage(true)).render().contains("Store keys"))
         assertTrue(
             report(keys = DiagnosticsReport.KeyInfo.Passage(false)).render()
                 .contains("Keys: no identities file")

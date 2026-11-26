@@ -51,8 +51,17 @@ data class DiagnosticsReport(
         /** pass: how many OpenPGP key files are imported. Never which. */
         data class Pass(val keyFiles: Int) : KeyInfo()
 
-        /** passage: whether the age identities file exists. Never its content. */
-        data class Passage(val identitiesPresent: Boolean) : KeyInfo()
+        /**
+         * passage: whether the age identities file exists, how many
+         * identities of each kind it holds, and which kind the store uses
+         * (null when no store is open). Never the file's content.
+         */
+        data class Passage(
+            val identitiesPresent: Boolean,
+            val classic: Int = 0,
+            val postQuantum: Int = 0,
+            val storePostQuantum: Boolean? = null,
+        ) : KeyInfo()
     }
 
     fun render(): String {
@@ -81,7 +90,15 @@ data class DiagnosticsReport(
         lines += "Language: " + languageTag.ifEmpty { "system" }
         lines += "Keys: " + when (keys) {
             is KeyInfo.Pass -> "${keys.keyFiles} OpenPGP key files"
-            is KeyInfo.Passage -> if (keys.identitiesPresent) "identities file present" else "no identities file"
+            is KeyInfo.Passage ->
+                if (keys.identitiesPresent) {
+                    "identities file present (${keys.classic} classic, ${keys.postQuantum} post-quantum)"
+                } else {
+                    "no identities file"
+                }
+        }
+        (keys as? KeyInfo.Passage)?.storePostQuantum?.let {
+            lines += "Store keys: " + if (it) "post-quantum" else "classic"
         }
         lines += "SSH key: " + (sshKey ?: "none")
         return lines.joinToString("\n")
