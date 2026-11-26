@@ -559,4 +559,40 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
     <string name="device_key_outdated_help">Dieser Speicher verwendet Post-Quanten-Schlüssel, mit denen ältere Versionen nicht umgehen können, und solange dieser Schlüssel eingetragen ist, kann hier nichts gesichert werden. Entferne ihn, aktualisiere dann PassPony auf dem Gerät und synchronisiere es erneut.</string>
     <string name="diagnostics_keys_passage_counts">%1$d klassisch, %2$d Post-Quanten</string>
     <string name="backup_saved_post_quantum">Backup gespeichert. Es enthält einen Post-Quanten-Schlüssel und lässt sich deshalb nur mit PassPony 3.0 oder neuer öffnen, nicht mit älteren Versionen.</string>
+    <string name="settings_move_pq">Auf Post-Quanten-Schlüssel umstellen …</string>
+    <string name="settings_move_pq_finish">Umstellung auf Post-Quanten-Schlüssel abschließen …</string>
+    <string name="move_pq_title">Post-Quanten-Schlüssel</string>
+    <string name="move_pq_intro">Dabei wird jeder Eintrag mit einem Post-Quanten-Schlüssel neu gespeichert, der auch vor künftigen Quantencomputern schützt. In der App lässt sich das nicht rückgängig machen.</string>
+    <string name="move_pq_before_header">Bevor du beginnst</string>
+    <string name="move_pq_warn_devices">Jedes andere Gerät, das diesen Speicher öffnet, braucht PassPony 3.0 oder neuer.</string>
+    <string name="move_pq_warn_locked">Deine anderen Geräte können den Speicher danach nicht mehr lesen. Jedes muss synchronisieren, und dann bestätigst du seinen neuen Schlüssel auf diesem Gerät.</string>
+    <string name="move_pq_warn_tools">Auf einem Computer braucht passage age 1.3 oder neuer.</string>
+    <string name="move_pq_warn_history">Ältere Fassungen deiner Einträge bleiben im Git-Verlauf und sind nur durch den klassischen Schlüssel geschützt.</string>
+    <string name="move_pq_steps_header">Auf diesem Gerät</string>
+    <string name="move_pq_step_key">Dieses Gerät braucht zuerst einen Post-Quanten-Schlüssel. Ihn zu erstellen ändert den Speicher nicht.</string>
+    <string name="move_pq_key_button">Schlüssel erstellen</string>
+    <string name="move_pq_step_backup">Sichere jetzt deine Schlüssel. Der neue Schlüssel ist in keinem früheren Backup enthalten, und ohne ihn lässt sich der Speicher nach der Umstellung nicht mehr öffnen.</string>
+    <string name="move_pq_backup_button">Schlüssel sichern …</string>
+    <string name="move_pq_step_ready">Dieses Gerät hat einen Post-Quanten-Schlüssel und deine Schlüssel sind gesichert.</string>
+    <string name="move_pq_blocked_folders">Diese Ordner haben eine eigene Empfängerdatei mit klassischen Schlüsseln. Ändere oder entferne diese Dateien zuerst.</string>
+    <string name="move_pq_button">Diesen Speicher umstellen</string>
+    <string name="move_pq_working">Einträge werden neu gespeichert. Lass PassPony geöffnet.</string>
+    <string name="move_pq_done_header">Umgestellt</string>
+    <string name="move_pq_done_history">Die alten Fassungen liegen weiterhin im Git-Verlauf. Ändere deine wichtigsten Passwörter, damit diese Fassungen keine Rolle mehr spielen.</string>
+    <string name="move_pq_done_devices">Synchronisiere als Nächstes deine anderen Geräte. Jedes fragt hier nach einer Bestätigung, bevor es den Speicher lesen kann.</string>
+    <string name="move_pq_finish_body">Das passiert, wenn die Umstellung unterbrochen wurde oder ein anderes Gerät einen Eintrag gespeichert hat, bevor es aktualisiert wurde. Beim Abschließen wird jeder Eintrag, den dieses Gerät lesen kann, neu gespeichert.</string>
+    <string name="move_pq_finish_button">Umstellung abschließen</string>
+    <string name="move_pq_none_left">Alle Einträge verwenden Post-Quanten-Schlüssel.</string>
+    <plurals name="move_pq_done">
+        <item quantity="one">%1$d Eintrag verwendet jetzt Post-Quanten-Schlüssel.</item>
+        <item quantity="other">%1$d Einträge verwenden jetzt Post-Quanten-Schlüssel.</item>
+    </plurals>
+    <plurals name="move_pq_skipped">
+        <item quantity="one">%1$d Eintrag konnte dieses Gerät nicht lesen. Er bleibt unverändert.</item>
+        <item quantity="other">%1$d Einträge konnte dieses Gerät nicht lesen. Sie bleiben unverändert.</item>
+    </plurals>
+    <plurals name="move_pq_left">
+        <item quantity="one">%1$d Eintrag verwendet noch klassische Schlüssel.</item>
+        <item quantity="other">%1$d Einträge verwenden noch klassische Schlüssel.</item>
+    </plurals>
 </resources>

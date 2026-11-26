@@ -559,4 +559,40 @@ Vous pouvez le gérer à tout moment dans les Réglages iOS, sous Remplissage au
     <string name="device_key_outdated_help">Ce coffre utilise des clés post-quantiques, que les versions plus anciennes ne peuvent pas utiliser, et rien ne peut y être enregistré tant que cette clé figure dans la liste. Retirez-la, puis mettez PassPony à jour sur cet appareil et synchronisez-le de nouveau.</string>
     <string name="diagnostics_keys_passage_counts">%1$d classiques, %2$d post-quantiques</string>
     <string name="backup_saved_post_quantum">Sauvegarde enregistrée. Elle contient une clé post-quantique et s\'ouvre donc avec PassPony 3.0 ou une version ultérieure, pas avec les versions plus anciennes.</string>
+    <string name="settings_move_pq">Passer aux clés post-quantiques…</string>
+    <string name="settings_move_pq_finish">Terminer le passage aux clés post-quantiques…</string>
+    <string name="move_pq_title">Clés post-quantiques</string>
+    <string name="move_pq_intro">Chaque entrée est enregistrée à nouveau avec une clé post-quantique, qui protège aussi contre les futurs ordinateurs quantiques. L\'opération ne peut pas être annulée depuis l\'app.</string>
+    <string name="move_pq_before_header">Avant de commencer</string>
+    <string name="move_pq_warn_devices">Tous les autres appareils qui ouvrent ce coffre doivent disposer de PassPony 3.0 ou d\'une version ultérieure.</string>
+    <string name="move_pq_warn_locked">Ensuite, vos autres appareils ne pourront plus lire le coffre. Chacun doit synchroniser, puis vous approuvez sa nouvelle clé sur cet appareil.</string>
+    <string name="move_pq_warn_tools">Sur un ordinateur, passage nécessite age 1.3 ou une version ultérieure.</string>
+    <string name="move_pq_warn_history">Les anciennes copies de vos entrées restent dans l\'historique git, protégées uniquement par la clé classique.</string>
+    <string name="move_pq_steps_header">Sur cet appareil</string>
+    <string name="move_pq_step_key">Cet appareil a d\'abord besoin d\'une clé post-quantique. La créer ne modifie pas le coffre.</string>
+    <string name="move_pq_key_button">Créer la clé</string>
+    <string name="move_pq_step_backup">Sauvegardez vos clés maintenant. La nouvelle clé ne figure dans aucune sauvegarde antérieure et, sans elle, rien ne pourra ouvrir le coffre une fois le passage effectué.</string>
+    <string name="move_pq_backup_button">Sauvegarder les clés…</string>
+    <string name="move_pq_step_ready">Cet appareil a une clé post-quantique et vos clés sont sauvegardées.</string>
+    <string name="move_pq_blocked_folders">Ces dossiers ont leur propre fichier de destinataires avec des clés classiques. Modifiez ou supprimez d\'abord ces fichiers.</string>
+    <string name="move_pq_button">Faire passer ce coffre</string>
+    <string name="move_pq_working">Enregistrement des entrées en cours. Gardez PassPony ouvert.</string>
+    <string name="move_pq_done_header">Passage effectué</string>
+    <string name="move_pq_done_history">Les anciennes copies sont toujours dans l\'historique git. Changez vos mots de passe les plus importants pour que ces copies n\'aient plus d\'importance.</string>
+    <string name="move_pq_done_devices">Synchronisez ensuite vos autres appareils. Chacun demandera votre approbation ici avant de pouvoir lire le coffre.</string>
+    <string name="move_pq_finish_body">Cela arrive quand le passage a été interrompu ou qu\'un autre appareil a enregistré une entrée avant d\'être mis à jour. Terminer enregistre à nouveau toutes les entrées que cet appareil peut lire.</string>
+    <string name="move_pq_finish_button">Terminer le passage</string>
+    <string name="move_pq_none_left">Toutes les entrées utilisent des clés post-quantiques.</string>
+    <plurals name="move_pq_done">
+        <item quantity="one">%1$d entrée utilise maintenant des clés post-quantiques.</item>
+        <item quantity="other">%1$d entrées utilisent maintenant des clés post-quantiques.</item>
+    </plurals>
+    <plurals name="move_pq_skipped">
+        <item quantity="one">%1$d entrée n\'a pas pu être lue par cet appareil et reste telle quelle.</item>
+        <item quantity="other">%1$d entrées n\'ont pas pu être lues par cet appareil et restent telles quelles.</item>
+    </plurals>
+    <plurals name="move_pq_left">
+        <item quantity="one">%1$d entrée utilise encore des clés classiques.</item>
+        <item quantity="other">%1$d entrées utilisent encore des clés classiques.</item>
+    </plurals>
 </resources>

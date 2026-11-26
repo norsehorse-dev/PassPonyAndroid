@@ -597,4 +597,46 @@
     <string name="device_key_outdated_help">В этом хранилище используются постквантовые ключи, с которыми старые версии работать не умеют, и пока этот ключ указан в списке, сохранить сюда ничего нельзя. Уберите его, затем обновите PassPony на том устройстве и синхронизируйте его снова.</string>
     <string name="diagnostics_keys_passage_counts">классических: %1$d, постквантовых: %2$d</string>
     <string name="backup_saved_post_quantum">Резервная копия сохранена. В ней есть постквантовый ключ, поэтому она открывается в PassPony 3.0 и новее, но не в более старых версиях.</string>
+    <string name="settings_move_pq">Перейти на постквантовые ключи…</string>
+    <string name="settings_move_pq_finish">Завершить переход на постквантовые ключи…</string>
+    <string name="move_pq_title">Постквантовые ключи</string>
+    <string name="move_pq_intro">Каждая запись будет сохранена заново с постквантовым ключом, который защищает и от будущих квантовых компьютеров. Отменить это в приложении нельзя.</string>
+    <string name="move_pq_before_header">Перед началом</string>
+    <string name="move_pq_warn_devices">Каждому другому устройству, которое открывает это хранилище, нужен PassPony 3.0 или новее.</string>
+    <string name="move_pq_warn_locked">После этого другие ваши устройства не смогут читать хранилище. Каждое должно выполнить синхронизацию, а затем вы подтверждаете его новый ключ на этом устройстве.</string>
+    <string name="move_pq_warn_tools">На компьютере для passage нужен age 1.3 или новее.</string>
+    <string name="move_pq_warn_history">Старые копии записей остаются в истории git и защищены только классическим ключом.</string>
+    <string name="move_pq_steps_header">На этом устройстве</string>
+    <string name="move_pq_step_key">Сначала этому устройству нужен постквантовый ключ. Его создание не меняет хранилище.</string>
+    <string name="move_pq_key_button">Создать ключ</string>
+    <string name="move_pq_step_backup">Создайте резервную копию ключей сейчас. Нового ключа нет ни в одной прежней копии, а без него после перехода хранилище ничем не открыть.</string>
+    <string name="move_pq_backup_button">Резервная копия ключей…</string>
+    <string name="move_pq_step_ready">На этом устройстве есть постквантовый ключ, и резервная копия ключей создана.</string>
+    <string name="move_pq_blocked_folders">В этих папках есть собственный файл получателей с классическими ключами. Сначала измените или удалите эти файлы.</string>
+    <string name="move_pq_button">Перевести это хранилище</string>
+    <string name="move_pq_working">Записи сохраняются заново. Не закрывайте PassPony.</string>
+    <string name="move_pq_done_header">Переход выполнен</string>
+    <string name="move_pq_done_history">Старые копии по-прежнему лежат в истории git. Смените самые важные пароли, чтобы эти копии перестали иметь значение.</string>
+    <string name="move_pq_done_devices">Теперь синхронизируйте другие устройства. Каждое запросит подтверждение здесь, прежде чем сможет читать хранилище.</string>
+    <string name="move_pq_finish_body">Так бывает, если переход был прерван или другое устройство сохранило запись до обновления. При завершении заново сохраняются все записи, которые это устройство может прочитать.</string>
+    <string name="move_pq_finish_button">Завершить переход</string>
+    <string name="move_pq_none_left">Все записи используют постквантовые ключи.</string>
+    <plurals name="move_pq_done">
+        <item quantity="one">%1$d запись теперь использует постквантовые ключи.</item>
+        <item quantity="few">%1$d записи теперь используют постквантовые ключи.</item>
+        <item quantity="many">%1$d записей теперь используют постквантовые ключи.</item>
+        <item quantity="other">%1$d записей теперь используют постквантовые ключи.</item>
+    </plurals>
+    <plurals name="move_pq_skipped">
+        <item quantity="one">Это устройство не смогло прочитать %1$d запись, она оставлена как есть.</item>
+        <item quantity="few">Это устройство не смогло прочитать %1$d записи, они оставлены как есть.</item>
+        <item quantity="many">Это устройство не смогло прочитать %1$d записей, они оставлены как есть.</item>
+        <item quantity="other">Это устройство не смогло прочитать %1$d записей, они оставлены как есть.</item>
+    </plurals>
+    <plurals name="move_pq_left">
+        <item quantity="one">%1$d запись всё ещё использует классические ключи.</item>
+        <item quantity="few">%1$d записи всё ещё используют классические ключи.</item>
+        <item quantity="many">%1$d записей всё ещё используют классические ключи.</item>
+        <item quantity="other">%1$d записей всё ещё используют классические ключи.</item>
+    </plurals>
 </resources>

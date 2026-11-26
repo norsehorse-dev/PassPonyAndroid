@@ -559,4 +559,40 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
     <string name="device_key_outdated_help">Este cofre usa chaves pós-quânticas, que as versões mais antigas não conseguem usar, e nada pode ser salvo aqui enquanto esta chave estiver na lista. Remova-a, depois atualize o PassPony nesse dispositivo e sincronize-o de novo.</string>
     <string name="diagnostics_keys_passage_counts">%1$d clássicas, %2$d pós-quânticas</string>
     <string name="backup_saved_post_quantum">Backup salvo. Ele contém uma chave pós-quântica, então abre no PassPony 3.0 ou mais recente, não em versões mais antigas.</string>
+    <string name="settings_move_pq">Migrar para chaves pós-quânticas…</string>
+    <string name="settings_move_pq_finish">Concluir a migração para chaves pós-quânticas…</string>
+    <string name="move_pq_title">Chaves pós-quânticas</string>
+    <string name="move_pq_intro">Isso salva todas as entradas novamente com uma chave pós-quântica, que também protege contra futuros computadores quânticos. Não dá para desfazer pelo app.</string>
+    <string name="move_pq_before_header">Antes de começar</string>
+    <string name="move_pq_warn_devices">Todos os outros dispositivos que abrem este cofre precisam do PassPony 3.0 ou mais recente.</string>
+    <string name="move_pq_warn_locked">Depois disso, seus outros dispositivos não conseguem ler o cofre. Cada um precisa sincronizar, e então você aprova a nova chave dele neste dispositivo.</string>
+    <string name="move_pq_warn_tools">No computador, o passage precisa do age 1.3 ou mais recente.</string>
+    <string name="move_pq_warn_history">As cópias antigas das suas entradas continuam no histórico do git, protegidas apenas pela chave clássica.</string>
+    <string name="move_pq_steps_header">Neste dispositivo</string>
+    <string name="move_pq_step_key">Este dispositivo precisa primeiro de uma chave pós-quântica. Criá-la não altera o cofre.</string>
+    <string name="move_pq_key_button">Criar chave</string>
+    <string name="move_pq_step_backup">Faça backup das suas chaves agora. A nova chave não está em nenhum backup anterior e, sem ela, nada consegue abrir o cofre depois da migração.</string>
+    <string name="move_pq_backup_button">Fazer backup das chaves…</string>
+    <string name="move_pq_step_ready">Este dispositivo tem uma chave pós-quântica e suas chaves têm backup.</string>
+    <string name="move_pq_blocked_folders">Estas pastas têm o próprio arquivo de destinatários com chaves clássicas. Altere ou remova esses arquivos primeiro.</string>
+    <string name="move_pq_button">Migrar este cofre</string>
+    <string name="move_pq_working">Salvando as entradas novamente. Mantenha o PassPony aberto.</string>
+    <string name="move_pq_done_header">Migrado</string>
+    <string name="move_pq_done_history">As cópias antigas continuam no histórico do git. Troque suas senhas mais importantes para que essas cópias deixem de importar.</string>
+    <string name="move_pq_done_devices">Agora sincronize seus outros dispositivos. Cada um pede aprovação aqui antes de conseguir ler o cofre.</string>
+    <string name="move_pq_finish_body">Isso acontece quando a migração foi interrompida ou quando outro dispositivo salvou uma entrada antes de ser atualizado. Concluir salva novamente todas as entradas que este dispositivo consegue ler.</string>
+    <string name="move_pq_finish_button">Concluir a migração</string>
+    <string name="move_pq_none_left">Todas as entradas usam chaves pós-quânticas.</string>
+    <plurals name="move_pq_done">
+        <item quantity="one">%1$d entrada agora usa chaves pós-quânticas.</item>
+        <item quantity="other">%1$d entradas agora usam chaves pós-quânticas.</item>
+    </plurals>
+    <plurals name="move_pq_skipped">
+        <item quantity="one">%1$d entrada não pôde ser lida por este dispositivo e ficou como estava.</item>
+        <item quantity="other">%1$d entradas não puderam ser lidas por este dispositivo e ficaram como estavam.</item>
+    </plurals>
+    <plurals name="move_pq_left">
+        <item quantity="one">%1$d entrada ainda usa chaves clássicas.</item>
+        <item quantity="other">%1$d entradas ainda usam chaves clássicas.</item>
+    </plurals>
 </resources>

@@ -540,4 +540,37 @@
     <string name="device_key_outdated_help">此密码库使用后量子密钥，旧版本无法使用这种密钥；只要此密钥仍在列表中，就无法在这里保存任何内容。请将其移除，然后在那台设备上更新 PassPony 并重新同步。</string>
     <string name="diagnostics_keys_passage_counts">经典 %1$d 个，后量子 %2$d 个</string>
     <string name="backup_saved_post_quantum">备份已保存。其中包含后量子密钥，因此只能在 PassPony 3.0 或更高版本中打开，旧版本无法打开。</string>
+    <string name="settings_move_pq">迁移到后量子密钥…</string>
+    <string name="settings_move_pq_finish">完成向后量子密钥的迁移…</string>
+    <string name="move_pq_title">后量子密钥</string>
+    <string name="move_pq_intro">此操作会用后量子密钥重新保存每个条目，后量子密钥还能抵御未来的量子计算机。无法在应用内撤销。</string>
+    <string name="move_pq_before_header">开始之前</string>
+    <string name="move_pq_warn_devices">打开此密码库的其他每台设备都需要 PassPony 3.0 或更高版本。</string>
+    <string name="move_pq_warn_locked">迁移后，你的其他设备将无法读取密码库。每台设备都需要先同步，然后由你在本设备上批准它的新密钥。</string>
+    <string name="move_pq_warn_tools">在电脑上，passage 需要 age 1.3 或更高版本。</string>
+    <string name="move_pq_warn_history">条目的旧副本仍保留在 git 历史记录中，只受经典密钥保护。</string>
+    <string name="move_pq_steps_header">在本设备上</string>
+    <string name="move_pq_step_key">本设备需要先有一个后量子密钥。创建密钥不会更改密码库。</string>
+    <string name="move_pq_key_button">创建密钥</string>
+    <string name="move_pq_step_backup">请立即备份密钥。新密钥不在你之前做的任何备份中，没有它，迁移后的密码库将无法打开。</string>
+    <string name="move_pq_backup_button">备份密钥…</string>
+    <string name="move_pq_step_ready">本设备已有后量子密钥，且密钥已备份。</string>
+    <string name="move_pq_blocked_folders">这些文件夹有自己的接收者文件，其中列有经典密钥。请先修改或删除这些文件。</string>
+    <string name="move_pq_button">迁移此密码库</string>
+    <string name="move_pq_working">正在重新保存条目。请保持 PassPony 打开。</string>
+    <string name="move_pq_done_header">已迁移</string>
+    <string name="move_pq_done_history">旧副本仍在 git 历史记录中。请更改你最重要的密码，让这些旧副本不再有用。</string>
+    <string name="move_pq_done_devices">接下来请同步你的其他设备。每台设备都会在这里请求批准，之后才能读取密码库。</string>
+    <string name="move_pq_finish_body">迁移被中断，或其他设备在更新前保存了条目时，会出现这种情况。完成迁移会重新保存本设备能读取的所有条目。</string>
+    <string name="move_pq_finish_button">完成迁移</string>
+    <string name="move_pq_none_left">所有条目均已使用后量子密钥。</string>
+    <plurals name="move_pq_done">
+        <item quantity="other">%1$d 个条目现已使用后量子密钥。</item>
+    </plurals>
+    <plurals name="move_pq_skipped">
+        <item quantity="other">本设备无法读取 %1$d 个条目，已保持原样。</item>
+    </plurals>
+    <plurals name="move_pq_left">
+        <item quantity="other">仍有 %1$d 个条目在使用经典密钥。</item>
+    </plurals>
 </resources>
