@@ -18,6 +18,8 @@ Features:
 * Git sync: clone, push, and per-entry conflict resolution
 * Or keep the store in a folder you pick and let an app like
   Syncthing sync it, with no git remote
+* Keep a pass store's OpenPGP keys in a key app, PGPony or
+  OpenKeychain, so PassPony holds no key material
 * System Autofill. Only entry names are indexed; nothing decrypts
   until you fill
 * Biometric unlock with a shared grace window
