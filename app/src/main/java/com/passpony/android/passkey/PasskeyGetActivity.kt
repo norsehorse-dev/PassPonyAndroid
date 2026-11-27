@@ -1,5 +1,7 @@
 package com.passpony.android.passkey
 
+import com.passpony.android.crypto.ProviderPrompt
+import com.passpony.android.crypto.ProviderRetry
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -35,6 +37,9 @@ import uniffi.pass_ffi.webauthnAssertionJson
  */
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 class PasskeyGetActivity : FragmentActivity() {
+    // 3.0: shows a provider app's screen and lets the sign-in run again.
+    private val providerRetry = ProviderRetry(this)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -57,13 +62,23 @@ class PasskeyGetActivity : FragmentActivity() {
 
         fun signNow() {
             lifecycleScope.launch {
-                val json = withContext(Dispatchers.IO) {
-                    runCatching {
+                // 3.0: a provider app may need its own screen first
+                // (passphrase, card tap). Show it here and sign again.
+                val attempt = withContext(Dispatchers.IO) {
+                    ProviderPrompt.capturing {
                         val passkey = PasskeyVault.find(this@PasskeyGetActivity, entryName, rpId, credentialId)
-                            ?: return@runCatching null
+                            ?: return@capturing null
                         val (authData, signature, userHandle) = PasskeyVault.sign(passkey, clientDataHash)
                         webauthnAssertionJson(passkey.credentialId, userHandle, authData, signature, null)
-                    }.getOrNull()
+                    }
+                }
+                val json = attempt.result.getOrNull()
+                val prompt = attempt.prompt
+                if (json == null && prompt != null) {
+                    providerRetry.show(prompt) { ok ->
+                        if (ok) signNow() else fail(GetCredentialCancellationException())
+                    }
+                    return@launch
                 }
                 if (json == null) {
                     fail(NoCredentialException())

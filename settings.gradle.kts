@@ -35,3 +35,8 @@ dependencyResolutionManagement {
 rootProject.name = "PassPonyAndroid"
 include(":app")
 include(":core")
+
+// 3.0: the OpenPGP provider API client, vendored as source (see its
+// README.md). A plain directory, not a submodule.
+include(":openpgp-api")
+project(":openpgp-api").projectDir = file("third_party/openpgp-api")

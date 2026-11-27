@@ -22,3 +22,10 @@
 # Callback interfaces invoked from native. Keep the package verbatim.
 -keep class uniffi.pass_ffi.** { *; }
 -keep interface uniffi.pass_ffi.** { *; }
+
+# ---- OpenPGP provider API (third_party/openpgp-api) ----
+# The parcelables and the AIDL interface cross the process boundary by
+# class name. PGPony Android 4.0.0 to 4.0.3 shipped a provider that worked
+# in debug and crashed clients in release because R8 renamed one.
+-keep class org.openintents.openpgp.** { *; }
+-keep interface org.openintents.openpgp.** { *; }

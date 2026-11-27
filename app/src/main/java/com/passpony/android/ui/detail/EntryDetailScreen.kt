@@ -50,6 +50,7 @@ import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.text.font.FontFamily
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavHostController
+import com.passpony.android.crypto.ProviderPrompt
 import com.passpony.android.R
 import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.AppViewModel
@@ -90,7 +91,10 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
     var revealed by remember(name) { mutableStateOf(false) }
     var showOverflowMenu by remember { mutableStateOf(false) }
 
-    LaunchedEffect(name) {
+    // 3.0: when a provider app's screen (passphrase, card tap) comes back
+    // OK, read the entry again without the person doing anything.
+    val providerGeneration by ProviderPrompt.generation.collectAsState()
+    LaunchedEffect(name, providerGeneration) {
         content = viewModel.readEntry(name)
         loadAttempted = true
     }

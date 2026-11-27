@@ -1,5 +1,7 @@
 package com.passpony.android.passkey
 
+import com.passpony.android.crypto.ProviderPrompt
+import com.passpony.android.crypto.ProviderRetry
 import android.app.Activity
 import android.content.Intent
 import android.os.Build
@@ -55,6 +57,9 @@ import uniffi.pass_ffi.webauthnRegistrationJson
  */
 @RequiresApi(Build.VERSION_CODES.UPSIDE_DOWN_CAKE)
 class PasskeyCreateActivity : FragmentActivity() {
+    // 3.0: shows a provider app's screen and lets the save run again.
+    private val providerRetry = ProviderRetry(this)
+
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -162,8 +167,11 @@ class PasskeyCreateActivity : FragmentActivity() {
     ) {
         fun registerNow() {
             lifecycleScope.launch {
-                val outcome = withContext(Dispatchers.IO) {
-                    runCatching {
+                // 3.0: a provider app may need its own screen first, and
+                // saving a passkey reads the entry and then writes it, so
+                // it can ask more than once. Show each and try again.
+                val attempt = withContext(Dispatchers.IO) {
+                    ProviderPrompt.capturing {
                         PasskeyVault.register(
                             context = this@PasskeyCreateActivity,
                             entryName = entryName,
@@ -173,6 +181,14 @@ class PasskeyCreateActivity : FragmentActivity() {
                             userDisplayName = options.userDisplayName,
                         )
                     }
+                }
+                val outcome = attempt.result
+                val prompt = attempt.prompt
+                if (outcome.isFailure && prompt != null) {
+                    providerRetry.show(prompt) { ok ->
+                        if (ok) registerNow() else onError(getString(R.string.error_cancelled))
+                    }
+                    return@launch
                 }
                 outcome.onSuccess { registration ->
                     val json = webauthnRegistrationJson(registration, null)

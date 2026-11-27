@@ -1,12 +1,18 @@
 package com.passpony.android
 
+import android.app.Activity
 import android.os.Bundle
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.IntentSenderRequest
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.appcompat.app.AppCompatActivity
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.material3.Surface
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -17,6 +23,7 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.lifecycle.LifecycleEventObserver
 import androidx.lifecycle.compose.LocalLifecycleOwner
 import androidx.lifecycle.viewmodel.compose.viewModel
+import com.passpony.android.crypto.ProviderPrompt
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.store.UnlockGateLogic
@@ -59,6 +66,23 @@ class MainActivity : AppCompatActivity() {
                     // still-fresh window leaves `locked` alone rather than
                     // force-unlocking, so a panic-lock triggered moments
                     // before backgrounding survives a fast switch back.
+                    // 3.0: a provider app's own screen (consent, passphrase,
+                    // card tap), parked by the provider engine. Show it,
+                    // then let the screen that was waiting run again.
+                    val providerPrompt by ProviderPrompt.pending.collectAsState()
+                    val providerPromptLauncher = rememberLauncherForActivityResult(
+                        ActivityResultContracts.StartIntentSenderForResult()
+                    ) { result ->
+                        ProviderPrompt.finished(result.resultCode == Activity.RESULT_OK, result.data)
+                    }
+                    LaunchedEffect(providerPrompt) {
+                        val pending = providerPrompt ?: return@LaunchedEffect
+                        ProviderPrompt.launched()
+                        runCatching {
+                            providerPromptLauncher.launch(IntentSenderRequest.Builder(pending.intentSender).build())
+                        }.onFailure { ProviderPrompt.finished(false, null) }
+                    }
+
                     val lifecycleOwner = LocalLifecycleOwner.current
                     DisposableEffect(lifecycleOwner) {
                         val observer = LifecycleEventObserver { _, event ->

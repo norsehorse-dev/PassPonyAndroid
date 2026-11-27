@@ -4,6 +4,12 @@ import android.content.Context
 import androidx.fragment.app.FragmentActivity
 import com.passpony.android.R
 import com.passpony.android.crypto.EngineProvider
+import com.passpony.android.crypto.ProviderPrompt
+import kotlinx.coroutines.withContext
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.Dispatchers
+import androidx.lifecycle.lifecycleScope
+import com.passpony.android.crypto.ProviderRetry
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.ui.detail.Utf8Text
@@ -62,15 +68,28 @@ object AutofillCredential {
      */
     fun resolveGated(
         activity: FragmentActivity,
+        providerRetry: ProviderRetry,
         name: String,
         onSuccess: (Credential) -> Unit,
         onFailure: () -> Unit,
     ) {
+        // 3.0: off the main thread, so a provider app that is not
+        // connected yet can be waited for, and with any provider screen
+        // (consent, passphrase, card tap) kept here to show and retry.
         fun decryptNow() {
-            try {
-                onSuccess(resolve(activity, name))
-            } catch (e: Exception) {
-                onFailure()
+            activity.lifecycleScope.launch {
+                val attempt = withContext(Dispatchers.IO) {
+                    ProviderPrompt.capturing { resolve(activity, name) }
+                }
+                val credential = attempt.result.getOrNull()
+                val prompt = attempt.prompt
+                when {
+                    credential != null -> onSuccess(credential)
+                    prompt != null -> providerRetry.show(prompt) { ok ->
+                        if (ok) decryptNow() else onFailure()
+                    }
+                    else -> onFailure()
+                }
             }
         }
         if (UnlockGate.isFresh(activity)) {

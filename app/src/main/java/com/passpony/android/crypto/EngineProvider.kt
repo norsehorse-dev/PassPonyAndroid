@@ -13,6 +13,10 @@ import uniffi.pass_ffi.StoreFormat
 object EngineProvider {
     fun engine(context: Context, format: StoreFormat): CryptoBackend = when (format) {
         StoreFormat.PASSAGE -> AgeIdentityStore.loadOrCreateEngine(context)
-        StoreFormat.PASS -> PgpEngine.load(context)
+        // 3.0: built-in key files, or a provider app that keeps the keys.
+        StoreFormat.PASS -> when (val source = PgpKeySourceStore.current(context)) {
+            is PgpKeySource.BuiltIn -> PgpEngine.load(context)
+            is PgpKeySource.Provider -> ProviderPgpEngine(context, source)
+        }
     }
 }

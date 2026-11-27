@@ -160,6 +160,8 @@ dependencies {
     implementation(project(":core"))
     // The pass (OpenPGP) engine is in :core too since 3.0 (the Rust
     // core's pgp-engine); PGPonyCore-Kotlin and BouncyCastle are gone.
+    // 3.0: the OpenPGP provider API client, for keys kept in another app.
+    implementation(project(":openpgp-api"))
 
     // -- Jetpack Compose --
     implementation(platform("androidx.compose:compose-bom:2024.12.01"))

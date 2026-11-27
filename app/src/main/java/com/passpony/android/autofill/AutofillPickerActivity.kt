@@ -1,5 +1,6 @@
 package com.passpony.android.autofill
 
+import com.passpony.android.crypto.ProviderRetry
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -57,6 +58,9 @@ import uniffi.pass_ffi.EntryRef
  * credential sheet.
  */
 class AutofillPickerActivity : FragmentActivity() {
+    // 3.0: shows a provider app's screen and lets the fill run again.
+    private val providerRetry = ProviderRetry(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -80,6 +84,7 @@ class AutofillPickerActivity : FragmentActivity() {
                     onPick = { name, onFailure ->
                         AutofillCredential.resolveGated(
                             activity = this,
+                            providerRetry = providerRetry,
                             name = name,
                             onSuccess = { credential ->
                                 val dataset = Dataset.Builder().apply {

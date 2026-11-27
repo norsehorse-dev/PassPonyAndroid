@@ -9,6 +9,7 @@ import com.passpony.android.BuildConfig
 import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
+import com.passpony.android.crypto.ProviderPrompt
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.crypto.SshKeyStore
 import com.passpony.android.passkey.PasskeyIndex
@@ -403,7 +404,10 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         val currentFormat = format
         val currentEngine = engine
         viewModelScope.launch(Dispatchers.IO) {
-            runCatching { PasskeyIndex.rebuild(context, currentFormat, current, currentEngine) }
+            // 3.0: with a provider, never pop its screens up from here.
+            runCatching {
+                ProviderPrompt.quietly { PasskeyIndex.rebuild(context, currentFormat, current, currentEngine) }
+            }
         }
     }
 

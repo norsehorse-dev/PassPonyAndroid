@@ -22,6 +22,14 @@
         android:name="android.hardware.camera.any"
         android:required="false" />
 
+    <!-- 3.0: so PassPony can see OpenPGP provider apps (PGPony,
+         OpenKeychain) on Android 11 and later. No permission. -->
+    <queries>
+        <intent>
+            <action android:name="org.openintents.openpgp.IOpenPgpService2" />
+        </intent>
+    </queries>
+
     <application
         android:name=".PassPonyApp"
         android:allowBackup="false"

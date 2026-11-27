@@ -1,5 +1,6 @@
 package com.passpony.android.autofill
 
+import com.passpony.android.crypto.ProviderRetry
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
@@ -24,6 +25,9 @@ import androidx.fragment.app.FragmentActivity
  * caller (Chrome, the target app) ever sees.
  */
 class AutofillAuthActivity : FragmentActivity() {
+    // 3.0: shows a provider app's screen and lets the fill run again.
+    private val providerRetry = ProviderRetry(this)
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
 
@@ -43,6 +47,7 @@ class AutofillAuthActivity : FragmentActivity() {
 
         AutofillCredential.resolveGated(
             activity = this,
+            providerRetry = providerRetry,
             name = entryName,
             onSuccess = { credential ->
                 val dataset = Dataset.Builder().apply {
