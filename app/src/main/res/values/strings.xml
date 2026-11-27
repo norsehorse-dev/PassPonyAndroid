@@ -97,6 +97,37 @@
     <string name="settings_format_passage" translatable="false">passage (age)</string>
     <string name="settings_format_pass" translatable="false">pass (OpenPGP)</string>
     <string name="settings_format_footer">Each format keeps its own store. Switching never touches the other store\'s data.</string>
+    <string name="key_source_header">Where the keys are kept</string>
+    <string name="key_source_builtin">This store\'s OpenPGP keys are kept in PassPony.</string>
+    <string name="key_source_use_app">Use keys from another app…</string>
+    <string name="key_source_app">This store\'s OpenPGP keys are kept in %1$s (version %2$s).</string>
+    <string name="key_source_app_missing">This store\'s OpenPGP keys are kept in %1$s, which is not installed.</string>
+    <string name="key_source_test">Test</string>
+    <string name="key_source_working">Working…</string>
+    <string name="key_source_app_changed">This store\'s OpenPGP keys are kept in %1$s, but that app is not the one you chose: it is signed by someone else now. Choose it again only if you reinstalled it yourself.</string>
+    <string name="key_source_choose_again">Choose the app again…</string>
+    <string name="key_source_get_pgpony">Get PGPony</string>
+    <string name="key_source_switched_untested">This store now uses the keys in %1$s, but the test did not work: %2$s</string>
+    <string name="key_source_delete_title">Delete the keys PassPony imported?</string>
+    <string name="key_source_delete_body">%1$s just decrypted an entry, so PassPony no longer needs its own copies of your key files. Deleting them here does not touch the keys in %1$s. Keep them if you might switch back.</string>
+    <string name="key_source_delete_confirm">Delete PassPony\'s copies</string>
+    <string name="key_source_delete_keep">Keep them</string>
+    <string name="key_source_deleted">PassPony\'s copies of the key files are deleted.</string>
+    <string name="backup_keys_in_app">This store\'s OpenPGP keys are kept in %1$s, so they are not in this backup. Back them up in %1$s.</string>
+    <string name="reencrypt_key_app_note">Your keys are in %1$s, which decrypts and encrypts each entry and may ask for your passphrase or a card tap more than once. If it asks, approve and tap Re-encrypt again. Entries already done stay readable.</string>
+    <string name="key_source_test_ok">%1$s decrypted an entry.</string>
+    <string name="key_source_test_connected">%1$s is connected. There is no entry to decrypt yet.</string>
+    <string name="key_source_change_app">Use a different app…</string>
+    <string name="key_source_use_builtin">Keep the keys in PassPony</string>
+    <string name="key_source_footer">%1$s holds the keys and does the decrypting. PassPony\'s own unlock still comes first. How long a passphrase is remembered is %1$s\'s setting, not PassPony\'s.</string>
+    <string name="key_source_choose_title">Use keys from another app</string>
+    <string name="key_source_choose_body">These apps can keep OpenPGP keys for PassPony. The app you choose will ask you to allow PassPony.</string>
+    <string name="key_source_none_installed">No app on this phone offers its OpenPGP keys to other apps. PGPony and OpenKeychain both do.</string>
+    <string name="key_source_not_installed">That app is not installed anymore.</string>
+    <string name="key_source_switched">This store now uses the keys in %1$s.</string>
+    <string name="key_source_switched_builtin">This store now uses the keys in PassPony. Import the key if it is not here yet.</string>
+    <string name="init_store_pick_in_app">Choose a key in %1$s…</string>
+    <string name="init_store_pick_another">Add another key from %1$s…</string>
     <string name="settings_pgp_keys_header">OpenPGP keys</string>
     <string name="settings_pgp_keys_empty">No keys imported. A pass store needs at least a public key matching its .gpg-id (and the secret key to decrypt).</string>
     <string name="settings_pgp_import">Import key file…</string>

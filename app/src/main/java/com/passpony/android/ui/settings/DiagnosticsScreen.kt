@@ -1,5 +1,9 @@
 package com.passpony.android.ui.settings
 
+import com.passpony.android.crypto.PgpKeySource
+import com.passpony.android.crypto.PgpKeySourceStore
+import com.passpony.android.crypto.ProviderConnection
+import org.openintents.openpgp.util.OpenPgpApi
 import android.content.ClipData
 import android.content.ClipboardManager
 import android.content.Context
@@ -116,7 +120,15 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                     storePostQuantum = storeKeys?.postQuantum,
                 )
             } else {
-                DiagnosticsReport.KeyInfo.Pass(PgpKeyStore.availableKeys(context).size)
+                when (val source = PgpKeySourceStore.current(context)) {
+                    is PgpKeySource.BuiltIn ->
+                        DiagnosticsReport.KeyInfo.Pass(PgpKeyStore.availableKeys(context).size)
+                    is PgpKeySource.Provider -> DiagnosticsReport.KeyInfo.PassProvider(
+                        packageName = source.packageName,
+                        version = ProviderConnection.version(context, source.packageName),
+                        apiVersion = OpenPgpApi.API_VERSION,
+                    )
+                }
             },
         )
     }
@@ -173,6 +185,8 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 stringResource(R.string.diagnostics_keys),
                 when (val keys = report.keys) {
                     is DiagnosticsReport.KeyInfo.Pass -> stringResource(R.string.diagnostics_keys_pass, keys.keyFiles)
+                    is DiagnosticsReport.KeyInfo.PassProvider ->
+                        "${keys.packageName} ${keys.version ?: ""}".trim()
                     is DiagnosticsReport.KeyInfo.Passage ->
                         if (keys.identitiesPresent) {
                             stringResource(R.string.diagnostics_keys_passage_counts, keys.classic, keys.postQuantum)

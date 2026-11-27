@@ -9,6 +9,9 @@ import com.passpony.android.BuildConfig
 import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
+import com.passpony.android.crypto.PgpKeySource
+import com.passpony.android.crypto.PgpKeySourceStore
+import com.passpony.android.crypto.ProviderConnection
 import com.passpony.android.crypto.ProviderPrompt
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.crypto.SshKeyStore
@@ -377,6 +380,25 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     /** The pass store's `.gpg-id` text, or null when there is none. */
     fun gpgIdText(): String? =
         if (format == StoreFormat.PASS) runCatching { store?.rootRecipients() }.getOrNull() else null
+
+    /**
+     * 3.0: change where the pass store's OpenPGP keys are kept, and open
+     * the store again with the engine for that source.
+     */
+    suspend fun useKeySource(source: PgpKeySource) {
+        ProviderConnection.disconnect(context)
+        PgpKeySourceStore.set(context, source)
+        openStore()
+    }
+
+    /** Where the pass store's OpenPGP keys are kept right now. */
+    fun keySource(): PgpKeySource = PgpKeySourceStore.current(context)
+
+    /** [readEntry] without the catch, for callers that handle the failure themselves. */
+    fun readEntryOrThrow(name: String): ByteArray {
+        val current = store ?: throw StoreException.NoStore()
+        return current.readEntry(name, engine)
+    }
 
     /**
      * Write the pass store's first `.gpg-id`, wherever that store lives.

@@ -1,5 +1,8 @@
 package com.passpony.android.ui.settings
 
+import com.passpony.android.crypto.PgpKeySource
+import com.passpony.android.crypto.PgpKeySourceStore
+import com.passpony.android.crypto.ProviderConnection
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Spacer
@@ -142,6 +145,18 @@ fun ReencryptScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            // 3.0: through a key app this is one decrypt and one encrypt
+            // per entry, and the app may ask each time.
+            (PgpKeySourceStore.current(context) as? PgpKeySource.Provider)?.let { provider ->
+                Text(
+                    stringResource(
+                        R.string.reencrypt_key_app_note,
+                        ProviderConnection.label(context, provider.packageName),
+                    ),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
 
             targets?.let { list ->
                 Spacer(Modifier.height(16.dp))

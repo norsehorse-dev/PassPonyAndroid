@@ -46,6 +46,9 @@ import androidx.compose.ui.text.input.KeyboardCapitalization
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.unit.dp
 import com.passpony.android.R
+import com.passpony.android.crypto.PgpKeySource
+import com.passpony.android.crypto.PgpKeySourceStore
+import com.passpony.android.crypto.ProviderConnection
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.crypto.SshKeyStore
@@ -94,6 +97,11 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
     val hasSshKey = remember { SshKeyStore.hasKey(context) }
     val pgpKeyCount = remember { PgpKeyStore.keyDirectory(context).listFiles()?.count { it.isFile } ?: 0 }
     val today = remember { LocalDate.now().toString() }
+    // 3.0: with a key app, the OpenPGP keys are not PassPony's to back up.
+    val keyApp = remember {
+        (PgpKeySourceStore.current(context) as? PgpKeySource.Provider)
+            ?.let { ProviderConnection.label(context, it.packageName) }
+    }
 
     val saveBackup = rememberLauncherForActivityResult(
         ActivityResultContracts.CreateDocument("application/octet-stream")
@@ -179,6 +187,14 @@ fun BackupScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
                 style = MaterialTheme.typography.bodySmall,
                 color = MaterialTheme.colorScheme.onSurfaceVariant
             )
+            keyApp?.let {
+                Spacer(Modifier.height(8.dp))
+                Text(
+                    stringResource(R.string.backup_keys_in_app, it),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+            }
             Spacer(Modifier.height(16.dp))
             Text(stringResource(R.string.backup_encrypted_header), style = MaterialTheme.typography.titleMedium)
             Text(

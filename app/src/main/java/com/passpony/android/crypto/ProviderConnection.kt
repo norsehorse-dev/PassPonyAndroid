@@ -58,6 +58,17 @@ object ProviderConnection {
             .joinToString("") { "%02x".format(it) }
     }.getOrNull()
 
+    /** The app's name as its launcher shows it, or the package name. */
+    fun label(context: Context, packageName: String): String = runCatching {
+        val pm = context.packageManager
+        pm.getApplicationLabel(pm.getApplicationInfo(packageName, 0)).toString()
+    }.getOrDefault(packageName)
+
+    /** The installed version name, or null when the app is gone. */
+    fun version(context: Context, packageName: String): String? = runCatching {
+        context.packageManager.getPackageInfo(packageName, 0).versionName
+    }.getOrNull()
+
     /** Start binding to [source] if that is not already under way. Returns at once. */
     fun connect(context: Context, source: PgpKeySource.Provider) {
         runCatching { ensureBinding(context.applicationContext, source) }

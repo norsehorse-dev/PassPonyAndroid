@@ -31,6 +31,14 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.stringResource
 import androidx.compose.ui.unit.dp
+import com.passpony.android.crypto.PgpKeySource
+import com.passpony.android.crypto.PgpKeySourceStore
+import com.passpony.android.crypto.ProviderConnection
+import com.passpony.android.crypto.ProviderOps
+import com.passpony.android.crypto.rememberProviderRunner
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.compose.ui.text.font.FontFamily
+import kotlinx.coroutines.launch
 import com.passpony.android.R
 import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.crypto.PgpKeyStore
@@ -64,6 +72,26 @@ fun InitializeStoreScreen(
 
     LaunchedEffect(Unit) { keys = PgpKeyStore.availableKeys(context) }
 
+    // 3.0: with a provider the key is picked in the provider's own
+    // picker, and its full fingerprint is what goes into .gpg-id.
+    val provider = remember { PgpKeySourceStore.current(context) as? PgpKeySource.Provider }
+    val runner = rememberProviderRunner()
+    val scope = rememberCoroutineScope()
+    var picked by remember { mutableStateOf(emptyList<String>()) }
+    var picking by remember { mutableStateOf(false) }
+
+    fun pickFromProvider(source: PgpKeySource.Provider) {
+        picking = true
+        scope.launch {
+            val outcome = runner.run { ProviderOps.pickKeyFingerprint(context, source) }
+            picking = false
+            outcome.fold(
+                { fingerprint -> if (fingerprint !in picked) picked = picked + fingerprint },
+                { error = it.ponyMessage(context) },
+            )
+        }
+    }
+
     fun toggle(file: String) {
         selected = if (selected.contains(file)) selected - file else selected + file
     }
@@ -72,7 +100,11 @@ fun InitializeStoreScreen(
         try {
             // Through the store, not a File: the pass store may be a
             // folder store (3.0).
-            val fingerprints = keys.filter { selected.contains(it.file) }.map { it.primaryFingerprint }
+            val fingerprints = if (provider != null) {
+                picked
+            } else {
+                keys.filter { selected.contains(it.file) }.map { it.primaryFingerprint }
+            }
             if (!appViewModel.initializePassStore(KeySummary.formatGpgId(fingerprints))) {
                 error = context.getString(R.string.init_store_already_exists)
                 return
@@ -91,7 +123,10 @@ fun InitializeStoreScreen(
                     TextButton(onClick = onCancel) { Text(stringResource(R.string.action_cancel)) }
                 },
                 actions = {
-                    TextButton(onClick = { initialize() }, enabled = selected.isNotEmpty()) {
+                    TextButton(
+                        onClick = { initialize() },
+                        enabled = if (provider != null) picked.isNotEmpty() else selected.isNotEmpty(),
+                    ) {
                         Text(stringResource(R.string.init_store_confirm))
                     }
                 }
@@ -108,14 +143,31 @@ fun InitializeStoreScreen(
             SectionHeader(stringResource(R.string.init_store_header))
             Spacer(Modifier.height(8.dp))
 
-            if (keys.isEmpty()) {
+            if (provider != null) {
+                val label = ProviderConnection.label(context, provider.packageName)
+                for (fingerprint in picked) {
+                    Text(
+                        fingerprint,
+                        style = MaterialTheme.typography.bodySmall.copy(fontFamily = FontFamily.Monospace),
+                    )
+                }
+                TextButton(onClick = { pickFromProvider(provider) }, enabled = !picking) {
+                    Text(
+                        if (picked.isEmpty()) {
+                            stringResource(R.string.init_store_pick_in_app, label)
+                        } else {
+                            stringResource(R.string.init_store_pick_another, label)
+                        }
+                    )
+                }
+            } else if (keys.isEmpty()) {
                 Text(
                     stringResource(R.string.init_store_empty),
                     style = MaterialTheme.typography.bodySmall,
                     color = MaterialTheme.colorScheme.onSurfaceVariant
                 )
             }
-            for (key in keys) {
+            for (key in if (provider != null) emptyList() else keys) {
                 Row(
                     modifier = Modifier
                         .fillMaxWidth()

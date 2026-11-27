@@ -1,5 +1,6 @@
 package com.passpony.android.ui.onboarding
 
+import com.passpony.android.ui.settings.rememberKeyAppChooser
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
@@ -252,6 +253,10 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
     val pickFolder = rememberFolderPicker(appViewModel) { result ->
         importMessage = result
     }
+    // 3.0: OpenPGP keys kept in another app, with nothing to import.
+    val chooseKeyApp = rememberKeyAppChooser(appViewModel) { _, result ->
+        importMessage = result
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // A clone populates entries; keep the key step reachable here
@@ -269,8 +274,13 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
             }
         }
         when (format) {
-            StoreFormat.PASS -> TextButton(onClick = { keyImportLauncher.launch(arrayOf("*/*")) }) {
-                Text(stringResource(R.string.settings_pgp_import))
+            StoreFormat.PASS -> {
+                TextButton(onClick = { keyImportLauncher.launch(arrayOf("*/*")) }) {
+                    Text(stringResource(R.string.settings_pgp_import))
+                }
+                TextButton(onClick = chooseKeyApp) {
+                    Text(stringResource(R.string.key_source_use_app))
+                }
             }
             StoreFormat.PASSAGE -> TextButton(onClick = { launchAgeImport() }) {
                 Text(stringResource(R.string.settings_age_import))

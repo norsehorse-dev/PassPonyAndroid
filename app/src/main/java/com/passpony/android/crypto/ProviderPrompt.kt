@@ -33,7 +33,12 @@ object ProviderPrompt {
 
     private val lock = Any()
     private var resume: Intent? = null
+    private var resumeAction: String? = null
     private var resumeAt = 0L
+
+    /** The action of the call that last asked for a screen. */
+    @Volatile
+    private var parkedAction: String? = null
 
     /** What a parked screen on this thread should do, when not the default. */
     private sealed class Mode {
@@ -80,8 +85,12 @@ object ProviderPrompt {
         }
     }
 
-    /** Called by the engine. False when this thread must not prompt. */
-    fun park(intent: PendingIntent): Boolean {
+    /**
+     * Called by the engine, with the action of the call that needs the
+     * screen. False when this thread must not prompt.
+     */
+    fun park(intent: PendingIntent, action: String): Boolean {
+        if (mode.get() !is Mode.Quiet) parkedAction = action
         when (val current = mode.get()) {
             is Mode.Quiet -> return false
             is Mode.Capture -> current.prompt = intent
@@ -105,6 +114,11 @@ object ProviderPrompt {
         if (!ok) return
         synchronized(lock) {
             resume = data
+            // Matched by the action of the call that asked, not by what
+            // the returned intent says: a provider may hand back an intent
+            // with no action of its own (OpenKeychain does for some
+            // screens), and it still has to be the one that is sent.
+            resumeAction = parkedAction
             resumeAt = SystemClock.elapsedRealtime()
         }
         _generation.value += 1
@@ -113,8 +127,10 @@ object ProviderPrompt {
     /** The intent to re-execute for [action], if a screen just returned one. */
     fun takeResume(action: String): Intent? = synchronized(lock) {
         val intent = resume ?: return null
-        if (intent.action != action) return null
+        if (resumeAction != action) return null
         resume = null
-        if (SystemClock.elapsedRealtime() - resumeAt > RESUME_VALID_MS) null else intent
+        if (SystemClock.elapsedRealtime() - resumeAt > RESUME_VALID_MS) return null
+        if (intent.action == null) intent.action = action
+        intent
     }
 }

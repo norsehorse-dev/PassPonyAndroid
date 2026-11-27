@@ -235,9 +235,38 @@ and can add a key to `.age-recipients`. PassPony asks before re-encrypting
 anything to a key it has not been asked about, which is what stops a key
 slipped into the file from being handed your entries.
 
+## Keys kept in another app
+
+A pass store's OpenPGP keys can stay in a key app, PGPony or OpenKeychain,
+through the OpenPGP provider API both implement. Settings, "Where the keys
+are kept", "Use keys from another app…". PassPony then holds no key
+material for that store: the key app decrypts and encrypts, shows its own
+passphrase or card screen when it needs one, and decides how long a
+passphrase is remembered. PassPony's own unlock still comes first.
+
+- The key app is pinned to the signing certificate it had when you chose
+  it. The same package name signed by someone else is refused.
+- The key app asks you once to allow PassPony.
+- A new store's `.gpg-id` is written from a key you pick in the key app,
+  as its full fingerprint.
+- Saving encrypts through the key app too, to the keys in `.gpg-id`. If
+  the key app does not hold one of them, the save fails with its message.
+- After switching, PassPony offers to delete the key files it had
+  imported, once the key app has decrypted an entry. It never deletes them
+  by itself.
+- A backup made in this mode does not contain the OpenPGP keys. Back them
+  up in the key app.
+- One store uses PassPony's keys or one key app, never a mix. passage
+  stores are not affected.
+
+The client code is the openpgp-api library from the OpenKeychain project,
+vendored as source in `third_party/openpgp-api`.
+
 ## Not yet
 
-- Smartcard decrypt (NFC and USB-C YubiKey).
+- Smartcard decrypt inside PassPony itself. Since 3.0 a pass store can
+  use keys kept in an OpenPGP key app (below), and a key app such as
+  PGPony can keep those keys on a card.
 - Passkeys for native apps (browsers only in 2.0).
 - Git on a folder store, and watching a folder for changes as they happen.
 - Conflict copies from sync tools other than Syncthing.

@@ -1,11 +1,7 @@
 package com.passpony.android.crypto
 
-import android.app.PendingIntent
 import android.content.Context
 import android.content.Intent
-import java.io.ByteArrayInputStream
-import java.io.ByteArrayOutputStream
-import org.openintents.openpgp.OpenPgpError
 import org.openintents.openpgp.util.OpenPgpApi
 import uniffi.pass_ffi.CryptoBackend
 import uniffi.pass_ffi.CryptoException
@@ -35,11 +31,8 @@ class ProviderPgpEngine(
         ProviderConnection.connect(this.context, source)
     }
 
-    override fun decrypt(ciphertext: ByteArray): ByteArray {
-        val request = ProviderPrompt.takeResume(OpenPgpApi.ACTION_DECRYPT_VERIFY)
-            ?: Intent(OpenPgpApi.ACTION_DECRYPT_VERIFY)
-        return run(request, ciphertext)
-    }
+    override fun decrypt(ciphertext: ByteArray): ByteArray =
+        ProviderOps.execute(context, source, Intent(OpenPgpApi.ACTION_DECRYPT_VERIFY), ciphertext).output
 
     override fun encrypt(plaintext: ByteArray, recipients: List<String>): ByteArray {
         // pass stores always resolve a .gpg-id; empty means uninitialized.
@@ -56,42 +49,12 @@ class ProviderPgpEngine(
             }
         }
         if (keyIds.isEmpty() && userIds.isEmpty()) throw CryptoException.NoUsableKey()
-        val request = ProviderPrompt.takeResume(OpenPgpApi.ACTION_ENCRYPT)
-            ?: Intent(OpenPgpApi.ACTION_ENCRYPT)
-        // Always this save's recipients, never ones left in a resumed intent.
-        request.removeExtra(OpenPgpApi.EXTRA_KEY_IDS)
-        request.removeExtra(OpenPgpApi.EXTRA_USER_IDS)
+        val request = Intent(OpenPgpApi.ACTION_ENCRYPT)
         if (keyIds.isNotEmpty()) request.putExtra(OpenPgpApi.EXTRA_KEY_IDS, keyIds.toLongArray())
         if (userIds.isNotEmpty()) request.putExtra(OpenPgpApi.EXTRA_USER_IDS, userIds.toTypedArray())
         // pass entries are binary .gpg
         request.putExtra(OpenPgpApi.EXTRA_REQUEST_ASCII_ARMOR, false)
-        return run(request, plaintext)
-    }
-
-    private fun run(request: Intent, input: ByteArray): ByteArray {
-        val api = ProviderConnection.api(context, source)
-        val output = ByteArrayOutputStream()
-        val result = api.executeApi(request, ByteArrayInputStream(input), output)
-        when (result.getIntExtra(OpenPgpApi.RESULT_CODE, OpenPgpApi.RESULT_CODE_ERROR)) {
-            OpenPgpApi.RESULT_CODE_SUCCESS -> return output.toByteArray()
-            OpenPgpApi.RESULT_CODE_USER_INTERACTION_REQUIRED -> {
-                @Suppress("DEPRECATION")
-                val pending: PendingIntent? = result.getParcelableExtra(OpenPgpApi.RESULT_INTENT)
-                if (pending != null && ProviderPrompt.park(pending)) {
-                    throw CryptoException.Unavailable(reason = "Your key app needs you first.")
-                }
-                // Nothing may be shown from here (background work), or the
-                // provider sent no screen: the key is not usable right now.
-                throw CryptoException.NoUsableKey()
-            }
-            else -> {
-                @Suppress("DEPRECATION")
-                val error: OpenPgpError? = result.getParcelableExtra(OpenPgpApi.RESULT_ERROR)
-                throw CryptoException.Unavailable(
-                    reason = error?.message?.takeIf { it.isNotBlank() } ?: "Your key app reported an error."
-                )
-            }
-        }
+        return ProviderOps.execute(context, source, request, plaintext).output
     }
 
     companion object {

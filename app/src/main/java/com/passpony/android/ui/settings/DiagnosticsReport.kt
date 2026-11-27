@@ -52,6 +52,13 @@ data class DiagnosticsReport(
         data class Pass(val keyFiles: Int) : KeyInfo()
 
         /**
+         * pass, with the keys kept in another app (3.0): its package, its
+         * version (null when it is not installed) and the provider API
+         * version PassPony speaks. Never a key ID or a fingerprint.
+         */
+        data class PassProvider(val packageName: String, val version: String?, val apiVersion: Int) : KeyInfo()
+
+        /**
          * passage: whether the age identities file exists, how many
          * identities of each kind it holds, and which kind the store uses
          * (null when no store is open). Never the file's content.
@@ -90,6 +97,8 @@ data class DiagnosticsReport(
         lines += "Language: " + languageTag.ifEmpty { "system" }
         lines += "Keys: " + when (keys) {
             is KeyInfo.Pass -> "${keys.keyFiles} OpenPGP key files"
+            is KeyInfo.PassProvider ->
+                "kept in ${keys.packageName} (${keys.version ?: "not installed"}), provider API ${keys.apiVersion}"
             is KeyInfo.Passage ->
                 if (keys.identitiesPresent) {
                     "identities file present (${keys.classic} classic, ${keys.postQuantum} post-quantum)"

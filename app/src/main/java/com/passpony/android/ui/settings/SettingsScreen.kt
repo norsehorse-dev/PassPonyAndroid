@@ -59,7 +59,6 @@ import com.passpony.android.crypto.PassphraseCache
 import com.passpony.android.crypto.PgpEngine
 import com.passpony.android.crypto.PgpKeySource
 import com.passpony.android.crypto.PgpKeySourceStore
-import com.passpony.android.crypto.ProviderConnection
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.store.StoreLocation
 import com.passpony.android.store.StoreMove
@@ -115,7 +114,7 @@ fun SettingsScreen(
     var agePresent by remember { mutableStateOf(false) }
     var ageKeys by remember { mutableStateOf(emptyList<AgeIdentityStore.PublicKey>()) }
     var ageMessage by remember { mutableStateOf<String?>(null) }
-    var keySourceTick by remember { mutableStateOf(0) }
+    var keySource by remember { mutableStateOf(PgpKeySourceStore.current(context)) }
 
     fun refreshKeys() {
         keyFiles = PgpKeyStore.availableKeys(context)
@@ -239,45 +238,22 @@ fun SettingsScreen(
                 }
             )
 
-            if (format == StoreFormat.PASS && BuildConfig.DEBUG) {
-                // 3.0 rc7: the only way to choose a provider until rc8
-                // builds the real setup. Debug builds only.
+            if (format == StoreFormat.PASS) {
+                // 3.0: built-in key files, or another app that keeps them.
                 Spacer(Modifier.height(24.dp))
-                SectionHeader("Key source (debug)")
-                val keySource = remember(keySourceTick) { PgpKeySourceStore.current(context) }
-                Text(
-                    when (keySource) {
-                        is PgpKeySource.BuiltIn -> "Built-in key files"
-                        is PgpKeySource.Provider -> "Provider: ${keySource.packageName}"
+                KeySourceSection(
+                    appViewModel = appViewModel,
+                    source = keySource,
+                    onChanged = { now ->
+                        keySource = now
+                        refreshKeys()
                     },
-                    style = MaterialTheme.typography.bodyMedium,
                 )
-                for (pkg in remember(keySourceTick) { ProviderConnection.installedProviders(context) }) {
-                    TextButton(onClick = {
-                        val cert = ProviderConnection.certificateSha256(context, pkg)
-                        if (cert == null) {
-                            message = "Could not read that app's certificate."
-                        } else {
-                            scope.launch {
-                                ProviderConnection.disconnect(context)
-                                PgpKeySourceStore.set(context, PgpKeySource.Provider(pkg, cert))
-                                appViewModel.openStore()
-                                keySourceTick++
-                            }
-                        }
-                    }) { Text("Use $pkg") }
-                }
-                TextButton(onClick = {
-                    scope.launch {
-                        ProviderConnection.disconnect(context)
-                        PgpKeySourceStore.set(context, PgpKeySource.BuiltIn)
-                        appViewModel.openStore()
-                        keySourceTick++
-                    }
-                }) { Text("Use built-in key files") }
             }
 
-            if (format == StoreFormat.PASS) {
+            // With a provider there are no key files here to list, import
+            // or unlock; the provider keeps and unlocks its own keys.
+            if (format == StoreFormat.PASS && keySource is PgpKeySource.BuiltIn) {
                 Spacer(Modifier.height(24.dp))
                 OpenPgpKeysSection(
                     keyFiles = keyFiles,
@@ -321,10 +297,13 @@ fun SettingsScreen(
                     )
                 }
 
+            }
+
+            if (format == StoreFormat.PASS) {
                 Spacer(Modifier.height(24.dp))
                 GpgIdSection(
                     gpgIdLines = gpgIdLines,
-                    hasKeys = keyFiles.isNotEmpty(),
+                    hasKeys = keyFiles.isNotEmpty() || keySource is PgpKeySource.Provider,
                     onInitialize = onInitializeStore
                 )
             }
