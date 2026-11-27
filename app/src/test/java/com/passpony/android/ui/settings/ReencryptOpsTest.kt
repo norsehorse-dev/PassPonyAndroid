@@ -53,6 +53,9 @@ class ReencryptOpsTest {
         override fun rootRecipients(): String? = null
         override fun setRootRecipients(text: String) {}
 
+        // 3.0 interface member; ReencryptOps doesn't use it.
+        override fun addEntry(name: String, content: ByteArray, backend: CryptoBackend) {}
+
         override fun removeEntry(name: String) {}
         override fun writeEntry(name: String, content: ByteArray, backend: CryptoBackend) {}
     }

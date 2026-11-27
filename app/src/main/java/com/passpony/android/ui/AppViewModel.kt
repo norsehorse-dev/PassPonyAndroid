@@ -4,6 +4,7 @@ import android.app.Application
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.passpony.android.BuildConfig
+import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.EngineProvider
 import com.passpony.android.crypto.PgpKeyStore
@@ -298,16 +299,38 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             return false
         }
         return try {
-            current.writeEntry(name, content, engine)
+            // 3.0: a new entry goes through the core's addEntry, which
+            // refuses a name that is taken instead of replacing what is
+            // there. Replacing is an edit, and is committed as one.
+            if (isNew) current.addEntry(name, content, engine) else current.writeEntry(name, content, engine)
             val message = if (isNew) commitMessageAdd(name) else commitMessageEdit(name)
             runCatching { git?.commitPaths(listOf(StorePaths.entryFileName(name, format)), message) }
             runCatching { PasskeyIndex.updateEntry(context, format, name, content) }
             refresh()
             true
         } catch (e: Exception) {
-            _lastError.value = e.ponyMessage(context)
+            _lastError.value = when (e) {
+                is StoreException.EntryExists -> context.getString(R.string.error_entry_exists, name)
+                else -> e.ponyMessage(context)
+            }
             false
         }
+    }
+
+    /** What [addEntry] did; the Add screen asks before replacing on [EXISTS]. */
+    enum class AddResult { SAVED, EXISTS, FAILED }
+
+    /**
+     * 3.0: save a new entry, telling a taken name apart from a failure so
+     * the Add screen can ask "Replace or Cancel" with everything typed
+     * still in place. On [AddResult.EXISTS] nothing was written.
+     */
+    fun addEntry(name: String, content: ByteArray): AddResult {
+        // Looked up first only to pick the answer; the core checks again
+        // inside addEntry, so a name taken in between still cannot be
+        // replaced.
+        if (hasEntry(name)) return AddResult.EXISTS
+        return if (saveEntry(name, content, isNew = true)) AddResult.SAVED else AddResult.FAILED
     }
 
     /**
@@ -318,6 +341,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun moveEntry(from: String, to: String): Boolean {
         val current = store ?: return false
+        // 3.0: a move onto a name that is taken would replace that entry.
+        if (current.hasEntry(to)) {
+            _lastError.value = context.getString(R.string.error_entry_exists, to)
+            return false
+        }
         return try {
             current.moveEntry(from, to, engine)
             runCatching {

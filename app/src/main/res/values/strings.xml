@@ -80,6 +80,12 @@
     <string name="error_dirty_workdir">The store has local changes that aren\'t committed yet.</string>
     <string name="error_git_other">Git error: %1$s</string>
     <string name="error_no_store">No store is open.</string>
+    <string name="error_entry_exists">An entry named %1$s already exists.</string>
+    <string name="error_entry_exists_plain">An entry with this name already exists.</string>
+    <string name="error_folder_unavailable">The store\'s folder is no longer available.</string>
+    <string name="add_entry_exists_title">Replace the entry?</string>
+    <string name="add_entry_exists_body">An entry named %1$s already exists. Replacing it saves this one in its place.</string>
+    <string name="add_entry_replace">Replace</string>
     <string name="error_not_in_store">This entry isn\'t in the store.</string>
     <string name="error_invalid_path">Invalid entry path.</string>
     <string name="error_store_crypto">Encryption error: %1$s</string>

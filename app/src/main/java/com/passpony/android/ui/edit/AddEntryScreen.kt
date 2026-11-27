@@ -14,6 +14,8 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Tune
+import androidx.compose.material3.AlertDialog
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -62,6 +64,34 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
     var showGeneratorSheet by remember { mutableStateOf(false) }
     // Why the last Save failed (no .gpg-id yet, no usable key, ...).
     var saveError by remember { mutableStateOf<String?>(null) }
+    var confirmReplace by remember { mutableStateOf(false) }
+
+    // 3.0: the name is taken. Nothing has been written; Cancel goes back
+    // to the form as it was, Replace saves over the old entry as an edit.
+    if (confirmReplace) {
+        AlertDialog(
+            onDismissRequest = { confirmReplace = false },
+            title = { Text(stringResource(R.string.add_entry_exists_title)) },
+            text = { Text(stringResource(R.string.add_entry_exists_body, name)) },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmReplace = false
+                        val content = NewEntryContent.assemble(password, username, url, otpauth)
+                        if (viewModel.saveEntry(name, content, isNew = false)) {
+                            onDone()
+                        } else {
+                            saveError = viewModel.lastError.value
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(R.string.add_entry_replace)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmReplace = false }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        )
+    }
 
     if (showGeneratorSheet) {
         GeneratorSheet(
@@ -93,10 +123,13 @@ fun AddEntryScreen(viewModel: AppViewModel, onDone: () -> Unit) {
                     TextButton(
                         onClick = {
                             val content = NewEntryContent.assemble(password, username, url, otpauth)
-                            if (viewModel.saveEntry(name, content, isNew = true)) {
-                                onDone()
-                            } else {
-                                saveError = viewModel.lastError.value
+                            when (viewModel.addEntry(name, content)) {
+                                AppViewModel.AddResult.SAVED -> onDone()
+                                AppViewModel.AddResult.EXISTS -> {
+                                    saveError = null
+                                    confirmReplace = true
+                                }
+                                AppViewModel.AddResult.FAILED -> saveError = viewModel.lastError.value
                             }
                         },
                         enabled = name.isNotEmpty() && (password.isNotEmpty() || otpauth != null)

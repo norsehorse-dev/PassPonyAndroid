@@ -77,6 +77,8 @@ fun StoreException.ponyMessage(context: Context): String = when (this) {
     is StoreException.SneakyPath -> context.getString(R.string.error_invalid_path)
     is StoreException.Crypto -> context.getString(R.string.error_store_crypto, reason)
     is StoreException.MixedRecipients -> context.getString(R.string.error_mixed_recipients)
+    is StoreException.EntryExists -> context.getString(R.string.error_entry_exists_plain)
+    is StoreException.FolderUnavailable -> context.getString(R.string.error_folder_unavailable)
     is StoreException.Io -> context.getString(R.string.error_store_io, reason)
 }
 
