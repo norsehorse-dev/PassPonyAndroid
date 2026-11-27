@@ -6,8 +6,8 @@ import uniffi.pass_ffi.StoreFormat
 
 /**
  * Resolves the real crypto engine for a store format. Both formats now
- * route to real crypto: PASSAGE to age (P05), PASS to PGPonyCore-Kotlin
- * over BouncyCastle (P06). DevCryptoEngine (the reversible byte flip)
+ * route to real crypto in the Rust core: PASSAGE to age, PASS to rpgp
+ * (the pgp-engine feature, since 3.0). DevCryptoEngine (the reversible byte flip)
  * stays in the tree as a debug-only stand-in but is no longer wired here.
  */
 object EngineProvider {

@@ -15,7 +15,7 @@ import uniffi.pass_ffi.StoreFormat
  * stand-in: pass-v4-minimal (Cv25519, from the PassPonyCore corpus, real
  * gpg-generated), pass-rsa-minimal (RSA, real gpg-generated, the software
  * capability Android has that iOS does not), and pass-v6-minimal (X25519
- * v6, PGPonyCore-Kotlin-generated — see GenerateV6FixtureTest for why).
+ * v6, made with the 2.x Kotlin engine and kept as committed files).
  * Assets live under this test package's own APK (src/androidTest/assets),
  * read through the instrumentation context; the copy under test lives in
  * the app-under-test's cache/files dirs, matching where the real app would

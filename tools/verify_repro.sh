@@ -24,7 +24,7 @@
 #           pinned to whatever commit third_party/passponycore points at
 #           for <tag> -- see P16) and an Android SDK/NDK matching
 #           gradle.properties' ndkVersion. A JDK 17 satisfying
-#           pgponycore's jvmToolchain(17) comes from settings.gradle.kts's
+#           the build's Java 17 toolchain comes from settings.gradle.kts's
 #           foojay-resolver-convention plugin auto-downloading one, from
 #           Gradle's own auto-detection if one is already installed
 #           somewhere it looks, or -- if neither finds one -- from an
@@ -55,7 +55,7 @@ resolve_java_home() {
   # earlier version of this function also fell back to reading
   # org.gradle.java.home out of the real (pre-isolation) gradle.properties,
   # on the theory that whatever JDK a developer's day-to-day builds
-  # resolve to was a safe bet for pgponycore's `jvmToolchain(17)`
+  # resolve to was a safe bet for the build's `jvmToolchain(17)`
   # requirement too. That's wrong whenever the machine's default JDK
   # isn't actually 17 itself (a JDK N can compile *targeting* bytecode 17
   # via sourceCompatibility/targetCompatibility without being a JDK 17

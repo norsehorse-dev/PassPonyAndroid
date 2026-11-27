@@ -113,8 +113,9 @@ the published, developer-signed APK instead of signing with their own
 key. rewritemeta places Binaries next to Repo and
 AllowedAPKSigningKeys after the Builds block on its own; let it.
 
-**No `srclibs:`.** PassPonyCore and PGPonyCore-Kotlin are git
-submodules of this repo; `submodules: true` runs
+**No `srclibs:`.** PassPonyCore is a git submodule of this repo (the
+only one since 3.0; PGPonyCore-Kotlin went when pass stores moved to the
+core's Rust engine); `submodules: true` runs
 `git submodule update --init --recursive` right after the clone,
 before prebuild. See `docs/REPRODUCIBLE.md` for why PassPonyCore
 became a submodule (a real F-Droid recipe has no way to inject an env

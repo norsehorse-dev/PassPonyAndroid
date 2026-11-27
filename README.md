@@ -102,21 +102,9 @@ pass around). Clone this repo with `--recurse-submodules`, or run
 `PASSPONY_CORE` still overrides `scripts/build-core.sh`'s default if you
 want to point it at some other PassPonyCore checkout for local dev.
 
-The pass-format engine is [PGPonyCore-Kotlin](https://github.com/norsehorse-dev/PGPonyCore-Kotlin)
-over BouncyCastle, pulled in the same way as a git submodule at
-`third_party/pgponycore-kotlin`.
-
-Pinned to commit `0c09788bda4c208297ae7d1668bdfec10b0f24fd`, not a tagged
-release: PGPonyCore-Kotlin has none yet. Re-pin to a real tag with
-`cd third_party/pgponycore-kotlin && git fetch --tags && git checkout <tag>`
-once one exists, then commit the updated submodule reference.
-
-(Bumped from the initial `080815d` pin to drop `kotlin { jvmToolchain(17) }`
-in favor of an explicit `compilerOptions.jvmTarget` -- F-Droid's buildserver
-disables Gradle's toolchain auto-provisioning, so a toolchain request with
-no matching JDK already installed fails outright. See `docs/fdroid/`'s
-recipe and NorseHorse's F-Droid Submission Playbook, which hit the same
-thing on QuorumPony's own pure-JVM core module.)
+The pass-format engine is in the same core (its `pgp-engine` feature,
+rpgp), so there is no second submodule. Up to 2.1.0 it was
+PGPonyCore-Kotlin over BouncyCastle.
 
 ## Layout
 
@@ -126,8 +114,6 @@ thing on QuorumPony's own pure-JVM core module.)
 - `core/`: generated UniFFI Kotlin bindings and jniLibs `.so` per ABI
   (gitignored, produced by `scripts/build-core.sh`), plus the thin Kotlin
   crypto engines that implement the FFI's `CryptoBackend` interface.
-- `third_party/pgponycore-kotlin`: git submodule, pinned to a commit (no
-  tagged release exists upstream yet, see the build section above).
 - `third_party/passponycore`: git submodule, pinned to a commit -- the
   Rust core cross-compiled by `scripts/build-core.sh` (see the build
   section above and `docs/REPRODUCIBLE.md`).
@@ -149,9 +135,14 @@ thing on QuorumPony's own pure-JVM core module.)
 passage stores run on a Rust age engine (the `age-pq` feature of
 PassPonyCore's pass-ffi, which adds post-quantum `age1pq1...` keys to the
 classic engine), reached through the generated FFI bindings. pass
-stores run on PGPonyCore-Kotlin over BouncyCastle: Cv25519 v4, X25519/Ed25519
-v6, and RSA keys, all in software. PassPony iOS has had software RSA
-since 2.1.0, so both phones open RSA-keyed pass stores. The recipient-resolution
+stores run on the core's Rust OpenPGP engine (rpgp, the `pgp-engine`
+feature), the same code PassPony iOS and Desktop run: Cv25519 v4,
+X25519/Ed25519 v6, RSA and NIST-curve keys, and the OCB packets current
+GnuPG writes. ElGamal and brainpool keys work too; rpgp has no arithmetic
+for those, so the core does that one step itself (see its
+`THREAT_MODEL.md`). Not supported: secp256k1 and Ed448/Cv448 encryption
+keys. Up to 2.1.0 this was PGPonyCore-Kotlin over BouncyCastle, which
+opened secp256k1 keys and could not read GnuPG's OCB packets. The recipient-resolution
 rule (fingerprint or 16-hex key ID, `.gpg-id` per entry) is the same rule
 PassPony iOS uses. A passphrase-protected pass secret key is cached for 5
 minutes after entry, sealed with an Android Keystore AES-GCM key

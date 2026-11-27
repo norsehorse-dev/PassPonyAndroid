@@ -15,16 +15,15 @@ import uniffi.pass_ffi.StoreException
 import uniffi.pass_ffi.StoreFormat
 
 /**
- * Locked-key behavior against pass-v6-locked (see GenerateV6FixtureTest):
+ * Locked-key behavior against pass-v6-locked (made with the 2.x Kotlin
+ * engine and kept as committed files; its generator went with that engine):
  * a protected key without the cached passphrase loads as locked and
  * decrypt fails (PgpEngine.decrypt() throws CryptoException.NoUsableKey,
  * which pass-core's FFI layer surfaces to PassStore callers as
  * StoreException.Crypto); after PassphraseCache.save() a fresh
  * PgpEngine.load() picks the cached passphrase up automatically and
- * decrypts. The fixed passphrase here must match
- * GenerateV6FixtureTest.LOCKED_FIXTURE_PASSPHRASE exactly — the two live
- * in separate source sets (test vs androidTest) so it cannot be shared as
- * one constant.
+ * decrypts. The fixed passphrase here is the one the fixture's key was
+ * protected with.
  */
 @RunWith(AndroidJUnit4::class)
 class PgpLockedKeyTest {

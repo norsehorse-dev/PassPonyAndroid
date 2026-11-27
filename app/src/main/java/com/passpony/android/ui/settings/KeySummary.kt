@@ -4,7 +4,7 @@ import com.passpony.android.crypto.PgpKeyStore
 
 /**
  * Pure display formatting for OpenPGP key material -- no Context, no FFI,
- * no BouncyCastle -- so it is unit-testable on the plain JVM. Ports the
+ * no crypto library -- so it is unit-testable on the plain JVM. Ports the
  * formatting iOS's SettingsView/InitializeStoreView inline directly on
  * PGPKeyStore.KeyFileInfo.
  */
