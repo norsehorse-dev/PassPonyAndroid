@@ -241,7 +241,7 @@ A pass store's OpenPGP keys can stay in a key app, PGPony or OpenKeychain,
 through the OpenPGP provider API both implement. Settings, "Where the keys
 are kept", "Use keys from another app…". PassPony then holds no key
 material for that store: the key app decrypts and encrypts, shows its own
-passphrase or card screen when it needs one, and decides how long a
+passphrase screen when it needs one, and decides how long a
 passphrase is remembered. PassPony's own unlock still comes first.
 
 - The key app is pinned to the signing certificate it had when you chose
@@ -254,6 +254,10 @@ passphrase is remembered. PassPony's own unlock still comes first.
 - After switching, PassPony offers to delete the key files it had
   imported, once the key app has decrypted an entry. It never deletes them
   by itself.
+- Re-encrypting a store goes through the key app one entry at a time. If
+  the key app stops to ask for something, the run stops there; tap
+  "Re-encrypt now" again and it carries on. Entries already done stay
+  readable.
 - A backup made in this mode does not contain the OpenPGP keys. Back them
   up in the key app.
 - One store uses PassPony's keys or one key app, never a mix. passage
@@ -264,9 +268,7 @@ vendored as source in `third_party/openpgp-api`.
 
 ## Not yet
 
-- Smartcard decrypt inside PassPony itself. Since 3.0 a pass store can
-  use keys kept in an OpenPGP key app (below), and a key app such as
-  PGPony can keep those keys on a card.
+- Smartcard decrypt (NFC and USB-C YubiKey).
 - Passkeys for native apps (browsers only in 2.0).
 - Git on a folder store, and watching a folder for changes as they happen.
 - Conflict copies from sync tools other than Syncthing.

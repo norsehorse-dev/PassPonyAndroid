@@ -652,7 +652,7 @@ Vous pouvez le gérer à tout moment dans les Réglages iOS, sous Remplissage au
     <string name="key_source_delete_keep">Les garder</string>
     <string name="key_source_deleted">Les copies des fichiers de clés de PassPony ont été supprimées.</string>
     <string name="backup_keys_in_app">Les clés OpenPGP de ce coffre sont conservées dans %1$s, elles ne sont donc pas dans cette sauvegarde. Sauvegardez-les dans %1$s.</string>
-    <string name="reencrypt_key_app_note">Vos clés sont dans %1$s, qui déchiffre et chiffre chaque entrée et peut vous demander votre phrase secrète ou une carte plusieurs fois. Si elle le demande, approuvez puis touchez à nouveau « Rechiffrer maintenant ». Les entrées déjà traitées restent lisibles.</string>
+    <string name="reencrypt_key_app_note">Vos clés sont dans %1$s, qui déchiffre et chiffre chaque entrée et peut vous demander votre phrase secrète plusieurs fois. Si elle le demande, approuvez puis touchez à nouveau « Rechiffrer maintenant ». Les entrées déjà traitées restent lisibles.</string>
     <string name="key_source_test_ok">%1$s a déchiffré une entrée.</string>
     <string name="key_source_test_connected">%1$s est connectée. Il n\'y a pas encore d\'entrée à déchiffrer.</string>
     <string name="key_source_change_app">Utiliser une autre app…</string>

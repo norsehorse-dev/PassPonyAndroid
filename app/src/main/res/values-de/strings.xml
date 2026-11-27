@@ -652,7 +652,7 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
     <string name="key_source_delete_keep">Behalten</string>
     <string name="key_source_deleted">PassPonys Kopien der Schlüsseldateien wurden gelöscht.</string>
     <string name="backup_keys_in_app">Die OpenPGP-Schlüssel dieses Speichers liegen in %1$s und sind deshalb nicht in diesem Backup. Sichere sie in %1$s.</string>
-    <string name="reencrypt_key_app_note">Deine Schlüssel liegen in %1$s. Die App entschlüsselt und verschlüsselt jeden Eintrag und fragt dabei vielleicht mehrmals nach deiner Passphrase oder einer Karte. Wenn sie fragt, bestätige und tippe erneut auf „Jetzt neu verschlüsseln“. Bereits fertige Einträge bleiben lesbar.</string>
+    <string name="reencrypt_key_app_note">Deine Schlüssel liegen in %1$s. Die App entschlüsselt und verschlüsselt jeden Eintrag und fragt dabei vielleicht mehrmals nach deiner Passphrase. Wenn sie fragt, bestätige und tippe erneut auf „Jetzt neu verschlüsseln“. Bereits fertige Einträge bleiben lesbar.</string>
     <string name="key_source_test_ok">%1$s hat einen Eintrag entschlüsselt.</string>
     <string name="key_source_test_connected">%1$s ist verbunden. Es gibt noch keinen Eintrag zum Entschlüsseln.</string>
     <string name="key_source_change_app">Andere App verwenden …</string>

@@ -652,7 +652,7 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
     <string name="key_source_delete_keep">Manter</string>
     <string name="key_source_deleted">As cópias dos arquivos de chave do PassPony foram excluídas.</string>
     <string name="backup_keys_in_app">As chaves OpenPGP deste cofre ficam no %1$s, então não estão neste backup. Faça o backup delas no %1$s.</string>
-    <string name="reencrypt_key_app_note">Suas chaves estão no %1$s, que descriptografa e criptografa cada entrada e pode pedir sua frase secreta ou um cartão mais de uma vez. Se pedir, aprove e toque em “Recriptografar agora” de novo. As entradas já feitas continuam legíveis.</string>
+    <string name="reencrypt_key_app_note">Suas chaves estão no %1$s, que descriptografa e criptografa cada entrada e pode pedir sua frase secreta mais de uma vez. Se pedir, aprove e toque em “Recriptografar agora” de novo. As entradas já feitas continuam legíveis.</string>
     <string name="key_source_test_ok">O %1$s descriptografou uma entrada.</string>
     <string name="key_source_test_connected">O %1$s está conectado. Ainda não há entrada para descriptografar.</string>
     <string name="key_source_change_app">Usar outro app…</string>

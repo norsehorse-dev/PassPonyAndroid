@@ -114,7 +114,7 @@
     <string name="key_source_delete_keep">Keep them</string>
     <string name="key_source_deleted">PassPony\'s copies of the key files are deleted.</string>
     <string name="backup_keys_in_app">This store\'s OpenPGP keys are kept in %1$s, so they are not in this backup. Back them up in %1$s.</string>
-    <string name="reencrypt_key_app_note">Your keys are in %1$s, which decrypts and encrypts each entry and may ask for your passphrase or a card tap more than once. If it asks, approve and tap Re-encrypt now again. Entries already done stay readable.</string>
+    <string name="reencrypt_key_app_note">Your keys are in %1$s, which decrypts and encrypts each entry and may ask for your passphrase more than once. If it asks, approve and tap Re-encrypt now again. Entries already done stay readable.</string>
     <string name="key_source_test_ok">%1$s decrypted an entry.</string>
     <string name="key_source_test_connected">%1$s is connected. There is no entry to decrypt yet.</string>
     <string name="key_source_change_app">Use a different app…</string>

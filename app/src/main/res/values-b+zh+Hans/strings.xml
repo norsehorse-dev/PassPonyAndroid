@@ -630,7 +630,7 @@
     <string name="key_source_delete_keep">保留</string>
     <string name="key_source_deleted">PassPony 的密钥文件副本已删除。</string>
     <string name="backup_keys_in_app">此密码库的 OpenPGP 密钥存放在 %1$s 中，因此不在此备份内。请在 %1$s 中备份它们。</string>
-    <string name="reencrypt_key_app_note">你的密钥在 %1$s 中，由它解密并加密每个条目，期间可能多次要求输入密码短语或轻触智能卡。如果它提出要求，请确认后再次点按“立即重新加密”。已完成的条目仍可读取。</string>
+    <string name="reencrypt_key_app_note">你的密钥在 %1$s 中，由它解密并加密每个条目，期间可能多次要求输入密码短语。如果它提出要求，请确认后再次点按“立即重新加密”。已完成的条目仍可读取。</string>
     <string name="key_source_test_ok">%1$s 已解密一个条目。</string>
     <string name="key_source_test_connected">%1$s 已连接。目前还没有可解密的条目。</string>
     <string name="key_source_change_app">使用其他应用…</string>

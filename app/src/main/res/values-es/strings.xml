@@ -652,7 +652,7 @@ Puedes gestionarlo en cualquier momento en los Ajustes de iOS, en Autorrelleno y
     <string name="key_source_delete_keep">Conservarlas</string>
     <string name="key_source_deleted">Se eliminaron las copias de PassPony de los archivos de claves.</string>
     <string name="backup_keys_in_app">Las claves OpenPGP de este almacén se guardan en %1$s, así que no están en esta copia de seguridad. Haz una copia de ellas en %1$s.</string>
-    <string name="reencrypt_key_app_note">Tus claves están en %1$s, que descifra y cifra cada entrada y puede pedirte la frase de contraseña o una tarjeta más de una vez. Si lo pide, aprueba y toca «Volver a cifrar ahora» otra vez. Las entradas ya hechas siguen siendo legibles.</string>
+    <string name="reencrypt_key_app_note">Tus claves están en %1$s, que descifra y cifra cada entrada y puede pedirte la frase de contraseña más de una vez. Si lo pide, aprueba y toca «Volver a cifrar ahora» otra vez. Las entradas ya hechas siguen siendo legibles.</string>
     <string name="key_source_test_ok">%1$s descifró una entrada.</string>
     <string name="key_source_test_connected">%1$s está conectada. Todavía no hay ninguna entrada que descifrar.</string>
     <string name="key_source_change_app">Usar otra app…</string>
