@@ -14,6 +14,7 @@ import org.junit.Test
 import org.junit.runner.RunWith
 import com.passpony.android.crypto.AgeCryptoBackend
 import com.passpony.android.crypto.AgeIdentityStore
+import com.passpony.android.store.StoreLocation
 import com.passpony.android.store.StorePaths
 import com.passpony.android.ui.sync.BlockingResolver
 import uniffi.pass_ffi.AgeEngine
@@ -102,6 +103,9 @@ class GitSyncFlowTest {
         val remote = bareRemote("publish-remote")
 
         StorePaths.setFormat(appContext(), StoreFormat.PASSAGE)
+        // 3.0: git only works on a store in app storage, and the device
+        // under test may have been left pointing at a folder.
+        StorePaths.setLocation(appContext(), StoreFormat.PASSAGE, StoreLocation.AppStorage)
         AgeIdentityStore.identitiesFile(appContext()).delete()
         StorePaths.storeRoot(appContext(), StoreFormat.PASSAGE).deleteRecursively()
 
@@ -150,6 +154,9 @@ class GitSyncFlowTest {
         // "This device": AppViewModel, real production code path, clones
         // the shared store into place via cloneReplaceStore.
         StorePaths.setFormat(appContext(), StoreFormat.PASSAGE)
+        // 3.0: git only works on a store in app storage, and the device
+        // under test may have been left pointing at a folder.
+        StorePaths.setLocation(appContext(), StoreFormat.PASSAGE, StoreLocation.AppStorage)
         StorePaths.storeRoot(appContext(), StoreFormat.PASSAGE).deleteRecursively()
         AgeIdentityStore.identitiesFile(appContext()).apply {
             delete()
