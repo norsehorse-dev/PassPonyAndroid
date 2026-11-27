@@ -666,13 +666,4 @@ Du kannst das jederzeit in den iOS-Einstellungen unter AutoFill und Passwörter 
     <string name="key_source_switched_builtin">Dieser Speicher verwendet jetzt die Schlüssel in PassPony. Importiere den Schlüssel, falls er noch nicht hier ist.</string>
     <string name="init_store_pick_in_app">Schlüssel in %1$s wählen …</string>
     <string name="init_store_pick_another">Weiteren Schlüssel aus %1$s hinzufügen …</string>
-    <string name="otp_sheet_title">Einmalcode einrichten</string>
-    <string name="otp_key_digits">Ziffern</string>
-    <string name="otp_scan_title">QR-Code scannen</string>
-    <string name="otp_preview">Vorschau</string>
-    <string name="generator_preview">Vorschau</string>
-    <string name="generator_no_classes">Aktiviere mindestens eine Zeichenart.</string>
-    <string name="diagnostics_title">Diagnose</string>
-    <string name="diagnostics_autofill">AutoFill</string>
-    <string name="diagnostics_language">Sprache</string>
 </resources>

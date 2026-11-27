@@ -666,13 +666,4 @@ Puedes gestionarlo en cualquier momento en los Ajustes de iOS, en Autorrelleno y
     <string name="key_source_switched_builtin">Este almacén usa ahora las claves de PassPony. Importa la clave si todavía no está aquí.</string>
     <string name="init_store_pick_in_app">Elegir una clave en %1$s…</string>
     <string name="init_store_pick_another">Añadir otra clave de %1$s…</string>
-    <string name="otp_sheet_title">Configurar código de un solo uso</string>
-    <string name="otp_key_digits">Dígitos</string>
-    <string name="otp_scan_title">Escanear código QR</string>
-    <string name="otp_preview">Vista previa</string>
-    <string name="generator_preview">Vista previa</string>
-    <string name="generator_no_classes">Activa al menos un tipo de carácter.</string>
-    <string name="diagnostics_title">Diagnóstico</string>
-    <string name="diagnostics_autofill">Autorrelleno</string>
-    <string name="diagnostics_language">Idioma</string>
 </resources>

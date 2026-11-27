@@ -666,13 +666,4 @@ Você pode gerenciar isso a qualquer momento nos Ajustes do iOS, em Preenchiment
     <string name="key_source_switched_builtin">Este cofre agora usa as chaves do PassPony. Importe a chave se ela ainda não estiver aqui.</string>
     <string name="init_store_pick_in_app">Escolher uma chave no %1$s…</string>
     <string name="init_store_pick_another">Adicionar outra chave do %1$s…</string>
-    <string name="otp_sheet_title">Configurar código de uso único</string>
-    <string name="otp_key_digits">Dígitos</string>
-    <string name="otp_scan_title">Escanear código QR</string>
-    <string name="otp_preview">Prévia</string>
-    <string name="generator_preview">Prévia</string>
-    <string name="generator_no_classes">Ative pelo menos um tipo de caractere.</string>
-    <string name="diagnostics_title">Diagnóstico</string>
-    <string name="diagnostics_autofill">Preenchimento automático</string>
-    <string name="diagnostics_language">Idioma</string>
 </resources>

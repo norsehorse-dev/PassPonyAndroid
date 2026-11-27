@@ -644,13 +644,4 @@
     <string name="key_source_switched_builtin">此密码库现在使用 PassPony 中的密钥。如果密钥还不在这里，请导入。</string>
     <string name="init_store_pick_in_app">在 %1$s 中选择密钥…</string>
     <string name="init_store_pick_another">从 %1$s 再添加一个密钥…</string>
-    <string name="otp_sheet_title">设置一次性验证码</string>
-    <string name="otp_key_digits">位数</string>
-    <string name="otp_scan_title">扫描二维码</string>
-    <string name="otp_preview">预览</string>
-    <string name="generator_preview">预览</string>
-    <string name="generator_no_classes">请至少开启一种字符类型。</string>
-    <string name="diagnostics_title">诊断</string>
-    <string name="diagnostics_autofill">自动填充</string>
-    <string name="diagnostics_language">语言</string>
 </resources>

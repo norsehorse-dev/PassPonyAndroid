@@ -710,13 +710,4 @@
     <string name="key_source_switched_builtin">Теперь это хранилище использует ключи из PassPony. Импортируйте ключ, если его здесь ещё нет.</string>
     <string name="init_store_pick_in_app">Выбрать ключ в %1$s…</string>
     <string name="init_store_pick_another">Добавить ещё один ключ из %1$s…</string>
-    <string name="otp_sheet_title">Настроить одноразовый код</string>
-    <string name="otp_key_digits">Цифры</string>
-    <string name="otp_scan_title">Сканировать QR-код</string>
-    <string name="otp_preview">Предпросмотр</string>
-    <string name="generator_preview">Предпросмотр</string>
-    <string name="generator_no_classes">Включите хотя бы один вид символов.</string>
-    <string name="diagnostics_title">Диагностика</string>
-    <string name="diagnostics_autofill">Автозаполнение</string>
-    <string name="diagnostics_language">Язык</string>
 </resources>

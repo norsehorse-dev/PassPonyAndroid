@@ -666,13 +666,4 @@ Vous pouvez le gérer à tout moment dans les Réglages iOS, sous Remplissage au
     <string name="key_source_switched_builtin">Ce coffre utilise maintenant les clés de PassPony. Importez la clé si elle n\'y est pas encore.</string>
     <string name="init_store_pick_in_app">Choisir une clé dans %1$s…</string>
     <string name="init_store_pick_another">Ajouter une autre clé depuis %1$s…</string>
-    <string name="otp_sheet_title">Configurer un code à usage unique</string>
-    <string name="otp_key_digits">Chiffres</string>
-    <string name="otp_scan_title">Scanner un code QR</string>
-    <string name="otp_preview">Aperçu</string>
-    <string name="generator_preview">Aperçu</string>
-    <string name="generator_no_classes">Activez au moins un type de caractère.</string>
-    <string name="diagnostics_title">Diagnostic</string>
-    <string name="diagnostics_autofill">Remplissage automatique</string>
-    <string name="diagnostics_language">Langue</string>
 </resources>
