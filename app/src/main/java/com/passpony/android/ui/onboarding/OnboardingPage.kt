@@ -63,6 +63,7 @@ import com.passpony.android.ui.edit.PasswordGenerator
 import com.passpony.android.ui.settings.LanguageManager
 import com.passpony.android.ui.settings.rememberAgeIdentitiesImporter
 import com.passpony.android.ui.settings.rememberBackupRestorer
+import com.passpony.android.ui.settings.rememberFolderPicker
 import com.passpony.android.ui.sync.HostKeyTrustDialog
 import com.passpony.android.ui.util.safDisplayName
 import java.io.File
@@ -248,6 +249,9 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
     val launchRestore = rememberBackupRestorer(appViewModel) { result ->
         importMessage = result
     }
+    val pickFolder = rememberFolderPicker(appViewModel) { result ->
+        importMessage = result
+    }
 
     Column(horizontalAlignment = Alignment.CenterHorizontally) {
         // A clone populates entries; keep the key step reachable here
@@ -258,6 +262,10 @@ private fun ImportStoreAction(appViewModel: AppViewModel) {
         } else {
             TextButton(onClick = { showCloneDialog = true }) {
                 Text(stringResource(R.string.xc_clone_existing_store))
+            }
+            // 3.0: a store kept in a folder another app syncs.
+            TextButton(onClick = pickFolder) {
+                Text(stringResource(R.string.storage_open_folder))
             }
         }
         when (format) {

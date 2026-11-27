@@ -1,6 +1,8 @@
 package com.passpony.android.ui
 
 import android.app.Application
+import android.content.Intent
+import android.net.Uri
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.viewModelScope
 import com.passpony.android.BuildConfig
@@ -16,6 +18,11 @@ import com.passpony.android.store.AgeHeader
 import com.passpony.android.store.BrowseModel
 import com.passpony.android.store.DemoSeed
 import com.passpony.android.store.DeviceKeys
+import com.passpony.android.store.FileStoreFs
+import com.passpony.android.store.FolderProbe
+import com.passpony.android.store.SafStoreFs
+import com.passpony.android.store.StoreMove
+import com.passpony.android.store.StoreLocation
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.settings.ReencryptOps
@@ -28,7 +35,9 @@ import kotlinx.coroutines.flow.combine
 import kotlinx.coroutines.flow.stateIn
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import uniffi.pass_ffi.ConflictCopy
 import uniffi.pass_ffi.ConflictResolver
+import uniffi.pass_ffi.conflictOf
 import uniffi.pass_ffi.CryptoBackend
 import uniffi.pass_ffi.EntryRef
 import uniffi.pass_ffi.GitException
@@ -113,6 +122,25 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     val syncStatus: StateFlow<SyncStatus?> = _syncStatus.asStateFlow()
 
+    private val _storeLocation = MutableStateFlow<StoreLocation>(StoreLocation.AppStorage)
+
+    /** 3.0: where the open store lives; see [StoreLocation]. */
+    val storeLocation: StateFlow<StoreLocation> = _storeLocation.asStateFlow()
+
+    private val _folderLost = MutableStateFlow(false)
+
+    /**
+     * 3.0: the folder store's folder cannot be reached (deleted, moved,
+     * or the permission was taken away). The list shows its own screen
+     * for this, never an empty store.
+     */
+    val folderLost: StateFlow<Boolean> = _folderLost.asStateFlow()
+
+    private val _folderName = MutableStateFlow<String?>(null)
+
+    /** The folder's own name when the store is a folder store, for display. */
+    val folderName: StateFlow<String?> = _folderName.asStateFlow()
+
     private val _storeKeys = MutableStateFlow<StoreKeys?>(null)
 
     /**
@@ -178,17 +206,26 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun openStore() {
         try {
-            val root = StorePaths.storeRoot(context, format)
-            root.mkdirs()
-            val opened = PassStore.open(root.absolutePath, format)
+            val location = StorePaths.location(context, format)
+            _storeLocation.value = location
+            _folderName.value = (location as? StoreLocation.Folder)
+                ?.let { SafStoreFs.folderName(context, it.treeUri) }
+            val opened = StorePaths.openStore(context, format)
             store = opened
-            git = runCatching { GitSync.open(root.absolutePath) }.getOrNull()
+            // 3.0: git only for app storage. A folder store syncs through
+            // its folder, and libgit2 cannot work on a document tree.
+            git = if (location is StoreLocation.AppStorage) {
+                runCatching { GitSync.open(StorePaths.storeRoot(context, format).absolutePath) }.getOrNull()
+            } else {
+                null
+            }
 
             // Demo seeding is passage-only; pass stores start from
             // imported keys and a real .gpg-id (P06). Held back until
             // onboarding completes so the onboarding import/try slides
             // see a genuinely empty store, once P14 adds them.
             if (BuildConfig.DEBUG &&
+                location is StoreLocation.AppStorage &&
                 format == StoreFormat.PASSAGE &&
                 opened.entries().isEmpty() &&
                 StorePaths.onboardingCompletedSnapshot(context)
@@ -203,13 +240,148 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             }
 
             _openError.value = null
+            _folderLost.value = false
             refresh()
             rebuildPasskeyIndex()
+            // 3.0: a folder store has no sync step to hang this on, so
+            // this phone lists its key, and looks for keys other devices
+            // added, whenever the store is opened.
+            if (location is StoreLocation.Folder && format == StoreFormat.PASSAGE) {
+                viewModelScope.launch { runCatching { joinRecipients() } }
+            }
         } catch (e: Exception) {
+            _folderLost.value = e is StoreException.FolderUnavailable
+            // Never keep showing the store that was open before: after a
+            // failed switch its entries would look like this store's.
+            store = null
+            git = null
+            _entries.value = emptyList()
+            _syncStatus.value = null
+            _storeKeys.value = null
             _lastError.value = e.ponyMessage(context)
             _openError.value = e.ponyMessage(context)
             _storeLoaded.value = true
         }
+    }
+
+    /**
+     * 3.0: keep this format's store in a folder the person picked. The
+     * caller has already taken the persistable permission for [treeUri].
+     * The app-storage store is left where it is; switching back shows it
+     * again.
+     */
+    suspend fun useFolder(treeUri: Uri, asFormat: StoreFormat = format) {
+        // A folder that already holds a store of the other format is
+        // opened as what it is.
+        if (asFormat != format) {
+            StorePaths.setFormat(context, asFormat)
+            format = asFormat
+            engine = EngineProvider.engine(context, asFormat)
+        }
+        val previous = StorePaths.location(context, format)
+        StorePaths.setLocation(context, format, StoreLocation.Folder(treeUri))
+        if (previous is StoreLocation.Folder && previous.treeUri != treeUri) release(previous.treeUri)
+        store = null
+        openStore()
+    }
+
+    /** What a picked folder holds; see [FolderProbe]. Throws when it cannot be read. */
+    suspend fun probeFolder(treeUri: Uri): FolderProbe.Kind = withContext(Dispatchers.IO) {
+        FolderProbe.inspect(SafStoreFs(context, treeUri))
+    }
+
+    /**
+     * How many entries [forFormat]'s store holds in app storage, when app
+     * storage is where it lives now: what a move into a folder would
+     * carry. Zero when that format is already a folder store.
+     */
+    suspend fun movableEntryCount(forFormat: StoreFormat): Int = withContext(Dispatchers.IO) {
+        if (StorePaths.location(context, forFormat) !is StoreLocation.AppStorage) return@withContext 0
+        runCatching {
+            val root = StorePaths.storeRoot(context, forFormat)
+            if (root.isDirectory) PassStore.open(root.absolutePath, forFormat).entries().size else 0
+        }.getOrDefault(0)
+    }
+
+    /**
+     * 3.0: move [asFormat]'s store from app storage into the folder. The
+     * files are copied and checked ([StoreMove.copy]); only then does the
+     * store switch to the folder, and only after it opened there is the
+     * app-storage copy removed, `.git` included: a folder store has no
+     * git, so the history and the remote setting do not come along.
+     */
+    suspend fun moveIntoFolder(treeUri: Uri, asFormat: StoreFormat): StoreMove.Outcome {
+        val root = StorePaths.storeRoot(context, asFormat)
+        val outcome = withContext(Dispatchers.IO) {
+            StoreMove.copy(FileStoreFs(root), SafStoreFs(context, treeUri))
+        }
+        if (outcome is StoreMove.Outcome.Done) {
+            useFolder(treeUri, asFormat)
+            if (store != null) withContext(Dispatchers.IO) { root.deleteRecursively() }
+        }
+        return outcome
+    }
+
+    /**
+     * 3.0: copy the folder store into app storage and use that from now
+     * on. The folder keeps its copy: deleting it here would delete it on
+     * every device the folder syncs to.
+     */
+    suspend fun moveToAppStorage(): StoreMove.Outcome {
+        val folder = _storeLocation.value as? StoreLocation.Folder
+            ?: return StoreMove.Outcome.Failed("this store is not in a folder")
+        val root = StorePaths.storeRoot(context, format)
+        val outcome = withContext(Dispatchers.IO) {
+            root.mkdirs()
+            StoreMove.copy(SafStoreFs(context, folder.treeUri), FileStoreFs(root))
+        }
+        if (outcome is StoreMove.Outcome.Done) useAppStorage()
+        return outcome
+    }
+
+    /** Give back a picked folder's permission when it was not used after all. */
+    fun forgetFolder(treeUri: Uri) {
+        val inUse = listOf(StoreFormat.PASS, StoreFormat.PASSAGE).any {
+            (StorePaths.location(context, it) as? StoreLocation.Folder)?.treeUri == treeUri
+        }
+        if (!inUse) release(treeUri)
+    }
+
+    /**
+     * 3.0: stop using the folder and go back to the store in app storage.
+     * The permission is given up and the folder's files are not touched.
+     */
+    suspend fun useAppStorage() {
+        val previous = _storeLocation.value
+        StorePaths.setLocation(context, format, StoreLocation.AppStorage)
+        if (previous is StoreLocation.Folder) release(previous.treeUri)
+        store = null
+        openStore()
+    }
+
+    private fun release(treeUri: Uri) {
+        runCatching {
+            context.contentResolver.releasePersistableUriPermission(
+                treeUri,
+                Intent.FLAG_GRANT_READ_URI_PERMISSION or Intent.FLAG_GRANT_WRITE_URI_PERMISSION,
+            )
+        }
+    }
+
+    /** The pass store's `.gpg-id` text, or null when there is none. */
+    fun gpgIdText(): String? =
+        if (format == StoreFormat.PASS) runCatching { store?.rootRecipients() }.getOrNull() else null
+
+    /**
+     * Write the pass store's first `.gpg-id`, wherever that store lives.
+     * False, with nothing written, when it already has one.
+     */
+    fun initializePassStore(gpgIdText: String): Boolean {
+        val passStore = StorePaths.openStore(context, StoreFormat.PASS)
+        if (passStore.rootRecipients() != null) return false
+        passStore.setRootRecipients(gpgIdText)
+        openStore()
+        return true
     }
 
     /**
@@ -269,7 +441,69 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
             _lastError.value = e.ponyMessage(context)
             // Couldn't list the store: show it as an error, not "loading".
             if (!_storeLoaded.value) _openError.value = e.ponyMessage(context)
+            // 3.0: the folder went away while the store was open. Stop
+            // showing entries that can no longer be read.
+            if (e is StoreException.FolderUnavailable) {
+                _entries.value = emptyList()
+                _folderLost.value = true
+                _openError.value = e.ponyMessage(context)
+            }
             _storeLoaded.value = true
+        }
+    }
+
+    /**
+     * 3.0: look at a folder store again, because whatever syncs the
+     * folder may have changed it while the app was away. Called when the
+     * app comes back to the front and from the list's Reload. Nothing
+     * watches the folder; the Storage Access Framework has no dependable
+     * change notice. A no-op for a store in app storage.
+     */
+    suspend fun reloadFolderStore() {
+        if (_storeLocation.value !is StoreLocation.Folder) return
+        // The first open has not finished; it does all of this itself.
+        if (!_storeLoaded.value) return
+        if (store == null) {
+            openStore()
+            return
+        }
+        refresh()
+        if (_folderLost.value) return
+        rebuildPasskeyIndex()
+        if (format == StoreFormat.PASSAGE) runCatching { joinRecipients() }
+    }
+
+    /** 3.0: the entry this one is a sync tool's conflict copy of, or null. */
+    fun conflictCopyOf(name: String): ConflictCopy? = runCatching { conflictOf(name) }.getOrNull()
+
+    /**
+     * 3.0: keep a conflict copy as the entry it is a copy of. The copy is
+     * read first, so an unreadable one changes nothing; then it is saved
+     * under the original name and the copy is removed.
+     */
+    fun keepConflictCopy(copy: String): Boolean {
+        val current = store ?: return false
+        val original = conflictCopyOf(copy)?.original ?: return false
+        return try {
+            val content = current.readEntry(copy, engine)
+            current.writeEntry(original, content, engine)
+            current.removeEntry(copy)
+            runCatching {
+                git?.commitPaths(
+                    listOf(StorePaths.entryFileName(original, format), StorePaths.entryFileName(copy, format)),
+                    commitMessageEdit(original)
+                )
+            }
+            runCatching {
+                PasskeyIndex.updateEntry(context, format, original, content)
+                PasskeyIndex.updateEntry(context, format, copy, null)
+            }
+            content.fill(0)
+            refresh()
+            true
+        } catch (e: Exception) {
+            _lastError.value = e.ponyMessage(context)
+            false
         }
     }
 
@@ -491,7 +725,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
     suspend fun classicEntryCount(): Int = withContext(Dispatchers.IO) {
         if (format != StoreFormat.PASSAGE) 0
         else runCatching {
-            AgeHeader.classicEntries(StorePaths.storeRoot(context, StoreFormat.PASSAGE))
+            AgeHeader.classicEntries(StorePaths.storeFs(context, StoreFormat.PASSAGE))
         }.getOrDefault(0)
     }
 
@@ -554,6 +788,13 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
         _pendingDeviceKeys.value = emptyList()
     }
 
+    /** Git works on app storage only; the Sync screen hides it for a folder store. */
+    private fun requireAppStorage() {
+        if (_storeLocation.value !is StoreLocation.AppStorage) {
+            throw GitException.Other("a folder store syncs through its folder, not git")
+        }
+    }
+
     /**
      * Publish the current local store to an empty remote: init (commits
      * everything with CLI-style messages) if this store has no repo
@@ -561,6 +802,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      * SyncView.publishSection.
      */
     suspend fun publishStore(url: String) {
+        requireAppStorage()
         withContext(Dispatchers.IO) {
             val handle = git ?: GitSync.init(StorePaths.storeRoot(context, format).absolutePath, format)
             store?.let { DeviceKeys.join(context, format, it, handle) }
@@ -579,6 +821,7 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      * store for this format. Matches iOS's SyncView.cloneSection.
      */
     suspend fun cloneReplaceStore(url: String) {
+        requireAppStorage()
         val root = StorePaths.storeRoot(context, format)
         val scratch = StorePaths.cloneScratchDir(context)
         withContext(Dispatchers.IO) {

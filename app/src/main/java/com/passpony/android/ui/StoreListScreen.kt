@@ -58,6 +58,17 @@ import com.passpony.android.ui.theme.Callout
 import com.passpony.android.ui.theme.ListDivider
 import com.passpony.android.ui.theme.MetaText
 import com.passpony.android.ui.theme.statusWarn
+import androidx.compose.material3.TextButton
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.rememberCoroutineScope
+import androidx.lifecycle.Lifecycle
+import androidx.lifecycle.LifecycleEventObserver
+import androidx.lifecycle.compose.LocalLifecycleOwner
+import com.passpony.android.store.StoreLocation
+import com.passpony.android.ui.settings.rememberFolderPicker
+import com.passpony.android.ui.sync.DeviceKeyDialog
+import kotlinx.coroutines.launch
+import uniffi.pass_ffi.conflictOf
 import uniffi.pass_ffi.EntryRef
 import uniffi.pass_ffi.StoreFormat
 
@@ -73,6 +84,36 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
     val storeLoaded by viewModel.storeLoaded.collectAsState()
     val openError by viewModel.openError.collectAsState()
     var pendingDelete by remember { mutableStateOf<String?>(null) }
+
+    // 3.0: a folder store changes underneath the app when its folder
+    // syncs. Look again whenever the app comes back to the front.
+    val storeLocation by viewModel.storeLocation.collectAsState()
+    val folderLost by viewModel.folderLost.collectAsState()
+    val pendingKeys by viewModel.pendingDeviceKeys.collectAsState()
+    val scope = rememberCoroutineScope()
+    val lifecycleOwner = LocalLifecycleOwner.current
+    DisposableEffect(lifecycleOwner) {
+        val observer = LifecycleEventObserver { _, event ->
+            if (event == Lifecycle.Event.ON_START) scope.launch { viewModel.reloadFolderStore() }
+        }
+        lifecycleOwner.lifecycle.addObserver(observer)
+        onDispose { lifecycleOwner.lifecycle.removeObserver(observer) }
+    }
+    val pickFolderAgain = rememberFolderPicker(viewModel) { }
+
+    // A folder store has no Sync screen to ask this on, so it is asked
+    // here: another device listed its key in .age-recipients.
+    if (storeLocation is StoreLocation.Folder) {
+        pendingKeys.firstOrNull()?.let { key ->
+            DeviceKeyDialog(
+                key = key,
+                outdated = viewModel.isOutdatedDeviceKey(key),
+                onApprove = { scope.launch { runCatching { viewModel.approveDeviceKey(key) } } },
+                onRemove = { scope.launch { runCatching { viewModel.removeDeviceKey(key) } } },
+                onLater = { viewModel.deferDeviceKeys() },
+            )
+        }
+    }
 
     Scaffold(
         topBar = {
@@ -93,6 +134,15 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
                         Icon(Icons.Filled.MoreVert, contentDescription = stringResource(R.string.store_list_more))
                     }
                     DropdownMenu(expanded = menuExpanded, onDismissRequest = { menuExpanded = false }) {
+                        if (storeLocation is StoreLocation.Folder) {
+                            DropdownMenuItem(
+                                text = { Text(stringResource(R.string.store_list_reload)) },
+                                onClick = {
+                                    menuExpanded = false
+                                    scope.launch { viewModel.reloadFolderStore() }
+                                }
+                            )
+                        }
                         DropdownMenuItem(
                             text = { Text(stringResource(R.string.store_list_import_authenticator)) },
                             onClick = {
@@ -140,7 +190,12 @@ fun StoreListScreen(navController: NavHostController, viewModel: AppViewModel = 
             }
 
             val error = openError
-            if (error != null) {
+            if (folderLost) {
+                LostFolderState(
+                    onPickAgain = pickFolderAgain,
+                    onUseAppStorage = { scope.launch { viewModel.useAppStorage() } }
+                )
+            } else if (error != null) {
                 ErrorState(error)
             } else if (!storeLoaded) {
                 LoadingState()
@@ -311,6 +366,27 @@ private fun ErrorState(message: String) {
     }
 }
 
+/**
+ * 3.0: the folder store's folder is gone or out of reach. Said plainly,
+ * with the two ways out. The app never falls back to an empty store on
+ * its own: that would look like every entry had been deleted.
+ */
+@Composable
+private fun LostFolderState(onPickAgain: () -> Unit, onUseAppStorage: () -> Unit) {
+    Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
+        Column(horizontalAlignment = Alignment.CenterHorizontally) {
+            Text(stringResource(R.string.folder_lost_title), style = MaterialTheme.typography.titleMedium)
+            MetaText(stringResource(R.string.folder_lost_body), modifier = Modifier.padding(top = 4.dp))
+            TextButton(onClick = onPickAgain, modifier = Modifier.padding(top = 12.dp)) {
+                Text(stringResource(R.string.folder_lost_pick))
+            }
+            TextButton(onClick = onUseAppStorage) {
+                Text(stringResource(R.string.folder_lost_switch))
+            }
+        }
+    }
+}
+
 @Composable
 private fun EmptyState() {
     Box(modifier = Modifier.fillMaxSize().padding(24.dp), contentAlignment = Alignment.Center) {
@@ -355,6 +431,8 @@ private fun EntryRow(
 ) {
     val leaf = name.substringAfterLast('/')
     val folder = name.substringBeforeLast('/', missingDelimiterValue = "")
+    // 3.0: a sync tool's conflict copy is an entry like any other; say what it is.
+    val isConflictCopy = remember(name) { runCatching { conflictOf(name) != null }.getOrDefault(false) }
 
     Column {
         Row(
@@ -367,6 +445,13 @@ private fun EntryRow(
             Icon(Icons.Filled.VpnKey, contentDescription = null, modifier = Modifier.padding(end = 12.dp))
             Column(modifier = Modifier.weight(1f)) {
                 Text(leaf)
+                if (isConflictCopy) {
+                    Text(
+                        stringResource(R.string.conflict_label),
+                        style = MaterialTheme.typography.bodySmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
                 if (showFolder && folder.isNotEmpty()) {
                     Text(
                         folder,

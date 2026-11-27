@@ -3,6 +3,7 @@ package com.passpony.android.passkey
 import android.content.Context
 import com.passpony.android.R
 import com.passpony.android.crypto.EngineProvider
+import com.passpony.android.store.StoreLocation
 import com.passpony.android.store.StorePaths
 import java.math.BigInteger
 import java.security.KeyFactory
@@ -35,8 +36,7 @@ import uniffi.pass_ffi.passkeySignedMessage
 object PasskeyVault {
     private fun store(context: Context): Pair<PassStore, uniffi.pass_ffi.StoreFormat> {
         val format = StorePaths.currentFormatSnapshot(context)
-        val root = StorePaths.storeRoot(context, format)
-        return PassStore.open(root.absolutePath, format) to format
+        return StorePaths.openStore(context, format) to format
     }
 
     fun format(context: Context) = StorePaths.currentFormatSnapshot(context)
@@ -97,7 +97,8 @@ object PasskeyVault {
         existing.fill(0)
         try {
             store.writeEntry(entryName, updated, engine)
-            runCatching {
+            // A folder store has no git (3.0); it syncs through its folder.
+            if (StorePaths.location(context, format) is StoreLocation.AppStorage) runCatching {
                 GitSync.open(StorePaths.storeRoot(context, format).absolutePath).use { git ->
                     git.commitPaths(listOf(StorePaths.entryFileName(entryName, format)), commitMessagePasskeyAdd(entryName))
                 }

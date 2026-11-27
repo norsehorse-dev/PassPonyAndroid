@@ -1,6 +1,7 @@
 package com.passpony.android.store
 
 import java.io.File
+import uniffi.pass_ffi.StoreFs
 
 /**
  * Reads the recipient stanza types from the header of a binary age file
@@ -31,41 +32,33 @@ object AgeHeader {
     fun isPostQuantum(bytes: ByteArray): Boolean = stanzaTypes(bytes).any { it in PQ_STANZAS }
 
     /**
-     * What the first readable `.age` entry under [root] was encrypted
-     * with: true for post-quantum, false for classic, null when the
-     * store has no entry to look at.
+     * What the first `.age` entry in the store was encrypted with: true
+     * for post-quantum, false for classic, null when the store has no
+     * entry to look at.
      */
-    fun sniffStore(root: File): Boolean? {
-        val entry = root.walkTopDown()
-            .onEnter { it.name != ".git" }
-            .firstOrNull { it.isFile && it.name.endsWith(".age") }
-            ?: return null
-        val head = head(entry) ?: return null
+    fun sniffStore(fs: StoreFs): Boolean? {
+        val entry = fs.walkFiles().firstOrNull { it.endsWith(".age") } ?: return null
+        val head = runCatching { fs.read(entry) }.getOrNull() ?: return null
         if (stanzaTypes(head).isEmpty()) return null
         return isPostQuantum(head)
     }
 
+    /** [sniffStore] for a store in a plain directory. */
+    fun sniffStore(root: File): Boolean? = sniffStore(FileStoreFs(root))
+
     /**
-     * How many `.age` entries under [root] have no post-quantum stanza.
+     * How many `.age` entries in the store have no post-quantum stanza.
      * In a post-quantum store these are entries a move to post-quantum
      * keys has not reached: it was interrupted, this device could not
      * read them, or another device saved them before it updated. A file
      * that is not a binary age file is not counted.
      */
-    fun classicEntries(root: File): Int =
-        root.walkTopDown()
-            .onEnter { it.name != ".git" }
-            .filter { it.isFile && it.name.endsWith(".age") }
-            .count { file ->
-                val head = head(file) ?: return@count false
-                stanzaTypes(head).isNotEmpty() && !isPostQuantum(head)
-            }
-
-    private fun head(file: File): ByteArray? = runCatching {
-        file.inputStream().use { input ->
-            val buffer = ByteArray(MAX_HEADER)
-            val read = input.read(buffer)
-            if (read <= 0) ByteArray(0) else buffer.copyOf(read)
+    fun classicEntries(fs: StoreFs): Int =
+        fs.walkFiles().filter { it.endsWith(".age") }.count { path ->
+            val head = runCatching { fs.read(path) }.getOrNull() ?: return@count false
+            stanzaTypes(head).isNotEmpty() && !isPostQuantum(head)
         }
-    }.getOrNull()
+
+    /** [classicEntries] for a store in a plain directory. */
+    fun classicEntries(root: File): Int = classicEntries(FileStoreFs(root))
 }

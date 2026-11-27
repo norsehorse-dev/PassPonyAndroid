@@ -102,6 +102,44 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
 
     val lastError by viewModel.lastError.collectAsState()
     val current = content
+    val conflict = remember(name) { viewModel.conflictCopyOf(name) }
+    var confirmConflict by remember(name) { mutableStateOf<ConflictAction?>(null) }
+
+    val pendingConflict = confirmConflict
+    if (conflict != null && pendingConflict != null) {
+        val keep = pendingConflict == ConflictAction.KEEP
+        AlertDialog(
+            onDismissRequest = { confirmConflict = null },
+            title = {
+                Text(stringResource(if (keep) R.string.conflict_keep else R.string.conflict_delete))
+            },
+            text = {
+                Text(
+                    stringResource(
+                        if (keep) R.string.conflict_keep_confirm else R.string.conflict_delete_confirm,
+                        conflict.original
+                    )
+                )
+            },
+            confirmButton = {
+                TextButton(
+                    onClick = {
+                        confirmConflict = null
+                        if (keep) {
+                            if (viewModel.keepConflictCopy(name)) navController.popBackStack()
+                        } else {
+                            viewModel.deleteEntry(name)
+                            navController.popBackStack()
+                        }
+                    },
+                    colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                ) { Text(stringResource(if (keep) R.string.conflict_keep else R.string.conflict_delete)) }
+            },
+            dismissButton = {
+                TextButton(onClick = { confirmConflict = null }) { Text(stringResource(R.string.action_cancel)) }
+            }
+        )
+    }
     // TOTP shows a live ring; HOTP (2.0) shows a code only when asked,
     // since every code uses up a counter value.
     val otpKind = remember(current) { current?.let { entryOtpKind(it) } }
@@ -167,6 +205,16 @@ fun EntryDetailScreen(name: String, viewModel: AppViewModel, navController: NavH
                 .padding(innerPadding)
                 .verticalScroll(rememberScrollState())
         ) {
+            // 3.0: a conflict copy from a synced folder. Shown even when
+            // the copy cannot be read, so it can still be deleted.
+            conflict?.let { copy ->
+                ConflictCopyBanner(
+                    original = copy.original,
+                    canKeep = current != null,
+                    onKeep = { confirmConflict = ConflictAction.KEEP },
+                    onDelete = { confirmConflict = ConflictAction.DELETE }
+                )
+            }
             when {
                 current != null -> {
                     val caption = if (otpOnly) stringResource(R.string.otp_only_caption) else null
@@ -454,3 +502,28 @@ private fun HotpSection(
     }
 }
 
+private enum class ConflictAction { KEEP, DELETE }
+
+/**
+ * 3.0: this entry is a sync tool's conflict copy of another one. Says so
+ * and offers the two things a person does with one: make it the entry,
+ * or throw it away.
+ */
+@Composable
+private fun ConflictCopyBanner(original: String, canKeep: Boolean, onKeep: () -> Unit, onDelete: () -> Unit) {
+    Column(modifier = Modifier.fillMaxWidth().padding(horizontal = 16.dp, vertical = 12.dp)) {
+        Text(
+            stringResource(R.string.conflict_label),
+            style = MaterialTheme.typography.titleSmall,
+            color = MaterialTheme.colorScheme.error
+        )
+        Text(
+            stringResource(R.string.conflict_banner, original),
+            style = MaterialTheme.typography.bodySmall,
+            modifier = Modifier.padding(top = 4.dp)
+        )
+        TextButton(onClick = onKeep, enabled = canKeep) { Text(stringResource(R.string.conflict_keep)) }
+        TextButton(onClick = onDelete) { Text(stringResource(R.string.conflict_delete)) }
+    }
+    HorizontalDivider()
+}

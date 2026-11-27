@@ -90,7 +90,7 @@ object DeviceKeys {
             StoreKeyType.POST_QUANTUM, StoreKeyType.MIXED -> true
             StoreKeyType.CLASSIC -> false
             StoreKeyType.EMPTY ->
-                AgeHeader.sniffStore(StorePaths.storeRoot(context, StoreFormat.PASSAGE))
+                AgeHeader.sniffStore(StorePaths.storeFs(context, StoreFormat.PASSAGE))
                     ?: AgeIdentityStore.recipients(context, postQuantum = false).isEmpty()
         }
 
@@ -201,15 +201,15 @@ object DeviceKeys {
      * while any exist; the person edits or removes those files first.
      */
     fun classicFolders(context: Context): List<String> {
-        val root = StorePaths.storeRoot(context, StoreFormat.PASSAGE)
-        return root.walkTopDown()
-            .onEnter { it.name != ".git" }
-            .filter { it.isFile && it.name == RECIPIENTS_FILE && it.parentFile != root }
-            .filter { file ->
-                val type = runCatching { recipientsKeyType(file.readText(Charsets.UTF_8)) }.getOrNull()
+        val fs = StorePaths.storeFs(context, StoreFormat.PASSAGE)
+        return fs.walkFiles()
+            .filter { it.endsWith("/$RECIPIENTS_FILE") }
+            .filter { path ->
+                val text = runCatching { fs.read(path).toString(Charsets.UTF_8) }.getOrNull()
+                val type = text?.let { runCatching { recipientsKeyType(it) }.getOrNull() }
                 type == StoreKeyType.CLASSIC || type == StoreKeyType.MIXED
             }
-            .mapNotNull { it.parentFile?.relativeTo(root)?.path }
+            .map { it.removeSuffix("/$RECIPIENTS_FILE") }
             .sorted()
             .toList()
     }

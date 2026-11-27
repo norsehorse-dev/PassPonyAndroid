@@ -34,11 +34,9 @@ import androidx.compose.ui.unit.dp
 import com.passpony.android.R
 import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.crypto.PgpKeyStore
-import com.passpony.android.store.StorePaths
 import com.passpony.android.store.ponyMessage
 import com.passpony.android.ui.AppViewModel
 import com.passpony.android.ui.util.SecureScreenEffect
-import uniffi.pass_ffi.StoreFormat
 
 /**
  * Port of PassPony iOS's InitializeStoreView: `pass init`, app-shaped --
@@ -72,16 +70,13 @@ fun InitializeStoreScreen(
 
     fun initialize() {
         try {
-            val root = StorePaths.storeRoot(context, StoreFormat.PASS)
-            root.mkdirs()
-            val gpgId = StorePaths.gpgIdFile(context)
-            if (gpgId.exists()) {
+            // Through the store, not a File: the pass store may be a
+            // folder store (3.0).
+            val fingerprints = keys.filter { selected.contains(it.file) }.map { it.primaryFingerprint }
+            if (!appViewModel.initializePassStore(KeySummary.formatGpgId(fingerprints))) {
                 error = context.getString(R.string.init_store_already_exists)
                 return
             }
-            val fingerprints = keys.filter { selected.contains(it.file) }.map { it.primaryFingerprint }
-            gpgId.writeText(KeySummary.formatGpgId(fingerprints))
-            appViewModel.openStore()
             onDone()
         } catch (e: Exception) {
             error = e.ponyMessage(context)

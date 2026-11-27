@@ -8,7 +8,6 @@ import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.ui.detail.Utf8Text
 import uniffi.pass_ffi.EntryRef
-import uniffi.pass_ffi.PassStore
 import uniffi.pass_ffi.entryFields
 import uniffi.pass_ffi.entryPassword
 
@@ -29,8 +28,7 @@ object AutofillCredential {
      * against. Read-only, no decrypt. */
     fun entries(context: Context): List<EntryRef> {
         val format = StorePaths.currentFormatSnapshot(context)
-        val root = StorePaths.storeRoot(context, format)
-        return PassStore.open(root.absolutePath, format).entries()
+        return StorePaths.openStore(context, format).entries()
     }
 
     /**
@@ -44,8 +42,7 @@ object AutofillCredential {
      */
     fun resolve(context: Context, name: String): Credential {
         val format = StorePaths.currentFormatSnapshot(context)
-        val root = StorePaths.storeRoot(context, format)
-        val store = PassStore.open(root.absolutePath, format)
+        val store = StorePaths.openStore(context, format)
         val engine = EngineProvider.engine(context, format)
         val content = store.readEntry(name, engine)
         val password = Utf8Text.decodeStrict(entryPassword(content)) ?: ""

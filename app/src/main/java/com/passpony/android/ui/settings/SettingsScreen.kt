@@ -58,6 +58,8 @@ import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.PassphraseCache
 import com.passpony.android.crypto.PgpEngine
 import com.passpony.android.crypto.PgpKeyStore
+import com.passpony.android.store.StoreLocation
+import com.passpony.android.store.StoreMove
 import com.passpony.android.store.StorePaths
 import com.passpony.android.store.UnlockGate
 import com.passpony.android.ui.AppViewModel
@@ -114,8 +116,7 @@ fun SettingsScreen(
     fun refreshKeys() {
         keyFiles = PgpKeyStore.availableKeys(context)
         if (format == StoreFormat.PASS) {
-            val gpgId = StorePaths.gpgIdFile(context)
-            gpgIdLines = if (gpgId.exists()) KeySummary.parseGpgId(gpgId.readText()) else emptyList()
+            gpgIdLines = appViewModel.gpgIdText()?.let { KeySummary.parseGpgId(it) } ?: emptyList()
             // Building the engine is what discovers locked keys --
             // opening the store alone never decrypts, so this must
             // actually load one. Return value unused on purpose.
@@ -135,6 +136,17 @@ fun SettingsScreen(
     // key list is re-read when that changes too.
     val storeKeys by appViewModel.storeKeys.collectAsState()
     LaunchedEffect(format, storeKeys) { refreshKeys() }
+
+    // 3.0: a folder store. Picking one may switch the format (a folder
+    // that already holds a store is opened as what it is).
+    val pickFolder = rememberFolderPicker(appViewModel) { result ->
+        format = appViewModel.format
+        result?.let { message = it }
+        refreshKeys()
+    }
+
+    val storeLocation by appViewModel.storeLocation.collectAsState()
+    val folderName by appViewModel.folderName.collectAsState()
 
     val keyImportLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenMultipleDocuments()
@@ -194,6 +206,32 @@ fun SettingsScreen(
                 onSelect = { newFormat ->
                     format = newFormat
                     scope.launch { appViewModel.switchFormat(newFormat) }
+                }
+            )
+
+            Spacer(Modifier.height(24.dp))
+            StorageSection(
+                location = storeLocation,
+                folderName = folderName,
+                onPickFolder = pickFolder,
+                onMoveToAppStorage = {
+                    scope.launch {
+                        message = when (val outcome = appViewModel.moveToAppStorage()) {
+                            is StoreMove.Outcome.Done -> context.getString(R.string.storage_moved_out)
+                            is StoreMove.Outcome.Clash -> context.getString(
+                                R.string.storage_move_out_clash, outcome.names.take(5).joinToString(", ")
+                            )
+                            is StoreMove.Outcome.Failed ->
+                                context.getString(R.string.storage_move_failed, outcome.reason)
+                        }
+                        refreshKeys()
+                    }
+                },
+                onUseAppStorage = {
+                    scope.launch {
+                        appViewModel.useAppStorage()
+                        refreshKeys()
+                    }
                 }
             )
 
@@ -695,6 +733,42 @@ private fun SshKeyRow(onOpen: () -> Unit) {
             color = MaterialTheme.colorScheme.onSurfaceVariant
         )
     }
+}
+
+/**
+ * 3.0: where the open store lives. App storage is the default and the
+ * only place git sync works; a folder is for syncing the encrypted files
+ * with another tool.
+ */
+@Composable
+private fun StorageSection(
+    location: StoreLocation,
+    folderName: String?,
+    onPickFolder: () -> Unit,
+    onMoveToAppStorage: () -> Unit,
+    onUseAppStorage: () -> Unit,
+) {
+    SectionHeader(stringResource(R.string.storage_header))
+    when (location) {
+        is StoreLocation.AppStorage -> {
+            Text(stringResource(R.string.storage_app), style = MaterialTheme.typography.bodyMedium)
+            TextButton(onClick = onPickFolder) { Text(stringResource(R.string.storage_use_folder)) }
+        }
+        is StoreLocation.Folder -> {
+            Text(
+                stringResource(R.string.storage_folder, folderName ?: stringResource(R.string.storage_folder_unnamed)),
+                style = MaterialTheme.typography.bodyMedium
+            )
+            TextButton(onClick = onPickFolder) { Text(stringResource(R.string.storage_change_folder)) }
+            TextButton(onClick = onMoveToAppStorage) { Text(stringResource(R.string.storage_move_out)) }
+            TextButton(onClick = onUseAppStorage) { Text(stringResource(R.string.storage_stop_folder)) }
+        }
+    }
+    Text(
+        stringResource(R.string.storage_footer),
+        style = MaterialTheme.typography.bodySmall,
+        color = MaterialTheme.colorScheme.onSurfaceVariant
+    )
 }
 
 @Composable

@@ -44,6 +44,7 @@ import com.passpony.android.R
 import com.passpony.android.crypto.AgeIdentityStore
 import com.passpony.android.crypto.PgpKeyStore
 import com.passpony.android.crypto.SshKeyStore
+import com.passpony.android.store.StoreLocation
 import com.passpony.android.store.StorePaths
 import com.passpony.android.ui.AppViewModel
 import uniffi.pass_ffi.RemoteScheme
@@ -85,7 +86,12 @@ fun DiagnosticsScreen(appViewModel: AppViewModel, onDone: () -> Unit) {
             device = "${Build.MANUFACTURER} ${Build.MODEL}".trim(),
             abi = Build.SUPPORTED_ABIS.firstOrNull() ?: "?",
             format = if (format == StoreFormat.PASSAGE) "passage" else "pass",
-            storePath = StorePaths.storeRoot(context, format).absolutePath,
+            // 3.0: for a folder store, the kind of place and the provider
+            // that serves it. Never the folder's path or name.
+            storePath = when (val location = StorePaths.location(context, format)) {
+                is StoreLocation.AppStorage -> StorePaths.storeRoot(context, format).absolutePath
+                is StoreLocation.Folder -> "a folder (${location.treeUri.authority ?: "unknown provider"})"
+            },
             entryCount = entries.size,
             git = syncStatus?.let { status ->
                 DiagnosticsReport.GitInfo(

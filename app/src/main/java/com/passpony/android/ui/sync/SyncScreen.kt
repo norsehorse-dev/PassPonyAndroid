@@ -39,6 +39,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.passpony.android.R
+import com.passpony.android.store.StoreLocation
 import com.passpony.android.ui.util.KeyDisplay
 import com.passpony.android.ui.theme.SectionHeader
 import com.passpony.android.ui.AppViewModel
@@ -81,6 +82,8 @@ fun SyncScreen(
     val message = syncViewModel.message
     val conflictPath = syncViewModel.resolver.conflictPath
     val pendingKeys by appViewModel.pendingDeviceKeys.collectAsState()
+    val storeLocation by appViewModel.storeLocation.collectAsState()
+    val folderName by appViewModel.folderName.collectAsState()
 
     // 2.0 rc4: another device listed its key in .age-recipients. Ask
     // before re-encrypting anything to it, one key at a time.
@@ -117,6 +120,24 @@ fun SyncScreen(
                 .verticalScroll(rememberScrollState())
                 .padding(16.dp)
         ) {
+            // 3.0: a folder store has no git. Say how it syncs and stop.
+            if (storeLocation is StoreLocation.Folder) {
+                SectionHeader(stringResource(R.string.sync_status_header))
+                Text(
+                    stringResource(
+                        R.string.sync_folder_store,
+                        folderName ?: stringResource(R.string.storage_folder_unnamed)
+                    ),
+                    style = MaterialTheme.typography.bodyMedium
+                )
+                Text(
+                    stringResource(R.string.backup_sync_is_not_backup),
+                    style = MaterialTheme.typography.bodySmall,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier.padding(top = 8.dp)
+                )
+                return@Column
+            }
             StatusSection(status)
             // 2.0: sync carries encrypted entries only. Said here because
             // this is where people assume their store is "backed up".
@@ -341,7 +362,7 @@ private fun ActionsSection(busy: Boolean, onSyncNow: () -> Unit, onPush: () -> U
  * older PassPony. It cannot be re-encrypted to, only removed.
  */
 @Composable
-private fun DeviceKeyDialog(
+internal fun DeviceKeyDialog(
     key: String,
     outdated: Boolean,
     onApprove: () -> Unit,

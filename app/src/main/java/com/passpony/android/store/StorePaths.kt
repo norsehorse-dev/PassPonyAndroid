@@ -1,6 +1,7 @@
 package com.passpony.android.store
 
 import android.content.Context
+import android.net.Uri
 import androidx.datastore.preferences.core.booleanPreferencesKey
 import androidx.datastore.preferences.core.edit
 import androidx.datastore.preferences.core.stringPreferencesKey
@@ -9,7 +10,9 @@ import java.io.File
 import kotlinx.coroutines.flow.first
 import kotlinx.coroutines.flow.map
 import kotlinx.coroutines.runBlocking
+import uniffi.pass_ffi.PassStore
 import uniffi.pass_ffi.StoreFormat
+import uniffi.pass_ffi.StoreFs
 
 // Shared with GeneratorPrefs: DataStore allows exactly one instance per
 // file, so every preference in passpony_prefs goes through this delegate.
@@ -37,6 +40,53 @@ object StorePaths {
         val dirName = if (format == StoreFormat.PASSAGE) "store" else "pass-store"
         return File(context.filesDir, dirName)
     }
+
+    private fun folderKey(format: StoreFormat) =
+        stringPreferencesKey(if (format == StoreFormat.PASSAGE) "store_folder_passage" else "store_folder_pass")
+
+    /**
+     * 3.0: where this format's store lives. App storage unless the
+     * person picked a folder for it. A blocking one-key read, like
+     * [currentFormatSnapshot].
+     */
+    fun location(context: Context, format: StoreFormat): StoreLocation = runBlocking {
+        val uri = context.passPonyDataStore.data.map { it[folderKey(format)] }.first()
+        if (uri.isNullOrEmpty()) StoreLocation.AppStorage else StoreLocation.Folder(Uri.parse(uri))
+    }
+
+    suspend fun setLocation(context: Context, format: StoreFormat, location: StoreLocation) {
+        context.passPonyDataStore.edit { prefs ->
+            when (location) {
+                is StoreLocation.AppStorage -> prefs.remove(folderKey(format))
+                is StoreLocation.Folder -> prefs[folderKey(format)] = location.treeUri.toString()
+            }
+        }
+    }
+
+    /**
+     * 3.0: open this format's store wherever it lives. Every caller that
+     * needs the store goes through here (the app, autofill, the passkey
+     * provider), so a folder store is a folder store to all of them.
+     */
+    fun openStore(context: Context, format: StoreFormat): PassStore =
+        when (val location = location(context, format)) {
+            is StoreLocation.AppStorage -> {
+                val root = storeRoot(context, format)
+                root.mkdirs()
+                PassStore.open(root.absolutePath, format)
+            }
+            is StoreLocation.Folder -> PassStore.openWithFs(SafStoreFs(context, location.treeUri), format)
+        }
+
+    /**
+     * 3.0: the store's files, for Kotlin code that looks at them
+     * directly instead of through [PassStore]. See [FileStoreFs].
+     */
+    fun storeFs(context: Context, format: StoreFormat): StoreFs =
+        when (val location = location(context, format)) {
+            is StoreLocation.AppStorage -> FileStoreFs(storeRoot(context, format))
+            is StoreLocation.Folder -> SafStoreFs(context, location.treeUri)
+        }
 
     suspend fun currentFormat(context: Context): StoreFormat {
         val stored = context.passPonyDataStore.data.map { it[FORMAT_KEY] }.first()
@@ -70,14 +120,6 @@ object StorePaths {
     }
 
     fun storeRoot(context: Context): File = storeRoot(context, currentFormatSnapshot(context))
-
-    /**
-     * The pass (OpenPGP) store's recipients file -- pass-core's own
-     * `.gpg-id`, read and written directly since there is no FFI call
-     * for it (mirrors iOS's direct File access in SettingsView /
-     * InitializeStoreView).
-     */
-    fun gpgIdFile(context: Context): File = File(storeRoot(context, StoreFormat.PASS), ".gpg-id")
 
     /**
      * Store-relative filename for a git commitPaths call: `name` plus
