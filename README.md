@@ -43,6 +43,12 @@ arm64-v8a and x86_64.
   Settings (3.0). Every entry is saved again in one commit. Git history
   is not rewritten, so older copies stay protected by the classic key
   only.
+- Folder stores (3.0, #14): keep a store in a folder you pick, so an app
+  like Syncthing can sync the encrypted files without a git remote. The
+  folder is opened in place; PassPony keeps no second copy. See "Syncing
+  with a folder" below.
+- Adding an entry under a name that is taken asks before replacing it
+  (3.0).
 - Keys backup: an encrypted `.passpony` backup of every key on the
   device, locked with a generated recovery code (a plain age file; see
   PassPonyCore's `docs/BACKUP.md`), a plain identities export, and
@@ -198,10 +204,52 @@ Settings offers to finish, which saves the entries again. What post-quantum
 keys do not cover: the git history from before the move, entry names, and
 a pass (OpenPGP) store.
 
+## Syncing with a folder
+
+Settings, Storage, "Use a folder…" points the store at a folder you pick
+with the system picker. PassPony gets access to that one folder through
+the Storage Access Framework and to nothing else; it asks for no storage
+permission. An existing store in PassPony's own storage can be moved in
+(every file is copied and read back before the original is removed) and a
+folder store can be moved back out.
+
+With Syncthing: share one folder between your devices, and point PassPony
+at it on each phone. A desktop uses the same folder as its
+`PASSWORD_STORE_DIR` or `PASSAGE_DIR`. Each phone lists its own key in
+`.age-recipients` when it opens the store, and you approve a new device's
+key on a device that can already read the entries, the same way as with
+git sync.
+
+- **No git.** A folder store never commits, pulls or pushes, and the Sync
+  screen says so. libgit2 cannot work on a document tree, and a sync tool
+  carrying a `.git` directory between devices is how repositories get
+  corrupted. A folder that already contains `.git` still opens; PassPony
+  ignores it. Moving a store into a folder leaves its git history behind.
+- **Changes show up when you come back to the app,** or from "Reload from
+  folder" in the list's menu. Nothing watches the folder.
+- **Conflict copies.** When two devices change an entry before they have
+  synced, Syncthing keeps both. PassPony labels the copy
+  (`name.sync-conflict-<date>-<time>-<device>`) and offers to keep it as
+  the entry or delete it.
+- **Temp files.** A save writes `.<name>.passpony-tmp`, renames it to
+  `.<name>.passpony-tmp-ready` when complete, then replaces the entry. They
+  exist for a moment; add `.*.passpony-tmp*` to `.stignore` if you would
+  rather they never sync.
+- **A folder that goes away** (deleted, moved, access revoked) gets its own
+  screen with "Pick the folder again". PassPony never shows an empty store
+  in its place.
+
+Anything that can write to the folder can add, change or delete entries,
+and can add a key to `.age-recipients`. PassPony asks before re-encrypting
+anything to a key it has not been asked about, which is what stops a key
+slipped into the file from being handed your entries.
+
 ## Not yet
 
 - Smartcard decrypt (NFC and USB-C YubiKey).
 - Passkeys for native apps (browsers only in 2.0).
+- Git on a folder store, and watching a folder for changes as they happen.
+- Conflict copies from sync tools other than Syncthing.
 - Post-quantum keys for pass (OpenPGP) stores.
 - A device key held in hardware (PassPony for iOS has one in the Secure
   Enclave).

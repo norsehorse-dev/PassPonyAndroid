@@ -115,7 +115,7 @@
     <string name="storage_header">Storage</string>
     <string name="storage_app">This store is kept in PassPony\'s own storage.</string>
     <string name="storage_folder">This store is kept in the folder %1$s.</string>
-    <string name="storage_folder_unnamed">you picked</string>
+    <string name="storage_folder_unnamed" translatable="false">…</string>
     <string name="storage_use_folder">Use a folder…</string>
     <string name="storage_change_folder">Use a different folder…</string>
     <string name="storage_stop_folder">Stop using this folder</string>
