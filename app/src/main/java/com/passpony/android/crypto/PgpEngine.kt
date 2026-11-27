@@ -1,96 +1,45 @@
 package com.passpony.android.crypto
 
 import android.content.Context
-import com.pgpony.android.crypto.PGPCryptoError
-import com.pgpony.android.crypto.PGPCryptoService
-import org.bouncycastle.openpgp.PGPPublicKeyRing
-import org.bouncycastle.openpgp.PGPSecretKeyRing
 import uniffi.pass_ffi.CryptoBackend
-import uniffi.pass_ffi.CryptoException
+import uniffi.pass_ffi.PgpLockState
+import uniffi.pass_ffi.PgpEngine as RustPgpEngine
 
 /**
- * pass (OpenPGP) engine over PGPonyCore-Kotlin / BouncyCastle. Port of
- * iOS's PGPonyEngine: same recipient-resolution rule, same locked-key
- * handling (via PgpKeyStore), same armored/binary tolerance. Unlike iOS,
- * RSA recipients are accepted on encrypt here — BC handles RSA natively in
- * software, so there is no smartcard-only gate the way
- * NorseHorsePGPCore's hand-rolled Cv25519/X25519-only parser requires.
+ * pass (OpenPGP) engine. Since 3.0 this is a thin wrapper over the core's
+ * Rust engine (rpgp, the `pgp-engine` feature), the same code iOS and
+ * Desktop run for pass stores; before that it was PGPonyCore-Kotlin over
+ * BouncyCastle. Recipient resolution, locked-key handling and the errors
+ * it raises are the core's.
+ *
+ * Every key file is handed to the engine with the cached passphrase when
+ * it is built. A key the passphrase does not open is left out of decrypt
+ * (its public half still encrypts) and its file is listed in
+ * [PgpKeyStore.lockedKeyFiles].
  */
 class PgpEngine private constructor(
-    private val entries: List<PgpKeyStore.KeyEntry>,
-    private val passphrase: String?,
+    private val engine: RustPgpEngine,
 ) : CryptoBackend {
 
-    private val secretRings: List<PGPSecretKeyRing> = entries.mapNotNull { it.secretRing }
+    override fun decrypt(ciphertext: ByteArray): ByteArray = engine.decrypt(ciphertext)
 
-    override fun decrypt(ciphertext: ByteArray): ByteArray {
-        if (secretRings.isEmpty()) throw CryptoException.NoUsableKey()
-        return try {
-            PGPCryptoService.shared.decrypt(ciphertext, secretRings, passphrase).data
-        } catch (e: PGPCryptoError.DecryptionFailed) {
-            if (e.message == NO_MATCHING_KEY_MESSAGE) throw CryptoException.NoUsableKey()
-            throw CryptoException.Unavailable(reason = e.message ?: "decryption failed")
-        } catch (e: PGPCryptoError.PassphraseRequired) {
-            throw CryptoException.NoUsableKey()
-        } catch (e: PGPCryptoError.InvalidPassphrase) {
-            throw CryptoException.NoUsableKey()
-        } catch (e: PGPCryptoError) {
-            throw CryptoException.Unavailable(reason = e.message ?: "decryption failed")
-        }
-    }
-
-    override fun encrypt(plaintext: ByteArray, recipients: List<String>): ByteArray {
-        // pass stores always resolve a .gpg-id; empty means uninitialized.
-        if (recipients.isEmpty()) throw CryptoException.NoUsableKey()
-        val targets = mutableListOf<PGPPublicKeyRing>()
-        for (spec in recipients) {
-            val entry = resolve(spec)
-                ?: throw CryptoException.Unavailable(
-                    reason = "No imported key matches $spec (fingerprint or 16-hex key ID)"
-                )
-            if (entry.publicRing.publicKeys.asSequence().none { it.isEncryptionKey }) {
-                throw CryptoException.Unavailable(
-                    reason = "Key for $spec has no usable encryption subkey"
-                )
-            }
-            targets += entry.publicRing
-        }
-        return try {
-            PGPCryptoService.shared.encrypt(
-                data = plaintext,
-                recipientPublicKeys = targets,
-                armor = false, // pass entries are binary .gpg
-            )
-        } catch (e: PGPCryptoError) {
-            throw CryptoException.Unavailable(reason = e.message ?: "encryption failed")
-        }
-    }
-
-    /**
-     * Match a `.gpg-id` spec against any key in the imported files: an
-     * uppercase-hex fingerprint (primary or subkey) or a 16-hex key ID.
-     * `0x` prefix and inner spaces tolerated, fingerprint-suffix match at
-     * 16+ chars — the exact rule iOS's PGPonyEngine.resolve() uses.
-     */
-    private fun resolve(spec: String): PgpKeyStore.KeyEntry? {
-        val needle = spec.uppercase().replace("0X", "").replace(" ", "")
-        if (needle.isEmpty()) return null
-        return entries.firstOrNull { entry ->
-            entry.publicRing.publicKeys.asSequence().any { key ->
-                val fp = PGPCryptoService.shared.fingerprintHex(key).uppercase()
-                val kid = String.format("%016X", key.keyID)
-                fp == needle || kid == needle || (needle.length >= 16 && fp.endsWith(needle))
-            }
-        }
-    }
+    override fun encrypt(plaintext: ByteArray, recipients: List<String>): ByteArray =
+        engine.encrypt(plaintext, recipients)
 
     companion object {
-        private const val NO_MATCHING_KEY_MESSAGE =
-            "Decryption failed: No matching decryption key found"
-
         fun load(context: Context, passphrase: String? = PassphraseCache.load(context)): PgpEngine {
-            val entries = PgpKeyStore.loadEntries(context, passphrase)
-            return PgpEngine(entries, passphrase)
+            val files = PgpKeyStore.keyFiles(context).mapNotNull { file ->
+                runCatching { file.readBytes() }.getOrNull()?.let { file.name to it }
+            }
+            val engine = RustPgpEngine.fromKeyBlobs(files.map { it.second }, passphrase)
+            val states = engine.blobLockStates()
+            PgpKeyStore.lockedKeyFiles = files.mapIndexedNotNull { index, (name, _) ->
+                when (states.getOrNull(index)) {
+                    PgpLockState.PASSPHRASE_REQUIRED, PgpLockState.WRONG_PASSPHRASE -> name
+                    else -> null
+                }
+            }
+            return PgpEngine(engine)
         }
     }
 }

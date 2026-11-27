@@ -206,6 +206,11 @@ class AppViewModel(application: Application) : AndroidViewModel(application) {
      */
     fun openStore() {
         try {
+            // The pass engine reads the key files and the cached
+            // passphrase when it is built, so build it again here: every
+            // key import, delete and unlock ends in openStore, and an
+            // engine from before would not know the new key.
+            if (format == StoreFormat.PASS) engine = EngineProvider.engine(context, format)
             val location = StorePaths.location(context, format)
             _storeLocation.value = location
             _folderName.value = (location as? StoreLocation.Folder)
